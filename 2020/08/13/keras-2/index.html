@@ -96,7 +96,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_2_1.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_2_2.png">
 <meta property="article:published_time" content="2020-08-13T14:02:55.689Z">
-<meta property="article:modified_time" content="2020-08-13T14:09:58.533Z">
+<meta property="article:modified_time" content="2020-08-15T04:31:16.024Z">
 <meta property="article:author" content="rouseway">
 <meta property="article:tag" content="人工智能">
 <meta property="article:tag" content="Deep Learning">
@@ -371,7 +371,7 @@
 <p>我们分别输出一条训练数据与对应的标签，可以看出每条评论被表示为单词的索引编号的序列，而标签对应于0/1的整数表示负面（negative）与正面（positive）。显然，用单词索引编号序列表示的每条评论数据是不等长的，并不能用作神经网络的输入，我们需要将其转换为张量。一种最简单的张量转换方法就是one-hot编码，这种方法把每一条评论对应为一个词汇表大小的向量，出现过单词多对应的位置被置为1，其他位置为0。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">vectorize_sequences</span><span class="params">(sequences, dimension=<span class="number">10000</span>)</span>:</span> <span class="comment">#维数就是词汇表的大小</span></span><br><span class="line">    results = np.zeros((len(sequences), dimension)) <span class="comment">#创建样本数*词汇表大小的零矩阵</span></span><br><span class="line">    <span class="keyword">for</span> i,sequence <span class="keyword">in</span> enumerate(sequences):</span><br><span class="line">        results[i, sequence] = <span class="number">1.</span></span><br><span class="line">    <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line">x_train = vectorize_sequences(train_data) <span class="comment">#对训练数据进行one-hot编码</span></span><br><span class="line">x_test = vectorize_sequences(test_data) <span class="comment">#对测试数据进行one-hot编码</span></span><br><span class="line">print(x_train[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
 
-<p> <font color=#A9A9A9 face="Courier New">[0. 1. 1. … 0. 0. 0.]</font></p>
+<p><font color=#A9A9A9 face="Courier New">[0. 1. 1. … 0. 0. 0.]</font></p>
 <p>当然，对应的标签也应该向量化作为神经网络的目标值，只需要将它们转换为Numpy数组就行：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y_train = np.asarray(train_labels).astype(<span class="string">'float32'</span>)</span><br><span class="line">y_test = np.asarray(test_labels).astype(<span class="string">'float32'</span>)</span><br></pre></td></tr></table></figure>
 
@@ -381,7 +381,7 @@
 
 <p>一个隐藏单元是对应的层所拥有的表示空间的一个维度，我们设计的中间层相当于做了这样一个运算：</p>
 <blockquote>
-<p>output = relu(dot(W, input) + b)</p>
+<p>output = relu(dot(<strong>W</strong>, input) + b)</p>
 </blockquote>
 <p>其中W是一个形状为(input_dimension, 16)的权重矩阵，与W做点积相当于将输入数据投影到一个16维的表示空间中，再加上一个偏置变量b，为了让变换后的表示空间具有更多样性，把点积与相加后的线性变化结果输入relu激活函数进行一定的非线性变换。</p>
 <p>然后，我们选择二元交叉熵损失函数与RMSprop优化器来配置模型，并且监控精度。</p>
@@ -394,14 +394,9 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">history = model.fit(partial_x_train, partial_y_train, </span><br><span class="line">		epochs=<span class="number">20</span>, batch_size=<span class="number">512</span>, validation_data=(x_val, y_val))</span><br></pre></td></tr></table></figure>
 
 <font color=#A9A9A9 face="Courier New">
-Train on 15000 samples, validate on 10000 samples</br>
-    Epoch 1/20</br>
-    15000/15000 [==============================] - 7s 482us/step - loss: 0.4977 - acc: 0.7947 - val\_loss: 0.3720 - val\_acc: 0.8717</br>
-    ... ... ...</br>
-    Epoch 20/20</br>
-    15000/15000 [==============================] - 3s 225us/step - loss: 0.0068 - acc: 0.9990 - val\_loss: 0.7058 - val\_acc: 0.8653
-</font>
+Train on 15000 samples, validate on 10000 samples
 
+<p>Epoch 1/20<br>15000/15000 [==============================] - 7s 482us/step - loss: 0.4977 - acc: 0.7947 - val_loss: 0.3720 - val_acc: 0.8717<br>… … …</br><br>Epoch 20/20<br>15000/15000 [==============================] - 3s 225us/step - loss: 0.0068 - acc: 0.9990 - val_loss: 0.7058 - val_acc: 0.8653<br></font></p>
 <p>20次的迭代很快就完成了，fit()函数执行后返回一个History对象，该对象有一个history成员，它是一个字典，包含了训练过程中的相关数据。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(history.history.keys())</span><br></pre></td></tr></table></figure>
 
@@ -420,17 +415,9 @@ Train on 15000 samples, validate on 10000 samples</br>
 <h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> models</span><br><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> imdb</span><br><span class="line"></span><br><span class="line">(train_data, train_labels), (test_data, test_labels) = </span><br><span class="line">	imdb.load_data(path=<span class="string">"/ABS_PATH/imdb.npz"</span>, num_words=<span class="number">10000</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">vectorize_sequences</span><span class="params">(sequences, dimension=<span class="number">10000</span>)</span>:</span></span><br><span class="line">    results = np.zeros((len(sequences), dimension))</span><br><span class="line">    <span class="keyword">for</span> i,sequence <span class="keyword">in</span> enumerate(sequences):</span><br><span class="line">        results[i, sequence] = <span class="number">1.</span></span><br><span class="line">    <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line">x_train = vectorize_sequences(train_data)</span><br><span class="line">x_test = vectorize_sequences(test_data)</span><br><span class="line">                                                                      </span><br><span class="line">model = models.Sequential()</span><br><span class="line">model.add(layers.Dense(<span class="number">16</span>, activation=<span class="string">'relu'</span>, input_shape=(<span class="number">10000</span>,)))</span><br><span class="line">model.add(layers.Dense(<span class="number">16</span>, activation=<span class="string">'relu'</span>))</span><br><span class="line">model.add(layers.Dense(<span class="number">1</span>, activation=<span class="string">'sigmoid'</span>))</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=<span class="string">'rmsprop'</span>, loss=<span class="string">'binary_crossentropy'</span>, </span><br><span class="line">	metrics=[<span class="string">'accuracy'</span>])</span><br><span class="line"></span><br><span class="line">history = model.fit(partial_x_train, partial_y_train, epochs=<span class="number">4</span>, batch_size=<span class="number">512</span>,</span><br><span class="line">                   validation_data=(x_val, y_val))</span><br><span class="line"></span><br><span class="line">results = model.evaluate(x_test, y_test)</span><br><span class="line">print(results)</span><br></pre></td></tr></table></figure>
 
 <font color=#A9A9A9 face="Courier New">
-Train on 15000 samples, validate on 10000 samples</br>
-    Epoch 1/4</br>
-    15000/15000 [==============================] - 7s 481us/step - loss: 0.5084 - acc: 0.7813 - val\_loss: 0.3798 - val\_acc: 0.8681</br>
-    ... ... ...</br>
-    Epoch 4/4</br>
-    15000/15000 [==============================] - 6s 396us/step - loss: 0.1751 - acc: 0.9438 - val\_loss: 0.2840 - val\_acc: 0.8831</br>
-    25000/25000 [==============================] - 6s 260us/step</br>
-    [0.3068919235897064, 0.87496]
-</font>
+Train on 15000 samples, validate on 10000 samples
 
-
+<p>Epoch 1/4<br>15000/15000 [==============================] - 7s 481us/step - loss: 0.5084 - acc: 0.7813 - val_loss: 0.3798 - val_acc: 0.8681<br>… … …</br><br>Epoch 4/4<br>15000/15000 [==============================] - 6s 396us/step - loss: 0.1751 - acc: 0.9438 - val_loss: 0.2840 - val_acc: 0.8831<br>25000/25000 [==============================] - 6s 260us/step<br>[0.3068919235897064, 0.87496]<br></font></p>
 <p>很激动吧，我们仅仅用了不到三十行代码就到达了87%的精度，如果我们换用更复杂的模型，会有更好的结果。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们把这个实例的实践步骤总结一下，可以作为我们进行深度学习建模的方法论，按部就班地开展相关的实验与工程：</p>
 <ol>
@@ -495,6 +482,10 @@ Train on 15000 samples, validate on 10000 samples</br>
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/08/15/keras-3/" rel="prev" title="预测房价的回归问题">
+                预测房价的回归问题 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -566,7 +557,7 @@ Train on 15000 samples, validate on 10000 samples</br>
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

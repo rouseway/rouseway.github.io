@@ -1,0 +1,784 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,keras," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="回归问题是通过一系列的已知数据预测未来的值，这个待预测的值是一个连续值。我们使用20世纪70年代中期波士顿郊区房价的数据来进行回归问题的讨论。 数据准备同样的，我们可以使用Keras的内嵌函数加载这批数据，如果网络不支持自动下载，你可以选择事先下载好的数据。 123456from keras.datasets import boston_housing(train_data, train_targ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="预测房价的回归问题">
+<meta property="og:url" content="http://yoursite.com/2020/08/15/keras-3/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="回归问题是通过一系列的已知数据预测未来的值，这个待预测的值是一个连续值。我们使用20世纪70年代中期波士顿郊区房价的数据来进行回归问题的讨论。 数据准备同样的，我们可以使用Keras的内嵌函数加载这批数据，如果网络不支持自动下载，你可以选择事先下载好的数据。 123456from keras.datasets import boston_housing(train_data, train_targ">
+<meta property="og:image" content="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_4_1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_4_2.png">
+<meta property="article:published_time" content="2020-08-15T03:54:28.014Z">
+<meta property="article:modified_time" content="2020-08-15T04:30:37.482Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="keras">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_4_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/08/15/keras-3/"/>
+
+
+
+
+
+  <title> 预测房价的回归问题 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/15/keras-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                预测房价的回归问题
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-15T11:54:28+08:00">
+                2020-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>回归问题是通过一系列的已知数据预测未来的值，这个待预测的值是一个连续值。我们使用20世纪70年代中期波士顿郊区房价的数据来进行回归问题的讨论。</p>
+<h2 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h2><p>同样的，我们可以使用Keras的内嵌函数加载这批数据，如果网络不支持自动下载，你可以选择事先下载好的数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> boston_housing</span><br><span class="line"></span><br><span class="line">(train_data, train_targets), (test_data, test_targets) = </span><br><span class="line">		boston_housing.load_data(path=<span class="string">'/ABS_PATH/boston_housing.npz'</span>)</span><br><span class="line">print(train_data.shape, test_data.shape)</span><br><span class="line">print(train_data[<span class="number">0</span>], train_targets[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<font color=#A9A9A9 size=2, face="Courier New">
+Using TensorFlow backend.<br />
+
+<p>(404, 13) (102, 13)<br>[  1.23247   0.        8.14      0.        0.538     6.142    91.7<br>   3.9769    4.      307.       21.      396.9      18.72   ] 15.2<br></font></p>
+<p>可以看出这组数据有404个训练样本和102个测试样本，每个样本都有13个数值特征，预测的目标是波士顿郊区房屋价格的中位数（单位是千美金）。这些数值特征由于各自的单位不同，取值范围与大小参差不齐，如果直接将这组数据输入到神经网络，势必增加模型学习的困难。所以，我们需要对每个特征进行标准化操作，即对输入数据的每个特征，减去特征的平均值，再除以标准差。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mean = train_data.mean(axis=<span class="number">0</span>)</span><br><span class="line">train_data -= mean</span><br><span class="line">std = train_data.std(axis=<span class="number">0</span>)</span><br><span class="line">train_data /= std</span><br><span class="line"></span><br><span class="line">test_data -= mean</span><br><span class="line">test_data /= std</span><br><span class="line">print(train_data[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<font color=#A9A9A9 size=2, face="Courier New">
+[-0.27224633 -0.48361547 -0.43576161 -0.25683275 -0.1652266  -0.1764426  
+ 0.81306188  0.1166983  -0.62624905 -0.59517003  1.14850044  0.44807713
+ 0.8252202 ]
+</font>
+
+<h2 id="构建网络"><a href="#构建网络" class="headerlink" title="构建网络"></a>构建网络</h2><p>我们已经有了电影评论极性分析的实践经验，可以很轻松地堆叠出一个网络模型出来，在这里我们把网络的构建功能封装成了一个函数，为了后面多次使用它。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> models</span><br><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> layers</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_model</span><span class="params">()</span>:</span></span><br><span class="line">    model = models.Sequential()</span><br><span class="line">    model.add(layers.Dense(<span class="number">64</span>, activation=<span class="string">'relu'</span>, input_shape=(train_data.shape[<span class="number">1</span>],)))</span><br><span class="line">    model.add(layers.Dense(<span class="number">64</span>, activation=<span class="string">'relu'</span>))</span><br><span class="line">    model.add(layers.Dense(<span class="number">1</span>))</span><br><span class="line">    model.compile(optimizer=<span class="string">'rmsprop'</span>, loss=<span class="string">'mse'</span>, metrics=[<span class="string">'mae'</span>])</span><br><span class="line">    <span class="keyword">return</span> model</span><br></pre></td></tr></table></figure>
+
+<p>这个网络模型包含两个中间层，每层都是64个隐藏单元的全连接层，对于第一层需要指定输入数据的维度，我们选择ReLU作为激活函数（你会发现这种带有ReLU激活的Dense层的堆叠，是非常有用的结构，可以解决很多种问题）。这里值得我们注意的是网络的最后一层只有一个单元，没有激活，它是一个线性层，这种设置是<strong>标量回归</strong>的典型配置。对于回归问题，损失函数通常选择<strong>均方误差</strong>（MES, mean squared error）;训练过程需要监控<strong>平均绝对误差</strong>（MAE, mean absolute error）。</p>
+<h2 id="验证方法"><a href="#验证方法" class="headerlink" title="验证方法"></a>验证方法</h2><p>在分析数据时我们已经看到，这批数据的样本量是很少的（只有几百个），如果我们仍然把训练集拆分为训练和验证集，势必导致训练数据不足，同时验证数据太少引发验证得分的波动。所以，在数据样本量较少的情况下，我们建议使用<strong>K折交叉验证</strong>，这种方法首先将数据集划分为K个分区，实例化K个相同的模型，将每个模型在K-1个分区上训练，并在剩下的一个分区上进行评估，把K次评估得分的平均值作为模型的验证分数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">k = <span class="number">4</span></span><br><span class="line">num_val_samples = len(train_data) // k</span><br><span class="line">num_epochs = <span class="number">500</span></span><br><span class="line">all_mae_history = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(k):</span><br><span class="line">    print(<span class="string">'processing fold #'</span>, i)</span><br><span class="line">    <span class="comment">#其中一份作为验证数据</span></span><br><span class="line">    val_data = train_data[i*num_val_samples: (i+<span class="number">1</span>)*num_val_samples]</span><br><span class="line">    val_targets = train_targets[i*num_val_samples: (i+<span class="number">1</span>)*num_val_samples]</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#剩余各份作为训练数据</span></span><br><span class="line">    partial_train_data = np.concatenate([train_data[:i*num_val_samples], </span><br><span class="line">                                        train_data[(i+<span class="number">1</span>)*num_val_samples:]], axis=<span class="number">0</span>)</span><br><span class="line">    partial_train_targets = np.concatenate([train_targets[:i*num_val_samples], </span><br><span class="line">                                           train_targets[(i+<span class="number">1</span>)*num_val_samples:]], axis=<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    model = build_model()</span><br><span class="line">    history = model.fit(partial_train_data, partial_train_targets, </span><br><span class="line">                        validation_data=(val_data, val_targets),</span><br><span class="line">                        epochs=num_epochs, batch_size=<span class="number">1</span>, verbose=<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#从hisotry中提取验证结果</span></span><br><span class="line">    mae_history = history.history[<span class="string">'val_mean_absolute_error'</span>]</span><br><span class="line">    all_mae_history.append(mae_history)</span><br></pre></td></tr></table></figure>
+<font color=#A9A9A9 size=2, face="Courier New">
+processing fold # 0
+
+<p>processing fold # 1<br>processing fold # 2<br>processing fold # 3<br></font></p>
+<p>当然，除了从history中提取验证结果，也可以手动获取验证得分，此时则不需要在fit函数里指定验证集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在验证数据上评估模型</span></span><br><span class="line">model.fit(partial_train_data, partial_train_targets, </span><br><span class="line">          epochs=num_epochs, batch_size=<span class="number">1</span>, verbose=<span class="number">0</span>)</span><br><span class="line">val_mse, val_mae = model.evaluate(val_data, val_targets, verbose=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>我们计算出每个轮次中所有折MAE的平均值，并使用Matplotlib绘制出指标的变化曲线。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">average_mae_history = [np.mean([x[i] <span class="keyword">for</span> x <span class="keyword">in</span> all_mae_history]) <span class="keyword">for</span> i <span class="keyword">in</span> range(num_epochs)]</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.plot(range(<span class="number">1</span>, len(average_mae_history) + <span class="number">1</span>), average_mae_history)</span><br><span class="line">plt.xlabel(<span class="string">'Epochs'</span>)</span><br><span class="line">plt.ylabel(<span class="string">'Validation MAE'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_4_1.png" alt="png"></p>
+<p>很遗憾，由于数据的方差都相对较大，图片并没有直观地反映出指标的变化趋势。我们需要采取一点小技巧重新绘制：</p>
+<ul>
+<li>删除前10个数据点，因为它们的取值范围与曲线上的其他点不同</li>
+<li>将每个数据点替换为前面数据点的指数移动平均值，以得到光滑的曲线</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">smooth_curve</span><span class="params">(points, factor=<span class="number">0.9</span>)</span>:</span></span><br><span class="line">    smoothed_points = []</span><br><span class="line">    <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">        <span class="keyword">if</span> smoothed_points:</span><br><span class="line">            previous = smoothed_points[<span class="number">-1</span>]</span><br><span class="line">            smoothed_points.append(previous*factor+point*(<span class="number">1</span>-factor))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            smoothed_points.append(point)</span><br><span class="line">    <span class="keyword">return</span> smoothed_points</span><br><span class="line"></span><br><span class="line">smooth_mae_history = smooth_curve(average_mae_history[<span class="number">10</span>:]) <span class="comment">#剔除前10个点</span></span><br><span class="line">plt.plot(range(<span class="number">1</span>, len(smooth_mae_history)+<span class="number">1</span>), smooth_mae_history)</span><br><span class="line">plt.xlabel(<span class="string">'Epochs'</span>)</span><br><span class="line">plt.ylabel(<span class="string">'Validation MAE'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://raw.githubusercontent.com/rouseway/blogs/master/keras/chapter_3_4_2.png" alt="png"></p>
+<p>此时的曲线可以很直观地看出，验证MAE在60轮左右就不再显著降低了，此后甚至出现了过拟合。我们用最好的参数（这里只演示了调整轮数）训练最终的生产模型，并观察它在测试集上的性能。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">model = build_model()</span><br><span class="line">model.fit(train_data, train_targets, epochs=<span class="number">80</span>, batch_size=<span class="number">16</span>, verbose=<span class="number">0</span>)</span><br><span class="line">test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)</span><br><span class="line">print(test_mae_score)</span><br></pre></td></tr></table></figure>
+
+<font color=#A9A9A9 size=2, face="Courier New">
+102/102 [==============================] - 0s 1ms/step
+
+<p>2.7114876391840914<br></font></p>
+<p>看来，我们预测的房价还是和实际价格相差了约2700美元。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>即便本节我们讨论的是回归问题，但是与前一节的电影评论极性分类问题的建模方法论是一样的，针对回归问题，我们可以总结如下：</p>
+<ul>
+<li>回归问题使用的损失函数通常是均方误差（MSE），评价指标为平均绝对误差（MAE）</li>
+<li>如果输入的数据的特征具有不同的取值范围，应该先进性预处理，对每个特征单独进行缩放（通常减均值除方差是一种不错的缩放手段）</li>
+<li>如果数据的验证表现受数据的分布影响，没有明显的趋势可见，可以采取一定的平滑处理以便直观地分析趋势</li>
+<li>如果可用数据较少，K折交叉验证是首选的验证方法（同样适用于分类问题）</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/keras/" rel="tag"># keras</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/08/13/keras-2/" rel="next" title="电影评论的情感极性分析">
+                <i class="fa fa-chevron-left"></i> 电影评论的情感极性分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据准备"><span class="nav-number">1.</span> <span class="nav-text">数据准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构建网络"><span class="nav-number">2.</span> <span class="nav-text">构建网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#验证方法"><span class="nav-number">3.</span> <span class="nav-text">验证方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

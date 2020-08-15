@@ -94,7 +94,7 @@
 <meta property="og:site_name" content="思维驿站">
 <meta property="og:description" content="构建一个神经网络主要围绕以下四个方面  层：多个层组成一个网络 输入与输出：输入网络的数据以及与每一个输入数据对应的目标值 损失函数：用于学习的反馈信号，在训练过程中不断地将其最小化，可以用它来衡量当前任务是否已经成功完成 优化器：决定学习过程如何进行，即如何基于损失函数对网络进行更新  在Keras中神经网络模型是靠层的堆叠构建而成的，有许多不同形式的层如你经常听到的全连接层（Keras里叫做密">
 <meta property="article:published_time" content="2020-08-08T03:06:43.736Z">
-<meta property="article:modified_time" content="2020-08-13T13:29:37.031Z">
+<meta property="article:modified_time" content="2020-08-15T04:32:56.188Z">
 <meta property="article:author" content="rouseway">
 <meta property="article:tag" content="人工智能">
 <meta property="article:tag" content="Deep Learning">
@@ -375,7 +375,7 @@
 <li><strong>序列学习问题</strong>：联结主义时序分类（CTC, connectionist temporal classification）损失函数</li>
 </ul>
 <p>当然，除过这些常见任务之外的特定问题可能需要我们自己定义损失函数。对于优化器的选择，无论你的问题是什么，<strong>RMSprop</strong>优化器通常都是足够好的选择。在Keras中，你需要把选择好的损失函数与优化器放入你所构建的网络模型中进行编译，如下面这段代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> optimizers</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=optimizers.RMSprop(lr=<span class="number">0.001</span>), loss=<span class="string">'mse'</span>, </span><br><span class="line">										metrics=[<span class="string">'accuracy'</span>])</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> optimizers</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=optimizers.RMSprop(lr=<span class="number">0.001</span>), loss=<span class="string">'mse'</span>, </span><br><span class="line">	      metrics=[<span class="string">'accuracy'</span>])</span><br></pre></td></tr></table></figure>
 
 <p>最后，学习的过程就是通过fit()方法将输入数据的Numpy数组（以及对应的目标值）传入模型：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model.fit(input_tensor, target_tensor, batch_size=<span class="number">128</span>, epochs=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
@@ -502,7 +502,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
