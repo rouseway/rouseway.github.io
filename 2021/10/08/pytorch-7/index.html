@@ -1,0 +1,774 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="结合前面介绍的PyTorch基础，我们将进行一系列的实战操练，首先从NLP中最基本的语言模型入手。传统的语言模型是一个使用句子的前文若干个单词预测后文的下一个单词，很明显这是一个序列问题，应该使用循环神经网络来建模。我们先导入相关的包，并选择合适的算力设备：123456import torch,pickleimport torch.nn as nnfrom torch.utils.data imp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch实战：语言模型">
+<meta property="og:url" content="http://yoursite.com/2021/10/08/pytorch-7/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="结合前面介绍的PyTorch基础，我们将进行一系列的实战操练，首先从NLP中最基本的语言模型入手。传统的语言模型是一个使用句子的前文若干个单词预测后文的下一个单词，很明显这是一个序列问题，应该使用循环神经网络来建模。我们先导入相关的包，并选择合适的算力设备：123456import torch,pickleimport torch.nn as nnfrom torch.utils.data imp">
+<meta property="article:published_time" content="2021-10-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:47.618Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/10/08/pytorch-7/"/>
+
+
+
+
+
+  <title> PyTorch实战：语言模型 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/10/08/pytorch-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch实战：语言模型
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-08T00:00:00+08:00">
+                2021-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>结合前面介绍的PyTorch基础，我们将进行一系列的实战操练，首先从NLP中最基本的语言模型入手。传统的语言模型是一个使用句子的前文若干个单词预测后文的下一个单词，很明显这是一个序列问题，应该使用循环神经网络来建模。我们先导入相关的包，并选择合适的算力设备：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch,pickle</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset,DataLoader</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils <span class="keyword">import</span> clip_grad_norm_</span><br><span class="line"></span><br><span class="line">device = torch.device(<span class="string">'cuda:1'</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">'cpu'</span>)</span><br></pre></td></tr></table></figure></p>
+<h2 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h2><p>我们下载<a href="http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz" target="_blank" rel="noopener"> PTB数据集</a>，解压后使用 data 文件夹下的 ptb.train.txt 作为构建语言模型的训练数据。首先需要对数据进行预处理，包括分词、单词编号等操作，我们可以直接调用前面章节<a href="https://demo.hedgedoc.org/5iS4nXRQQx-FpGM22akhKA#" target="_blank" rel="noopener">《PyTorch数据预处理》</a>中的 <strong>build_vocab</strong> 方法，需要注意的是，PTB 的训练数据里已经将低频词替换为 \<unk> 了，所以我们不需要显式地在词表中增加 \<unk>，同时由于语料是英文的，可以简单地将 tokenizer 实现为空格分隔。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">preprocessing</span><span class="params">()</span>:</span></span><br><span class="line">    word2idx, idx2word = build_vocab(<span class="string">"./data/NNLM/ptb.train.txt"</span>, space_tokenizer, <span class="number">50000</span>, <span class="number">0</span>)</span><br><span class="line">    fout = open(<span class="string">'./data/NNLM/vocab.pkl'</span>, <span class="string">'wb'</span>)</span><br><span class="line">    pickle.dump((word2idx, idx2word), fout)</span><br><span class="line">    fout.close()</span><br><span class="line">    print(<span class="string">"vocab size is: &#123;&#125;"</span>.format(str(len(word2idx))))</span><br></pre></td></tr></table></figure></p>
+<p>需要将 <strong>build_vocab</strong> 返回单词与编号的索引保存下来，同时输出并记录下单词的数量，作为后续模型的超参数传入。</p>
+<h2 id="数据加载"><a href="#数据加载" class="headerlink" title="数据加载"></a>数据加载</h2><p>数据的读取与加载我们使用 PyTorch 提供的 Dataset 与 DataLoader 来实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyDataset</span><span class="params">(Dataset)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, vocab_file, input_file)</span>:</span></span><br><span class="line">        word2idx, _ = pickle.load(open(vocab_file, <span class="string">'rb'</span>))</span><br><span class="line">        data = []</span><br><span class="line">        <span class="keyword">with</span> open(input_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">            <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">                word_list = sline.strip().split(<span class="string">' '</span>)</span><br><span class="line">                data.append([word2idx[w] <span class="keyword">for</span> w <span class="keyword">in</span> word_list])</span><br><span class="line">        <span class="comment"># 语言模型的target可以根据data来生成，在train的过程中去做就行</span></span><br><span class="line">        self.data = data</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.data)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, idx)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.data[idx]</span><br></pre></td></tr></table></figure></p>
+<p>我们继承 Dataset 实现自己的数据读取，由于语言模型的目标 label 完全可以通过输入 data 移位来获取，所以我们只需要 Dataset 返回一个 data 就可以了，在类的构造函数中实现从文件读取训练数据并转换为单词 ID 序列。将 Dataset 实例化后与 DataLoader 配合实现数据的批量加载：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_loader</span><span class="params">(vocab_file, input_file, batch_size)</span>:</span></span><br><span class="line">    dataset = MyDataset(vocab_file, input_file)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">collate_fn</span><span class="params">(batch_data, pad=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="comment"># 以批量数据中的最长序列为基准补齐</span></span><br><span class="line">        max_len = max([len(seq) <span class="keyword">for</span> seq <span class="keyword">in</span> batch_data])  </span><br><span class="line">        data = [seq + [pad] * (max_len - len(seq)) <span class="keyword">for</span> seq <span class="keyword">in</span> batch_data]</span><br><span class="line">        data = torch.LongTensor(data).to(device)</span><br><span class="line">        <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> DataLoader(dataset=dataset, batch_size=batch_size, shuffle=<span class="literal">True</span>, </span><br><span class="line">                      collate_fn=collate_fn, drop_last=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
+<p>我们通过实现一个 collate_fn 函数来对序列数据进行补齐，最后我们要舍弃掉训练数据按 batch_size 划分时最后一个 batch 中不足一个 batch_size 的那些数据，因为我们后面使用的模型（LSTM）需要多次初始化隐藏层（其大小与 batch_size 相关，所以要保持每个 batch 的数据量相同），当然也可以通过把最后一个 batch 做一个批层面的补齐来保留这部分数据。</p>
+<h2 id="定义网络"><a href="#定义网络" class="headerlink" title="定义网络"></a>定义网络</h2><p>我们定义一个使用循环神经网络实现的语言模型：它包含一个 embedding 层，用于将每个单词编号转换成一个连续空间里的向量；然后是 LSTM 层，用来对序列的每一步进行预测，为了与其他网络层的输入要求保持一致，我们在定义 LSTM 层的时候设置了 batch_first=True，以便让 batch_size 位于第0轴的位置；由于语言模型是用来预测下一个单词的，所以 LSTM 的输出需要接一个全连接层，以实现对预测位置上的单词的还原（分类）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RNNLM</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, vocab_size, embed_size, hidden_size, num_layers=<span class="number">1</span>, dropout_p=<span class="number">0.5</span>)</span>:</span></span><br><span class="line">        super(RNNLM, self).__init__()</span><br><span class="line">        self.embed = nn.Embedding(vocab_size, embed_size)</span><br><span class="line">        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=<span class="literal">True</span>)</span><br><span class="line">        self.fc = nn.Linear(hidden_size, vocab_size)</span><br><span class="line">        self.dropout = nn.Dropout(dropout_p)</span><br><span class="line"></span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        self.num_layers = num_layers</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">init_hidden</span><span class="params">(self, batch_size)</span>:</span></span><br><span class="line">        states = (torch.zeros(self.num_layers, batch_size, self.hidden_size).to(device),</span><br><span class="line">                  torch.zeros(self.num_layers, batch_size, self.hidden_size).to(device))</span><br><span class="line">        <span class="keyword">return</span> states</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x, h)</span>:</span></span><br><span class="line">        x = self.embed(x)</span><br><span class="line">        out, h = self.lstm(x, h)</span><br><span class="line">        out = self.fc(self.dropout(out))</span><br><span class="line">        <span class="keyword">return</span> out, h</span><br></pre></td></tr></table></figure></p>
+<p>在使用 LSTM 的时候，需要额外实现一个 <strong>init_hidden( )</strong> 的函数，因为训练过程中 loss 反向传播的时候，PyTorch 会试图把 hidden state 也反向传播，但是在新的一轮 batch 的时候 hidden state 已经被内存释放了，所以需要每个 batch 都要重新初始化隐层状态。该网络在前向传播时需要注意的是，输入的 x 形状是 (batch_size, seq_len, embed_size)，输出的 out 的形状是 (batch_size, seq_len, vocab_size)，输入和输出都是一个完整的序列，我们可以只从宏观上数据整体的形状进行把控，而 LSTM 内部会实现序列的按步展开与逐步运算。</p>
+<h2 id="开始训练"><a href="#开始训练" class="headerlink" title="开始训练"></a>开始训练</h2><p>启动训练之前，我们需要设置好相关的超参数，我们不妨把这些参数预先定义到一个配置类里：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span><span class="params">(object)</span>:</span></span><br><span class="line">    batch_size = <span class="number">64</span>         <span class="comment"># 数据批量的大小</span></span><br><span class="line">    epochs = <span class="number">30</span>             <span class="comment"># 训练的迭代次数</span></span><br><span class="line"></span><br><span class="line">    vocab_size = <span class="number">10000</span>      <span class="comment"># 词汇表的大小（预处理时统计而得）</span></span><br><span class="line">    embed_size = <span class="number">64</span>         <span class="comment"># 词向量的维度</span></span><br><span class="line">    hidden_size = <span class="number">128</span>       <span class="comment"># 隐藏层的维度</span></span><br><span class="line">    num_layers = <span class="number">1</span>          <span class="comment"># LSTM的层数</span></span><br><span class="line">    learning_rate = <span class="number">0.002</span>   <span class="comment"># 学习率</span></span><br></pre></td></tr></table></figure></p>
+<p>然后，我们开始正式的训练过程，包括初始化超参数、加载数据、初始化网络、定义损失、选择优化器、迭代训练（每一轮迭代都要完成一次批量遍历，每一个批量的数据训练后都要进行一次参数更新）、记录损失变化：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">()</span>:</span></span><br><span class="line">    config = Config()</span><br><span class="line"></span><br><span class="line">    train_loader = create_loader(<span class="string">'./data/NNLM/vocab.pkl'</span>, <span class="string">'./data/NNLM/ptb.train.txt'</span>, config.batch_size)</span><br><span class="line"></span><br><span class="line">    net = RNNLM(config.vocab_size, config.embed_size, config.hidden_size, config.num_layers, dropout_p=<span class="number">0.5</span>)</span><br><span class="line">    net = net.to(device)</span><br><span class="line">    <span class="comment"># 计算损失的时候忽略补齐序列所padding的部分</span></span><br><span class="line">    criterion = nn.CrossEntropyLoss(ignore_index=<span class="number">0</span>)</span><br><span class="line">    optimizer = torch.optim.Adam(net.parameters(), lr=config.learning_rate)</span><br><span class="line"></span><br><span class="line">    training_loss = []</span><br><span class="line">    training_accuracy = []</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(config.epochs):</span><br><span class="line">        losses = <span class="number">0</span></span><br><span class="line">        accuracy = <span class="number">0</span></span><br><span class="line">        batch_num = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> batch_sentence <span class="keyword">in</span> train_loader:</span><br><span class="line">            <span class="comment"># target与src相差一个位置</span></span><br><span class="line">            src, tgt = batch_sentence[:], batch_sentence[:, <span class="number">1</span>:]</span><br><span class="line">            <span class="comment"># 每个batch都要初始化一次隐层状态</span></span><br><span class="line">            states = net.init_hidden(config.batch_size)</span><br><span class="line">            outputs, states = net(src, states)</span><br><span class="line">            <span class="comment"># 计算损失时，预测结果在seq_len轴上的最后一个结果要去掉，调整形状为二阶张量</span></span><br><span class="line">            <span class="comment"># 其中第1轴的维度为分类类别即词表大小：(batch*seq_len, vocab_size)</span></span><br><span class="line">            y_pred = outputs[:,:<span class="number">-1</span>,:].reshape(<span class="number">-1</span>, config.vocab_size)</span><br><span class="line">            <span class="comment"># 计算损失时，真实结果也要调整形状为一阶张量</span></span><br><span class="line">            y_true = tgt.reshape(<span class="number">-1</span>)</span><br><span class="line">            loss = criterion(y_pred, y_true)</span><br><span class="line">            optimizer.zero_grad()</span><br><span class="line">            loss.backward()</span><br><span class="line">            clip_grad_norm_(net.parameters(), <span class="number">0.5</span>)</span><br><span class="line">            optimizer.step()</span><br><span class="line">            losses += loss.item()</span><br><span class="line">            accuracy += compute_accuracy(y_pred, y_true)</span><br><span class="line">            batch_num += <span class="number">1</span></span><br><span class="line">            print(<span class="string">"Batch index = %d, Batch loss = %f."</span> % (batch_num, loss.item()))</span><br><span class="line">        training_loss.append(losses/batch_num)</span><br><span class="line">        training_accuracy.append(accuracy/batch_num)</span><br><span class="line">        print(<span class="string">'Epoch = %d, Train Loss = %f, Train Accuracy = %f.'</span></span><br><span class="line">              % (epoch, training_loss[epoch], training_accuracy[epoch]))</span><br><span class="line">    torch.save(net, <span class="string">'./model/NNLM_epoch%d_loss_%f.pth'</span> %(epoch, training_loss[<span class="number">-1</span>]))</span><br></pre></td></tr></table></figure><br>训练过程中需要注意的是，一定要确保数据和网络都放到相同的设备（CPU或GPU）上进行运算；另外，我们没有对序列增加特殊的句首句尾标记 \<sos> 和 \<eos>，所以序列的预测结果中最后一个位置上的值要丢弃（并不存在），其实增加句首句尾标记是有用的，大家可以自行尝试加入。我们除了观察损失的变化，也计算了训练时的准确率进行输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">compute_accuracy</span><span class="params">(y_pred, y_true, mask_index=<span class="number">0</span>)</span>:</span></span><br><span class="line">    _, y_pred_indices = y_pred.max(dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    correct_indices = torch.eq(y_pred_indices, y_true).float()</span><br><span class="line">    valid_indices = torch.ne(y_true, mask_index).float()</span><br><span class="line"></span><br><span class="line">    n_correct = (correct_indices * valid_indices).sum().item()</span><br><span class="line">    n_valid = valid_indices.sum().item()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> n_correct / n_valid * <span class="number">100</span></span><br></pre></td></tr></table></figure>
+<h2 id="使用模型"><a href="#使用模型" class="headerlink" title="使用模型"></a>使用模型</h2><p>使用语言模型的一个案例就是进行文本生成，给定一个输入，根据语言模型的预测逐步输出下文：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch.autograd <span class="keyword">import</span> Variable</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generate</span><span class="params">(input_word, vocab_file, model_file, word_len=<span class="number">10</span>, temperature=<span class="number">1.0</span>)</span>:</span></span><br><span class="line">    config = Config()</span><br><span class="line">    <span class="comment"># 加载模型</span></span><br><span class="line">    model = torch.load(model_file, map_location=device)</span><br><span class="line">    <span class="comment"># 加载词典</span></span><br><span class="line">    word2idx, idx2word = pickle.load(open(vocab_file, <span class="string">'rb'</span>))</span><br><span class="line">    <span class="comment"># 使用eval()使 Dropout 层冻结</span></span><br><span class="line">    model.eval()</span><br><span class="line">    <span class="comment"># 使用Variable定义隐藏层，不进行梯度回传，batch_size=1</span></span><br><span class="line">    hidden = (Variable(torch.zeros(config.num_layers, <span class="number">1</span>, config.hidden_size)).to(device),</span><br><span class="line">              Variable(torch.zeros(config.num_layers, <span class="number">1</span>, config.hidden_size)).to(device))</span><br><span class="line">    <span class="comment"># 输入是二阶张量，batch_size=1, seq_len=1</span></span><br><span class="line">    input_tensor = torch.tensor([[word2idx[input_word]]])</span><br><span class="line">    input = input_tensor.to(device)</span><br><span class="line">    print(input_word, end=<span class="string">' '</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(word_len): </span><br><span class="line">        output, hidden = model(input, hidden)</span><br><span class="line">        <span class="comment"># output的形状是 (batch_size=1, seq_len=1, vocab_size=10000)</span></span><br><span class="line">        <span class="comment"># 压缩维度把第0、1轴删除了，进而通过softmax转换成概率</span></span><br><span class="line">        word_weights = F.softmax(output.squeeze()/temperature)</span><br><span class="line">        <span class="comment"># 按照概率大小进行采样</span></span><br><span class="line">        word_idx = torch.multinomial(word_weights, <span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">        input.data.fill_(word_idx)</span><br><span class="line">        word = idx2word[word_idx.item()]</span><br><span class="line">        print(word, end=<span class="string">' '</span>)</span><br></pre></td></tr></table></figure><br>上面的代码我们引入了两个小技巧：一个是在进行softmax计算时加入了<strong>温度参数</strong>，可以参考<a href="https://research.google/pubs/pub48840/" target="_blank" rel="noopener">论文</a>；还有一个就是在生成序列时并不是通过 argmax 直接取概率最大的那个词，而是按概率大小进行采样，当然也可以引入 beam search 等算法。</p>
+<h2 id="可视化"><a href="#可视化" class="headerlink" title="可视化"></a>可视化</h2><p>tensorboradX 只是一个辅助工具，可以把 PyTorch 中的参数以 tensorboard 可以呈现的格式保存，我们需要启动 tensorboard 来可视化这些训练过程的记录信息。由于 tensorboard 是 tensorflow 的工具，我们可以单独创建一个 tensorflow 的虚拟环境，并切换到这个环境下启动 tensorboard，通过执行命令 tensorboard —logdir=’./log’ 启动 tensorboard，并在浏览器上通过 <a href="http://localhost:6006" target="_blank" rel="noopener">http://localhost:6006</a> 查看训练过程记录指标的可视化图形。如果我们是在服务器上训练模型，而想在自己的 PC 上打开可是化界面，则可以增加一个参数 —host=0.0.0.0 来启动。</p>
+<p>模块来记录训练过程中各种指标的变化，该模块可以方便可视化训练结束后我们会发现，在 log 目录下会有多个已 “日期_时间”为名称的子目录，每一个目录对应一次训练过程的记录信息。我们可以超参数的调优往往都是通过多次实验，在指标的变化曲线上确定的。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/10/02/pytorch-6/" rel="next" title="PyTorch优化器与正则化">
+                <i class="fa fa-chevron-left"></i> PyTorch优化器与正则化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/11/02/pytorch-8/" rel="prev" title="PyTorch实战：文本分类">
+                PyTorch实战：文本分类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#预处理"><span class="nav-number">1.</span> <span class="nav-text">预处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据加载"><span class="nav-number">2.</span> <span class="nav-text">数据加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定义网络"><span class="nav-number">3.</span> <span class="nav-text">定义网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始训练"><span class="nav-number">4.</span> <span class="nav-text">开始训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用模型"><span class="nav-number">5.</span> <span class="nav-text">使用模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可视化"><span class="nav-number">6.</span> <span class="nav-text">可视化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

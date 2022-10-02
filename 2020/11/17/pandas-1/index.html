@@ -1,0 +1,785 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="从文件中读取数据，并使用 Pandas 的基本数据结构（Series 和 DataFrame）进行数据简单分析和处理，最后将新的数据结果保存到文件里，这就是基本的 Pandas 操作。1import pandas as pd 读取数据最常见的文件主要是csv、excel 和 txt，所以我们重点介绍这三种文件的读取函数：123df_table &#x3D; pd.read_table(&#39;.&#x2F;data&#x2F;my_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas基础知识">
+<meta property="og:url" content="http://yoursite.com/2020/11/17/pandas-1/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="从文件中读取数据，并使用 Pandas 的基本数据结构（Series 和 DataFrame）进行数据简单分析和处理，最后将新的数据结果保存到文件里，这就是基本的 Pandas 操作。1import pandas as pd 读取数据最常见的文件主要是csv、excel 和 txt，所以我们重点介绍这三种文件的读取函数：123df_table &#x3D; pd.read_table(&#39;.&#x2F;data&#x2F;my_">
+<meta property="article:published_time" content="2020-11-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:22.074Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/11/17/pandas-1/"/>
+
+
+
+
+
+  <title> Pandas基础知识 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/17/pandas-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas基础知识
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-17T00:00:00+08:00">
+                2020-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从文件中读取数据，并使用 Pandas 的基本数据结构（Series 和 DataFrame）进行数据简单分析和处理，最后将新的数据结果保存到文件里，这就是基本的 Pandas 操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br></pre></td></tr></table></figure></p>
+<h2 id="读取数据"><a href="#读取数据" class="headerlink" title="读取数据"></a>读取数据</h2><p>最常见的文件主要是csv、excel 和 txt，所以我们重点介绍这三种文件的读取函数：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">df_table = pd.read_table(<span class="string">'./data/my_table.txt'</span>, header=<span class="literal">None</span>, sep=<span class="string">'\|'</span>, engine=<span class="string">'python'</span>)</span><br><span class="line">df_csv = pd.read_csv(<span class="string">'./data/my_csv.csv'</span>, index_col=[<span class="string">'col1'</span>, <span class="string">'col2'</span>], parse_dates=[<span class="string">'col5'</span>])</span><br><span class="line">df_excel = pd.read_excel(<span class="string">'./data/my_excel.xlsx'</span>, nrows=<span class="number">20</span>)</span><br></pre></td></tr></table></figure></p>
+<p>这里有一些公共参数，header=None 表示第一行不是表头，index_col 表示把指定的列按级作为索引，parse_dates 表示将指定列解析为时间，nrows 表示读取多少行数据。对于读取 txt 文件，可能会有比较灵活的分隔符，我们可以通过 sep 参数来指定，对于与正则冲突的特殊符号需要进行转义，并指明引擎为 python。</p>
+<h2 id="数据写入"><a href="#数据写入" class="headerlink" title="数据写入"></a>数据写入</h2><p>写入数据是通过对内置数据结构直接调用 to_csv 等方法，通常对于没有意义的（只是用来分析数据用的）索引我们会将 index 参数设置为 False，将其在保存时忽略掉。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df_csv.to_csv(<span class="string">'data/my_csv_saved.csv'</span>, index=<span class="literal">False</span>)</span><br><span class="line">df_excel.to_excel(<span class="string">'data/my_excel_saved.xlsx'</span>, index=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure></p>
+<p>如果想要把表格快速转换为 markdown 和 latex 语言，可以使用 to_markdown 和 to_latex 函数，此处需要安装 tabulate 包。</p>
+<h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><p>Pandas 具有两种基本的数据结构：一维的 Series 和 二维的 DataFrame。</p>
+<ul>
+<li>Series 一般由四个部分组成，分别是序列的值 data 、索引 index 、存储类型 dtype 、序列的名字 name 。其中，索引也可以指定它的名字，默认为空  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series(data = [<span class="number">100</span>, <span class="string">'a'</span>, &#123;<span class="string">'dic1'</span>:<span class="number">5</span>&#125;],</span><br><span class="line">    index = pd.Index([<span class="string">'id1'</span>, <span class="number">20</span>, <span class="string">'third'</span>], name=<span class="string">'my_idx'</span>),</span><br><span class="line">    dtype = <span class="string">'object'</span>,</span><br><span class="line">    name = <span class="string">'my_name'</span>)</span><br></pre></td></tr></table></figure></li>
+<li>DataFrame 在 Series 的基础上增加了列索引 columns，一个 DataFrame 由二维的 data 与行列索引来构造  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">df = pd.DataFrame(data = &#123;<span class="string">'col_0'</span>: [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>], <span class="string">'col_1'</span>:list(<span class="string">'abc'</span>),</span><br><span class="line">    <span class="string">'col_2'</span>: [<span class="number">1.2</span>, <span class="number">2.2</span>, <span class="number">3.2</span>]&#125;,</span><br><span class="line">    index = [<span class="string">'row_%d'</span>%i <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>)])</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>上述的这些属性，可以通过 . 的方式来获取：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">print(s.values)</span><br><span class="line">print(s.index)</span><br><span class="line">print(df.shape)</span><br><span class="line">print(df.columns)</span><br><span class="line"></span><br><span class="line">print(s[<span class="string">'third'</span>])</span><br><span class="line">print(df[<span class="string">'col_0'</span>])  <span class="comment"># 单列则是一个Series对象</span></span><br><span class="line">sub_df = df[[<span class="string">'col_0'</span>, <span class="string">'col_1'</span>]]</span><br></pre></td></tr></table></figure><br>另外，Series 可以使用索引取出对应的元素值。DataFrame 可以使用列索引取出相应的一个或多个列组成的表。</p>
+<h2 id="基本函数"><a href="#基本函数" class="headerlink" title="基本函数"></a>基本函数</h2><p>我们读取一份包含了四所学校学生的体侧信息的数据，这些数据包括学校、年级、姓名、性别、身高、体重、是否为转系生、体测场次、测试时间、1000 米成绩等信息，以此作为数据来讲解 DataFrame 的基础操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(<span class="string">'./data/learn_pandas.csv'</span>)</span><br><span class="line">print(df.head(<span class="number">2</span>)) <span class="comment"># 输出表格的前两行</span></span><br><span class="line">print(df.tail(<span class="number">3</span>)) <span class="comment"># 输出表格的倒数三行</span></span><br><span class="line">df = df[df.columns[:<span class="number">7</span>]] <span class="comment"># 取出表格数据的前七列进行分析</span></span><br><span class="line">print(df.info()) <span class="comment"># 输出表格数据的信息概况（都有哪些列，每列有多少非空数据，数据类型是什么等）</span></span><br><span class="line">print(df.describe()) <span class="comment"># 输出表格数据中浮点数类型列的统计信息（均值、方差、最值、分位数等）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 我们可以显示调用一些统计函数：sum、mean、median、var、std、max、min等</span></span><br><span class="line">df_demo = df[[<span class="string">'Height'</span>, <span class="string">'Weight'</span>]]</span><br><span class="line">print(df_demo.mean()) <span class="comment"># 计算均值</span></span><br><span class="line">print(df_demo.median()) <span class="comment"># 计算中位数</span></span><br><span class="line">print(df_demo.quantile(<span class="number">0.75</span>)) <span class="comment"># 计算75%分位数</span></span><br><span class="line">print(df_demo.count()) <span class="comment"># 计算非缺失值的个数</span></span><br><span class="line">print(df_demo.idxmax()) <span class="comment"># 最大值对应的索引</span></span><br><span class="line"><span class="comment"># 上面这些所有的函数，由于操作后返回的是标量，所以又称为聚合函数，它们有一个公共参数axis，</span></span><br><span class="line"><span class="comment"># 默认为 0 代表逐列聚合，如果设置为 1 则表示逐行聚合</span></span><br><span class="line"></span><br><span class="line">print(df[<span class="string">'School'</span>].unique()) <span class="comment"># 得到去重后的“学校”array</span></span><br><span class="line">print(df[<span class="string">'School'</span>].nunique()) <span class="comment"># 得到去重后“学校”的个数</span></span><br><span class="line">print(df[<span class="string">'School'</span>].value_counts()) <span class="comment"># 各“学校”对应的频数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看多列组合的唯一值</span></span><br><span class="line">df_demo = df[[<span class="string">'Gender'</span>,<span class="string">'Transfer'</span>,<span class="string">'Name'</span>]]</span><br><span class="line">print(df_demo.drop_duplicates([<span class="string">'Gender'</span>, <span class="string">'Transfer'</span>])) <span class="comment"># keep参数：默认first保留重复结果第一次出现的行，可选last/False(所有重复都剔除）</span></span><br><span class="line">print(df_demo.duplicated([<span class="string">'Gender'</span>, <span class="string">'Transfer'</span>])) <span class="comment"># 输出是否重复元素的布尔序列</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 对某列中的元素进行替换操作</span></span><br><span class="line">print(df[<span class="string">'Gender'</span>].replace(&#123;<span class="string">'Female'</span>: <span class="number">0</span>, <span class="string">'Male'</span>: <span class="number">1</span>&#125;)) <span class="comment"># 通过字典映射替换</span></span><br><span class="line"><span class="comment"># replace 还支持方向替换，指定method参数为ffill则为用前面一个最近的未被替换的值进行</span></span><br><span class="line"><span class="comment"># 替换，bfill则使用后面最近的未被替换的值进行替换</span></span><br><span class="line">s = pd.Series([<span class="string">'a'</span>, <span class="number">1</span>, <span class="string">'b'</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="string">'a'</span>])</span><br><span class="line">print(s.replace([<span class="number">1</span>, <span class="number">2</span>], method=<span class="string">'ffill'</span>)) <span class="comment"># 1-&gt;a, 2-&gt; b, 1-&gt;b, 1-&gt;b</span></span><br><span class="line"><span class="comment"># replace 还支持逻辑替换，包括了where和mask，</span></span><br><span class="line"><span class="comment"># 这两个函数是完全对称的：where函数在传入条件为False的对应行进行替换，</span></span><br><span class="line"><span class="comment"># 而mask在传入条件为True的对应行进行替换，当不指定替换值时，替换为缺失值。</span></span><br><span class="line">s = pd.Series([<span class="number">-1</span>, <span class="number">1.2345</span>, <span class="number">100</span>, <span class="number">-50</span>])</span><br><span class="line">print(s.where(s&lt;<span class="number">0</span>)) <span class="comment"># 1.2345-&gt;NaN, 100-&gt;NaN</span></span><br><span class="line">print(s.mask(s&lt;<span class="number">0</span>, <span class="number">0</span>)) <span class="comment"># -1-&gt;0, -50-&gt;0</span></span><br><span class="line"><span class="comment"># 数值替换包含了round, abs, clip方法，它们分别表示取整、取绝对值和截断</span></span><br><span class="line">print(s.clip(<span class="number">0</span>, <span class="number">2</span>)) <span class="comment"># 0和2指定了上下截断边界：-1-&gt;0, 100-&gt;2, -50-&gt;0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 排序共有两种方式：值排序sort_values和索引排序sort_index</span></span><br><span class="line">df_demo = df[[<span class="string">'Grade'</span>, <span class="string">'Name'</span>, <span class="string">'Height'</span>,<span class="string">'Weight'</span>]].set_index([<span class="string">'Grade'</span>,<span class="string">'Name'</span>])</span><br><span class="line">print(df_demo.sort_values(<span class="string">'Height'</span>)) <span class="comment"># 默认是升序排序</span></span><br><span class="line">print(df_demo.sort_values([<span class="string">'Weight'</span>,<span class="string">'Height'</span>],ascending=[<span class="literal">True</span>,<span class="literal">False</span>])) <span class="comment"># 体重升序，体重相同时升高降序排</span></span><br><span class="line"><span class="comment"># 索引排序需要指定索引level</span></span><br><span class="line">print(df_demo.sort_index(level=[<span class="string">'Grade'</span>,<span class="string">'Name'</span>],ascending=[<span class="literal">True</span>,<span class="literal">False</span>]))</span><br><span class="line"></span><br><span class="line"><span class="comment"># apply方法常用于DataFrame的行或列的迭代，通过参数axis指定行或列</span></span><br><span class="line">df_demo = df[[<span class="string">'Height'</span>, <span class="string">'Weight'</span>]]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_mean</span><span class="params">(x)</span>:</span></span><br><span class="line">    res = x.mean()</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">print(df_demo.apply(my_mean)) <span class="comment"># 默认对列进行迭代（求平均）</span></span><br><span class="line"><span class="comment"># 求偏离该序列均值的绝对值大小的均值，pandas内置了mad函数实现了同样功能，内置函数要比使用apply实现速度更高效</span></span><br><span class="line">print(df_demo.apply(<span class="keyword">lambda</span> x:(x-x.mean()).abs().mean()))</span><br></pre></td></tr></table></figure></p>
+<p>简单总结一下，Pandas 中对于基本数据结构的内置函数包括了汇总、特征统计、唯一值、替换、排序，以及提供了 apply 函数迭代调用自定义的操作。</p>
+<h2 id="窗口对象"><a href="#窗口对象" class="headerlink" title="窗口对象"></a>窗口对象</h2><p>Pandas 中有 3 类窗口，分别是滑动窗口 rolling 、扩张窗口 expanding 以及指数加权窗口 ewm。得到窗口对象后，可以在指定窗口大小的数据上进行计算操作。</p>
+<p>我们首先重点介绍一下滑动窗口，对一个序列使用 .rolling( ) 函数即可得到滑窗对象，其最重要的参数为窗口大小window。在得到了滑窗对象后，能够使用相应的聚合函数进行计算，计算则以窗口包含的数据为作用域。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line">roller = s.rolling(window=<span class="number">3</span>)</span><br><span class="line">print(roller.mean()) <span class="comment"># 第一、二位置上都是NaN，第三个位置是(1+2+3)/3=2</span></span><br><span class="line">print(roller.apply(<span class="keyword">lambda</span> x:x.mean())) <span class="comment"># 也可以使用apply函数</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">输出：</span></span><br><span class="line"><span class="string">0    NaN</span></span><br><span class="line"><span class="string">1    NaN</span></span><br><span class="line"><span class="string">2    2.0</span></span><br><span class="line"><span class="string">3    3.0</span></span><br><span class="line"><span class="string">4    4.0</span></span><br><span class="line"><span class="string">dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>shift（平移）, diff（后减前的差）, pct_change（后减前再除以前==“每日涨跌幅”） 是一组类滑窗函数，它们的公共参数为 periods=n ，默认为 1，分别表示取向前第 n 个元素的值、与向前第 n 个元素做差（与 Numpy 中不同，后者表示 n 阶差分）、与向前第 n 个元素相比计算增长率。这里的 n 可以为负，表示反方向的类似操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([<span class="number">1</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>])</span><br><span class="line">print(s.shift(<span class="number">-2</span>))</span><br><span class="line">print(s.diff(<span class="number">3</span>))</span><br><span class="line">print(s.pct_change())</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">-----------------------------------------------</span></span><br><span class="line"><span class="string">|shift输出:     |diff输出：    |pct_change输出: |</span></span><br><span class="line"><span class="string">-----------------------------------------------</span></span><br><span class="line"><span class="string">|0     6.0     |0     NaN     |0         NaN  |    </span></span><br><span class="line"><span class="string">|1    10.0     |1     NaN     |1    2.000000  |</span></span><br><span class="line"><span class="string">|2    15.0     |2     NaN     |2    1.000000  |</span></span><br><span class="line"><span class="string">|3     NaN     |3     9.0     |3    0.666667  |</span></span><br><span class="line"><span class="string">|4     NaN     |4    12.0     |4    0.500000  |</span></span><br><span class="line"><span class="string">|dtype: float64|dtype: float64|dtype: float64 |</span></span><br><span class="line"><span class="string">-----------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>之所以将其视作类滑窗函数的原因是，它们的功能可以用窗口大小为 n+1 的 rolling 方法等价代替：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">s.rolling(<span class="number">3</span>).apply(<span class="keyword">lambda</span> x:list(x)[<span class="number">0</span>]) <span class="comment"># s.shift(2)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_pct</span><span class="params">(x)</span>:</span></span><br><span class="line">    L = list(x)</span><br><span class="line">    <span class="keyword">return</span> L[<span class="number">-1</span>]/L[<span class="number">0</span>]<span class="number">-1</span></span><br><span class="line">s.rolling(<span class="number">2</span>).apply(my_pct) <span class="comment"># s.pct_change()</span></span><br></pre></td></tr></table></figure></p>
+<p>扩张窗口又称累计窗口，可以理解为一个动态长度的窗口，其窗口的大小就是从序列开始处到具体操作的对应位置，其使用的聚合函数会作用于这些逐步扩张的窗口上。具体地说，设序列为 a1, a2, a3, a4，则其每个位置对应的窗口即 [a1]、[a1, a2]、[a1, a2, a3]、[a1, a2, a3, a4]。在上述两种窗口对象分组中的所有数值，计算的权重都是一样的，指数加权就是我们对分组中的数据给予不同的权重用于后边的计算中。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([<span class="number">1</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">10</span>])</span><br><span class="line"><span class="comment"># min_periods参数扩张到最少包含3个元素时才开始计算</span></span><br><span class="line">print(s.expanding(min_periods=<span class="number">3</span>).mean())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指数加权滑动</span></span><br><span class="line">ewm(com=<span class="literal">None</span>, span=<span class="literal">None</span>, halflife=<span class="literal">None</span>, alpha=<span class="literal">None</span>, min_periods=<span class="number">0</span>,\</span><br><span class="line">adjust=<span class="literal">True</span>, ignore_na=<span class="literal">False</span>, axis=<span class="number">0</span>)</span><br></pre></td></tr></table></figure></p>
+<p>我们简单解释一下指数加权滑动函数中的几个参数，指数加权滑动的移动窗口计算公式为：</p>
+<script type="math/tex; mode=display">\hat{y}_{t+1}={\alpha}y_t+(1-\alpha)\hat{y}_{t}</script><p>其中$\alpha$是平滑因子；如果根据跨度进行衰减，则$\alpha=\frac{2}{span+1}$。如果根据质心指定衰减，则$\alpha=\frac{2}{com+1}$。如果根据半衰期进行衰减，则$\alpha=1-\exp\frac{log(0.5)}{halflife}$。</p>
+<h2 id="内置对象"><a href="#内置对象" class="headerlink" title="内置对象"></a>内置对象</h2><h3 id="str对象"><a href="#str对象" class="headerlink" title="str对象"></a>str对象</h3><p>当一个 Pandas 序列 s 是字符串时，可以通过 s.str 获取其内置的字符串对象，Pandas 为 str 对象提供了许多操作函数，其中大量操作与 Python 本身的 str 对象的方法具有相同的用法，包括正则表达式。调用 s.str 对象的方法可以直接在整个序列上完成对字符串的操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([<span class="string">'a'</span>, <span class="string">'bc'</span>, <span class="string">'def'</span>])</span><br><span class="line">print(s.str.len())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0    1</span></span><br><span class="line"><span class="string">1    2</span></span><br><span class="line"><span class="string">2    3</span></span><br><span class="line"><span class="string">dtype: int64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(s.str.match(<span class="string">'a|d'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0     True</span></span><br><span class="line"><span class="string">1    False</span></span><br><span class="line"><span class="string">2     True</span></span><br><span class="line"><span class="string">dtype: bool</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>当然，Pandas 还提供了许多 Python str 对象不具备的功能函数，如 s.str.extract() 用以提取满足特定正则的匹配结果等。</p>
+<h3 id="cat对象"><a href="#cat对象" class="headerlink" title="cat对象"></a>cat对象</h3><p>在 Pandas 中提供了 category 类型，使用户能够处理分类类型的变量，将一个普通序列转换成分类变量可以使用 astype 方法。在一个分类类型的 Series 中定义了 cat 对象，对于一个具体的分类，有两个组成部分，其一为类别的本身，它以 Index 类型存储，其二为是否有序，它们都可以通过 cat 的属性被访问。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(<span class="string">'data/learn_pandas.csv'</span>,</span><br><span class="line">                 usecols = [<span class="string">'Grade'</span>, <span class="string">'Name'</span>, <span class="string">'Gender'</span>, <span class="string">'Height'</span>, <span class="string">'Weight'</span>])</span><br><span class="line">s = df.Grade.astype(<span class="string">'category'</span>)</span><br><span class="line">print(s.cat.categories)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">Index(['Freshman', 'Junior', 'Senior', 'Sophomore'], dtype='object')</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">s.cat.ordered <span class="comment"># False</span></span><br><span class="line"></span><br><span class="line">s = s.cat.add_categories(<span class="string">'Graduate'</span>) <span class="comment"># 增加一个毕业生类别</span></span><br><span class="line"><span class="comment"># 删除某一个类别使用 remove_categories，使用 set_categories 直接设置序列的新类别</span></span><br></pre></td></tr></table></figure><br>常用的 cat 对象操作包括对分类类型的增删改查，以及构建顺序，有序类别和无序类别可以通过 as_unordered 和 reorder_categories 互相转化。</p>
+<h3 id="时序对象"><a href="#时序对象" class="headerlink" title="时序对象"></a>时序对象</h3><p>当 Pandas 的某一列数据是时间格式串，该列就可以转换为时序对象，时序对象是一个复杂的概念，其中包括了时间戳、时间差、时间段、时间偏置等概念。对应的 Pandas 内置对象也有多种（<strong>s.dt 对象</strong>、pd.offsets.*中的 <strong>offset 对象</strong>等），我们在后面的《Pandas时序数据》中详细展开介绍。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/07/nlp-1/" rel="next" title="Python快速自然语言处理">
+                <i class="fa fa-chevron-left"></i> Python快速自然语言处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/12/21/pandas-2/" rel="prev" title="Pandas索引访问">
+                Pandas索引访问 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#读取数据"><span class="nav-number">1.</span> <span class="nav-text">读取数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据写入"><span class="nav-number">2.</span> <span class="nav-text">数据写入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本数据结构"><span class="nav-number">3.</span> <span class="nav-text">基本数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本函数"><span class="nav-number">4.</span> <span class="nav-text">基本函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#窗口对象"><span class="nav-number">5.</span> <span class="nav-text">窗口对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内置对象"><span class="nav-number">6.</span> <span class="nav-text">内置对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#str对象"><span class="nav-number">6.1.</span> <span class="nav-text">str对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cat对象"><span class="nav-number">6.2.</span> <span class="nav-text">cat对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时序对象"><span class="nav-number">6.3.</span> <span class="nav-text">时序对象</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

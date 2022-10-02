@@ -1,0 +1,840 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="分组操作在日常生活中使用极其广泛，想要实现分组操作，必须明确三个要素：分组依据、数据来源、操作及其返回结果。所以，分组代码的范式可以写作：  df.groupby(分组依据)[数据来源].使用操作  分组的依据可以是多种多样的，可以是某个列名，某几个列名，还可以是复杂的逻辑组合：123456789101112131415161718192021222324252627282930313233343">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas分组操作">
+<meta property="og:url" content="http://yoursite.com/2021/03/07/pandas-6/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="分组操作在日常生活中使用极其广泛，想要实现分组操作，必须明确三个要素：分组依据、数据来源、操作及其返回结果。所以，分组代码的范式可以写作：  df.groupby(分组依据)[数据来源].使用操作  分组的依据可以是多种多样的，可以是某个列名，某几个列名，还可以是复杂的逻辑组合：123456789101112131415161718192021222324252627282930313233343">
+<meta property="article:published_time" content="2021-03-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:56.699Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/03/07/pandas-6/"/>
+
+
+
+
+
+  <title> Pandas分组操作 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/03/07/pandas-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas分组操作
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-07T00:00:00+08:00">
+                2021-03-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>分组操作在日常生活中使用极其广泛，想要实现分组操作，必须明确三个要素：分组依据、数据来源、操作及其返回结果。所以，分组代码的范式可以写作：</p>
+<blockquote>
+<p><strong><center>df.groupby(分组依据)[数据来源].使用操作</center></strong></p>
+</blockquote>
+<p>分组的依据可以是多种多样的，可以是某个列名，某几个列名，还可以是复杂的逻辑组合：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">df = pd.read_csv(<span class="string">'data/learn_pandas.csv'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 依据是单一维度的列名：按照性别统计身高中位数</span></span><br><span class="line">print(df.groupby(<span class="string">'Gender'</span>)[<span class="string">'Height'</span>].median())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">Gender</span></span><br><span class="line"><span class="string">Female    159.6</span></span><br><span class="line"><span class="string">Male      173.4</span></span><br><span class="line"><span class="string">Name: Height, dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 依据是多维度的列名：根据学校和性别进行分组，统计身高的均值</span></span><br><span class="line">print(df.groupby([<span class="string">'School'</span>, <span class="string">'Gender'</span>])[<span class="string">'Height'</span>].mean())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">School                         Gender</span></span><br><span class="line"><span class="string">Fudan University               Female    158.776923</span></span><br><span class="line"><span class="string">                               Male      174.212500</span></span><br><span class="line"><span class="string">Peking University              Female    158.666667</span></span><br><span class="line"><span class="string">                               Male      172.030000</span></span><br><span class="line"><span class="string">Shanghai Jiao Tong University  Female    159.122500</span></span><br><span class="line"><span class="string">                               Male      176.760000</span></span><br><span class="line"><span class="string">Tsinghua University            Female    159.753333</span></span><br><span class="line"><span class="string">                               Male      171.638889</span></span><br><span class="line"><span class="string">Name: Height, dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 依据是复杂逻辑组合：根据学生体重是否超过总体均值来分组，计算身高的均值</span></span><br><span class="line">condition = df.Weight &gt; df.Weight.mean()</span><br><span class="line">print(df.groupby(condition)[<span class="string">'Height'</span>].mean())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">Weight</span></span><br><span class="line"><span class="string">False    159.034646</span></span><br><span class="line"><span class="string">True     172.705357</span></span><br><span class="line"><span class="string">Name: Height, dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>从上面的结果可以看出，分组输出的结果是以<strong>依据</strong>作为索引的，在<strong>数据来源</strong>上进行<strong>操作</strong>的结果。</p>
+<h2 id="Groupby对象"><a href="#Groupby对象" class="headerlink" title="Groupby对象"></a>Groupby对象</h2><p>能够注意到，最终具体做分组操作时，所调用的方法都来自于 Pandas 中的 Groupby 对象，除了上文中使用的统计值相关的方法外，Groupby 对象还有很多属性和其他方法：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">gb = df.groupby([<span class="string">'School'</span>, <span class="string">'Grade'</span>])</span><br><span class="line"><span class="comment"># 通过 ngroups 属性，可以访问分为了多少组</span></span><br><span class="line">print(gb.ngroups)</span><br><span class="line"><span class="comment"># 通过 groups 属性，可以返回从组名映射到组索引列表的字典：</span></span><br><span class="line">res = gb.groups</span><br><span class="line">print(res.keys()) <span class="comment"># 仅输出字典的key</span></span><br><span class="line"><span class="comment"># .size() 统计每个组的元素个数</span></span><br><span class="line">print(gb.size())</span><br><span class="line"><span class="comment"># .get_group() 获取所在组对应的</span></span><br><span class="line">print(gb.get_group((<span class="string">'Fudan University'</span>, <span class="string">'Freshman'</span>)).iloc[:<span class="number">3</span>, :<span class="number">3</span>])</span><br></pre></td></tr></table></figure></p>
+<p>对于一个 Groupby 对象，使用最多的操作可以总结为三类：聚合、变换和过滤。它们分别对应如下的三种应用场景：</p>
+<ul>
+<li><strong>聚合</strong>：依据性别分组，统计全国人口寿命的平均值</li>
+<li><strong>变换</strong>：依据季节分组，对每一个季节的温度进行组内标准化</li>
+<li><strong>过滤</strong>：依据班级分组，筛选出组内数学分数的平均值超过80 分的班级</li>
+</ul>
+<h2 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h2><p>Groupby 对象内置了许多聚合函数，较为常用的包括max、min、mean 和 median，还有一些常用的内置聚合函数整理如下表：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内置聚合函数</th>
+<th style="text-align:left">功能</th>
+<th style="text-align:left">内置聚合函数</th>
+<th style="text-align:left">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">count()</td>
+<td style="text-align:left">统计分组中的非缺失值个数</td>
+<td style="text-align:left">nunique([dropna])</td>
+<td style="text-align:left">返回每个维度去重元素的个数</td>
+</tr>
+<tr>
+<td style="text-align:left">all([skipna)</td>
+<td style="text-align:left">分组中所有值为真返回True，否则False</td>
+<td style="text-align:left">any([skipna]</td>
+<td style="text-align:left">分组中任一值为真返回True，否则False</td>
+</tr>
+<tr>
+<td style="text-align:left">sum(numeric_only, min_count)</td>
+<td style="text-align:left">返回分组值之和</td>
+<td style="text-align:left">prod(numeric_only, min_count)</td>
+<td style="text-align:left">返回分组值之积</td>
+</tr>
+<tr>
+<td style="text-align:left">quantile([q, iternpolation])</td>
+<td style="text-align:left">返回分组中指定分为数的值</td>
+<td style="text-align:left">mad([axis])</td>
+<td style="text-align:left">返回指定轴上值的平均绝对偏差</td>
+</tr>
+<tr>
+<td style="text-align:left">std([ddof])</td>
+<td style="text-align:left">返回分组的标准偏差，不包括缺失值</td>
+<td style="text-align:left">var([ddof])</td>
+<td style="text-align:left">返回分组的方差，不包括缺失值</td>
+</tr>
+<tr>
+<td style="text-align:left">sem([ddof])</td>
+<td style="text-align:left">返回分组平均值的标准误差，不包括缺失值</td>
+<td style="text-align:left">skew([axis])</td>
+<td style="text-align:left">返回指定轴上的偏度系数</td>
+</tr>
+<tr>
+<td style="text-align:left">idxmin([axis, skipna])</td>
+<td style="text-align:left">返回指定轴上第一次出现的最小值索引</td>
+<td style="text-align:left">idxmax([axis, skipna])</td>
+<td style="text-align:left">返回指定轴上第一次出现的最大值索引</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>这些聚合函数当传入的数据来源包含多个列时，将按照列进行迭代计算：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">gb = df.groupby(<span class="string">'Gender'</span>)[[<span class="string">'Height'</span>, <span class="string">'Weight'</span>]]</span><br><span class="line">print(gb.max())</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Height  Weight</span></span><br><span class="line"><span class="string">Gender                </span></span><br><span class="line"><span class="string">Female   170.2    63.0</span></span><br><span class="line"><span class="string">Male     193.9    89.0</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>虽然在 Groupby 对象内置了许多聚合函数，但仍然有以下不便之处：无法同时使用多个函数，无法对特定的列使用特定的聚合函数，无法使用自定义的聚合函数，无法直接对结果的列名在聚合前进行自定义命名。此时，我们可以通过使用 agg 函数来解决以上不便。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 一次使用多个内置聚合函数</span></span><br><span class="line">print(gb.agg([<span class="string">'sum'</span>, <span class="string">'idxmax'</span>, <span class="string">'skew'</span>]))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 对特定的列使用特定的聚合函数</span></span><br><span class="line">print(gb.agg(&#123;<span class="string">'Height'</span>:[<span class="string">'mean'</span>,<span class="string">'max'</span>], <span class="string">'Weight'</span>:<span class="string">'count'</span>&#125;))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 使用自定义函数（计算身高和体重的极差）</span></span><br><span class="line">print(gb.agg(<span class="keyword">lambda</span> x: x.mean()-x.min()))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 聚合结果重命名</span></span><br><span class="line">print(gb.agg([(<span class="string">'range'</span>, <span class="keyword">lambda</span> x: x.max()-x.min()), (<span class="string">'my_sum'</span>, <span class="string">'sum'</span>)]))</span><br></pre></td></tr></table></figure></p>
+<p>使用多个聚合函数的输出结果其列索引为多级索引，第一层为数据源，第二层为使用的聚合方法；对于方法和列的特殊对应，可以通过构造字典传入 agg 中实现；自定义函数，需要注意传入函数的参数是之前数据源中的列，逐列进行计算，且返回值必须是标量；想要对结果进行重命名，只需要将上述函数的位置改写成元组，元组的第一个元素为新的名字，第二个位置为原来的函数。</p>
+<h2 id="变换"><a href="#变换" class="headerlink" title="变换"></a>变换</h2><p>变换函数的返回值是与数据来源相同长度的序列，Groupby 对象内置的变换函数中最常用的是累计函数：cumcount/cumsum/cumprod/cummax/cummin。另外，rank 方法也是一个实用的变换函数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">data = &#123;<span class="string">'Gender'</span>: [<span class="string">'M'</span>, <span class="string">'M'</span>, <span class="string">'M'</span>, <span class="string">'F'</span>, <span class="string">'F'</span>, <span class="string">'M'</span>], <span class="string">'Height'</span>: [<span class="number">185</span>, <span class="number">172</span>, <span class="number">178</span>, <span class="number">152</span>, <span class="number">160</span>, <span class="number">181</span>]&#125;</span><br><span class="line">test_df = pd.DataFrame(data)</span><br><span class="line">print(test_df.groupby(<span class="string">'Gender'</span>).cumcount())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0    0</span></span><br><span class="line"><span class="string">1    1</span></span><br><span class="line"><span class="string">2    2</span></span><br><span class="line"><span class="string">3    0</span></span><br><span class="line"><span class="string">4    1</span></span><br><span class="line"><span class="string">5    3</span></span><br><span class="line"><span class="string">dtype: int64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(test_df.groupby(<span class="string">'Gender'</span>).rank(method=<span class="string">'average'</span>, ascending=<span class="literal">True</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">   Height</span></span><br><span class="line"><span class="string">0     4.0</span></span><br><span class="line"><span class="string">1     1.0</span></span><br><span class="line"><span class="string">2     2.0</span></span><br><span class="line"><span class="string">3     1.0</span></span><br><span class="line"><span class="string">4     2.0</span></span><br><span class="line"><span class="string">5     3.0</span></span><br><span class="line"><span class="string">'''</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 对身高和体重进行分组标准化，即减去组均值后除以组的标准差</span></span><br><span class="line">print(gb.transform(<span class="keyword">lambda</span> x: (x-x.mean())/x.std()).head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     Height    Weight</span></span><br><span class="line"><span class="string">0 -0.058760 -0.354888</span></span><br><span class="line"><span class="string">1 -1.010925 -0.355000</span></span><br><span class="line"><span class="string">2  2.167063  2.089498</span></span><br><span class="line"><span class="string">3       NaN -1.279789</span></span><br><span class="line"><span class="string">4  0.053133  0.159631</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 返回是标量，会使得结果被广播到其所在的整个组</span></span><br><span class="line">print(gb.transform(<span class="string">'mean'</span>).head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">      Height     Weight</span></span><br><span class="line"><span class="string">0  159.19697  47.918519</span></span><br><span class="line"><span class="string">1  173.62549  72.759259</span></span><br><span class="line"><span class="string">2  173.62549  72.759259</span></span><br><span class="line"><span class="string">3  159.19697  47.918519</span></span><br><span class="line"><span class="string">4  173.62549  72.759259</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>当用自定义变换时需要使用 transform 方法，被调用的自定义函数，其传入值为数据源的序列，最后的返回结果是行列索引与数据源一致的 DataFrame。前面提到了 transform 只能返回同长度的序列，但事实上还可以返回一个标量，这会使得结果被广播到其所在的整个组，这种标量广播的技巧在特征工程中是非常常见的。</p>
+<h2 id="过滤"><a href="#过滤" class="headerlink" title="过滤"></a>过滤</h2><p>组过滤指的是如果对一个组的全体所在行进行统计的结果返回 True 则会被保留，False 则该组会被过滤，最后把所有未被过滤的组其对应的所在行拼接起来作为 DataFrame 返回。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 过滤得到所有容量大于100的组</span></span><br><span class="line">print(gb.filter(<span class="keyword">lambda</span> x: x.shape[<span class="number">0</span>] &gt; <span class="number">100</span>).head())</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">   Height  Weight</span></span><br><span class="line"><span class="string">0   158.9    46.0</span></span><br><span class="line"><span class="string">3     NaN    41.0</span></span><br><span class="line"><span class="string">5   158.0    51.0</span></span><br><span class="line"><span class="string">6   162.5    52.0</span></span><br><span class="line"><span class="string">7   161.9    50.0</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>在 Groupby 对象中，定义了 filter 方法进行组的筛选，其中自定义函数的输入参数为数据源构成的 DataFrame 本身，且需保证自定义函数的返回为布尔值。</p>
+<h2 id="跨列分组"><a href="#跨列分组" class="headerlink" title="跨列分组"></a>跨列分组</h2><p>如果我们要对上述的分组求BMI值（体重/POW(身高, 2)），显然前面所讲的任何一种方法都无法处理，所以，我们引入了 apply 函数来实现复杂的分组操作。在设计上，apply 的自定义函数传入参数与 filter 完全一致，但返回值并不受限于布尔型。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">BMI</span><span class="params">(x)</span>:</span></span><br><span class="line">    Height = x[<span class="string">'Height'</span>]/<span class="number">100</span></span><br><span class="line">    Weight = x[<span class="string">'Weight'</span>]</span><br><span class="line">    BMI_value = Weight/Height**<span class="number">2</span></span><br><span class="line">    <span class="keyword">return</span> BMI_value.mean()</span><br><span class="line"></span><br><span class="line">print(gb.apply(BMI))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">Gender</span></span><br><span class="line"><span class="string">Female    18.860930</span></span><br><span class="line"><span class="string">Male      24.318654</span></span><br><span class="line"><span class="string">dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>除了返回标量之外，apply 方法还可以返回一维 Series 和二维 DataFrame。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="comment"># 1. 自定义函数返回标量情况：结果得到的是Series，索引与agg的结果一致</span></span><br><span class="line">gb = df.groupby([<span class="string">'Gender'</span>,<span class="string">'Test_Number'</span>])[[<span class="string">'Height'</span>,<span class="string">'Weight'</span>]]</span><br><span class="line">print(gb.apply(<span class="keyword">lambda</span> x: <span class="number">0</span>))</span><br><span class="line"><span class="comment">#print(gb.apply(lambda x: [0, 0])) # 虽然是列表，但是作为返回值仍然看作标量</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">Gender  Test_Number</span></span><br><span class="line"><span class="string">Female  1              0</span></span><br><span class="line"><span class="string">        2              0</span></span><br><span class="line"><span class="string">        3              0</span></span><br><span class="line"><span class="string">Male    1              0</span></span><br><span class="line"><span class="string">        2              0</span></span><br><span class="line"><span class="string">        3              0</span></span><br><span class="line"><span class="string">dtype: int64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 自定义函数返回Series情况：得到的是DataFrame，行索引与标量情况一致，列索引为Series的索引</span></span><br><span class="line">print(gb.apply(<span class="keyword">lambda</span> x: pd.Series([<span class="number">0</span>,<span class="number">0</span>],index=[<span class="string">'a'</span>,<span class="string">'b'</span>])))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">                    a  b</span></span><br><span class="line"><span class="string">Gender Test_Number      </span></span><br><span class="line"><span class="string">Female 1            0  0</span></span><br><span class="line"><span class="string">       2            0  0</span></span><br><span class="line"><span class="string">       3            0  0</span></span><br><span class="line"><span class="string">Male   1            0  0</span></span><br><span class="line"><span class="string">       2            0  0</span></span><br><span class="line"><span class="string">       3            0  0</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 自定义函数返回DataFrame情况：得到的是DataFrame，行索引最内层在每个组原先agg的结果索引上，</span></span><br><span class="line"><span class="comment"># 再加一层返回的DataFrame行索引，同时分组结果DataFrame的列索引和返回的DataFrame列索引一致</span></span><br><span class="line">rest = gb.apply(<span class="keyword">lambda</span> x: pd.DataFrame(np.ones((<span class="number">2</span>,<span class="number">2</span>)), index = [<span class="string">'a'</span>,<span class="string">'b'</span>], </span><br><span class="line">                                columns=pd.Index([(<span class="string">'w'</span>,<span class="string">'x'</span>),(<span class="string">'y'</span>,<span class="string">'z'</span>)])))</span><br><span class="line">print(rest)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">                        w    y</span></span><br><span class="line"><span class="string">                        x    z</span></span><br><span class="line"><span class="string">Gender Test_Number            </span></span><br><span class="line"><span class="string">Female 1           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">       2           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">       3           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">Male   1           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">       2           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">       3           a  1.0  1.0</span></span><br><span class="line"><span class="string">                   b  1.0  1.0</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>最后需要强调的是，apply 函数的灵活性是以牺牲一定性能为代价换得的，除非需要使用跨列处理的分组处理，否则应当使用其他专门设计的 groupby 对象方法，否则在性能上会存在较大的差距。同时，在使用聚合函数和变换函数时，也应当优先使用内置函数，它们经过了高度的性能优化，一般而言在速度上都会快于用自定义函数来实现。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/16/pandas-5/" rel="next" title="Pandas表格变形">
+                <i class="fa fa-chevron-left"></i> Pandas表格变形
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/24/pandas-7/" rel="prev" title="Pandas时序数据">
+                Pandas时序数据 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Groupby对象"><span class="nav-number">1.</span> <span class="nav-text">Groupby对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#聚合"><span class="nav-number">2.</span> <span class="nav-text">聚合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变换"><span class="nav-number">3.</span> <span class="nav-text">变换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤"><span class="nav-number">4.</span> <span class="nav-text">过滤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跨列分组"><span class="nav-number">5.</span> <span class="nav-text">跨列分组</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

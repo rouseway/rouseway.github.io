@@ -1,0 +1,813 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="搜索引擎,数据科学,ElasticSearch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="存储数据需要定义的是文档的结构，即数据包含哪些字段，各字段都是什么类型，哪些字段被用作全文检索，并使用哪种分析器。在实际应用中，我们希望能够批量地导入文档，而不是一条文档一条文档地去执行 POST 操作。 Mapping基本概念Mapping 对应关系型数据库的 schema 的定义，其作用包括定义索引中字段的名字，定义字段的数据类型，例如字符串、数字、布尔类型等；字段的倒排索引相关配置，例如是否">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch：存储数据">
+<meta property="og:url" content="http://yoursite.com/2021/06/25/elasticsearch-2/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="存储数据需要定义的是文档的结构，即数据包含哪些字段，各字段都是什么类型，哪些字段被用作全文检索，并使用哪种分析器。在实际应用中，我们希望能够批量地导入文档，而不是一条文档一条文档地去执行 POST 操作。 Mapping基本概念Mapping 对应关系型数据库的 schema 的定义，其作用包括定义索引中字段的名字，定义字段的数据类型，例如字符串、数字、布尔类型等；字段的倒排索引相关配置，例如是否">
+<meta property="og:image" content="https://codimd.s3.shivering-isles.com/demo/uploads/upload_10345f4615cf3252ef7925d6f3c0579b.PNG">
+<meta property="article:published_time" content="2021-06-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:40:30.239Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="搜索引擎">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="ElasticSearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://codimd.s3.shivering-isles.com/demo/uploads/upload_10345f4615cf3252ef7925d6f3c0579b.PNG">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/06/25/elasticsearch-2/"/>
+
+
+
+
+
+  <title> ElasticSearch：存储数据 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/06/25/elasticsearch-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ElasticSearch：存储数据
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-25T00:00:00+08:00">
+                2021-06-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2/" itemprop="url" rel="index">
+                    <span itemprop="name">信息检索</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2/ElasticSearch/" itemprop="url" rel="index">
+                    <span itemprop="name">ElasticSearch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>存储数据需要定义的是文档的结构，即数据包含哪些字段，各字段都是什么类型，哪些字段被用作全文检索，并使用哪种分析器。在实际应用中，我们希望能够批量地导入文档，而不是一条文档一条文档地去执行 POST 操作。</p>
+<h2 id="Mapping基本概念"><a href="#Mapping基本概念" class="headerlink" title="Mapping基本概念"></a>Mapping基本概念</h2><p>Mapping 对应关系型数据库的 schema 的定义，其作用包括定义索引中字段的名字，定义字段的数据类型，例如字符串、数字、布尔类型等；字段的倒排索引相关配置，例如是否被倒排索引，使用什么分析器等。</p>
+<p>本节内容我们重点介绍 Elasticsearch 中的字段类型：</p>
+<ul>
+<li><p>字符串类型：</p>
+<ul>
+<li>text：定义可以被全文检索的字段，该字段内容默认会被分析器分析，并生成倒排索引，参与到检索与相关性计算中</li>
+<li>keyword：一般用于定义简短或结构化的文本字段，例如标签、email 地址、手机号码等，定义为该类型的字段默认不会被分析器分析，通常用来作过滤、排序、聚合等</li>
+</ul>
+</li>
+<li><p>数值类型：ES 支持多种精度的数值类型，在满足需求的情况下，优先使用范围小的字段。字段长度越短，索引和搜索的效率越高。浮点数，优先考虑使用 scaled_float</p>
+<p>  |类型   |    取值范围 |<br>  |———|————-|<br>  |long|-2^63^ 到 2^63^-1|<br>  |integer|-2^31^ 到 2^31^-1|<br>  |short|-2^15^ 到 2^15^-1|<br>  |byte|-2^7^ 到 2^7^-1|<br>  |double|64 位的双精度 IEEE754 浮点类型|<br>  |float|32 位的双精度 IEEE754 浮点类型|<br>  |half_float|16 位的双精度 IEEE754 浮点类型|<br>  |scaled_float|缩放类型的浮点类型|</p>
+</li>
+<li><p>日期类型（date）： 取值为多种格式日期时间表达式的字段，通过定义为 date 类型在 ES 内部被解析为毫秒计时的长整型数</p>
+</li>
+<li><p>布尔类型（boolean）：文档中取值为 “true”、“false”、true、false 的字段</p>
+</li>
+<li><p>二进制类型（binary）：二进制接受的是 base64 编码的字符串，默认不可搜索</p>
+</li>
+<li><p>对象类型（object）：文档中属于结构化的对象数据对应的字段应该定义为对象类型</p>
+</li>
+<li><p>数组类型：ES 中没有专门的数组类型，任何字段都可以有一个或者多个值。也就是说我们无需对一个取值为数组的字段显式地定义其为数组类型，只需要按照数组中元素的类型去定义即可，同时要确保数据中数组的元素都是同一种类型</p>
+</li>
+<li><p>嵌套类型（nested）：它是对象类型的一个特例，如果一个字段的取值是对象的数组，在 ES 内部回对其进行扁平化处理，将一个对象转为字段名和值构成的简单列表，这样会导致对象的属性关系丢失，此时应该使用嵌套类型来独立保存数组中的每个对象<br><img src="https://codimd.s3.shivering-isles.com/demo/uploads/upload_10345f4615cf3252ef7925d6f3c0579b.PNG" alt=""></p>
+</li>
+</ul>
+<p>还有范围类型（integer_range）等一些特殊的数据类型，由于我们使用不多，所以不做详细的介绍了。专有的特殊类型包括：地理类型（geo_poing &amp; geo_shape / percolator），IP类型（ip），统计词频类型（token_count），向量类型（dense_vector / sparse_vector）等。</p>
+<p>值得注意的是，对于一个字段的类型定义，只能在创建 index 时一次性完成，此后不能更改。新增字段并指定新字段的类型是可以的。</p>
+<h2 id="Dynamic-Mapping"><a href="#Dynamic-Mapping" class="headerlink" title="Dynamic Mapping"></a>Dynamic Mapping</h2><p>Dynamic Mapping 的机制，使得我们无需手动定义 Mapping，ES 会自动根据文档信息，推算出字段的类型。我们前一节在创建 shopping 索引的时候，并没有显式地定义过映射，但是 ES 还是自动地识别字段生成了一些定义。我们在 Kibana 中发送请求 <code>GET /shopping/_mapping</code> 可以得到：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"shopping"</span> : &#123;</span><br><span class="line">    <span class="attr">"mappings"</span> : &#123;</span><br><span class="line">      <span class="attr">"properties"</span> : &#123;</span><br><span class="line">        <span class="attr">"category"</span> : &#123;</span><br><span class="line">          <span class="attr">"type"</span> : <span class="string">"text"</span>,</span><br><span class="line">          <span class="attr">"fields"</span> : &#123;</span><br><span class="line">            <span class="attr">"keyword"</span> : &#123;</span><br><span class="line">              <span class="attr">"type"</span> : <span class="string">"keyword"</span>,</span><br><span class="line">              <span class="attr">"ignore_above"</span> : <span class="number">256</span> <span class="comment">// 用作 keyword 时，限制最大字符长度，超过则不被索引</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        ...</span><br><span class="line">        </span><br><span class="line">        "price" : &#123;</span><br><span class="line">          "type" : "float"</span><br><span class="line">        &#125;,</span><br><span class="line">       ...</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>我们导入的文档数据里的字段都被放到了 Mapping 的 properties 里了，而且通过 type 指定了它们的数据类型。有的时候 ES 对字段的类型可能会推算不准，尤其是一些复杂类型的字段，当类型设置不对时，会导致一些功能无法正常运行。所以，ES 允许用户定义 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html" target="_blank" rel="noopener">Dynamic Templates</a> 通过模板匹配来设置正确的字段定义。</p>
+<h2 id="Mapping常用参数"><a href="#Mapping常用参数" class="headerlink" title="Mapping常用参数"></a>Mapping常用参数</h2><p>type 参数（字段的类型）仅仅只是 Mapping 中需要设置的一个参数，还有很多常用的参数我们需要了解，并且在实践中做相关个性化的配置。</p>
+<ul>
+<li>dynamic：与 properties 是同级的，默认是 true，即如果数据中有新字段会自动推算其类型，也可以设置为 false，表示忽略新字段；当设置为 strict 时则会在发现新字段时抛出异常</li>
+<li>analyzer：定义文本字段的分析器，默认对索引和查询对生效，分析器是一种用于分析数据或者按照用户想要的方式处理数据的工具，我们会在《ElasticSearch：分析数据》一章中详细展开</li>
+<li>search_analyzer：查询时的分析器，如果定义了查询则使用这个分析器</li>
+<li>index：是否使用分析器构建倒排索引，默认为 true；设置为 false 只表示不使用分析器构建倒排，但仍然可以通过完全匹配搜索到（正排索引）</li>
+<li>enabled：ES 默认会索引所有的字段，但是有的字段可能只需要存储，不需要索引（不索引能减少 CPU 使用、不影响相关性评分），此时可以设置该参数为 false</li>
+<li>fields：可以让同一字段有多种不同的索引方式</li>
+<li>normalizer：用于解析前（索引或者查询）的标准化配置，如大小写归一化</li>
+<li>boost：设置字段的权重，一般不推荐配置，常用的方法是在查询时设置，可以动态变化</li>
+<li>coerce 用来清除脏数据，默认为 true，如当数值类型的字段以字符串形式表达时会自动清洗，如果设为 false 则会报错</li>
+<li>copy_to：可以将多个字段的值，复制到同一个字段中</li>
+<li>ignore_above：用于指定分词和索引的字符串最大长度，超过最大长度的话，该字段将不会被索引，这个字段只适用于 keyword 类型</li>
+<li>index_options：控制索引时哪些信息被存储到倒排索引中，有四种取值：docs 表示只存储文档编号（默认）；freqs 表示在 docs 基础上，存储词项频率；positions    是在 freqs 基础上，存储词项偏移位置；offsets 是在 positions 基础上，存储词项开始和结束的字符位置</li>
+<li>position_increment_gap：被解析的 text 字段会将 term 的位置考虑进去，目的是为了支持近似查询和短语查询，当我们去索引一个含有多个值的 text 字段时，会在各个值之间添加一个假想的空间，将值隔开，这样就可以有效避免一些无意义的短语匹配，间隙大小通过该参数来控制，默认是 100</li>
+<li>similarity：指定文档的评分模型，默认有三种：BM25 为默认的评分模型；classic 为    TF/IDF 评分；boolean 为布尔模型评分</li>
+<li>store：控制数据存储方式，设置为 true 的字段会单独存储。如果查询是从一个很多字段的文档中检索几个小的字段，就可以将小的字段设置为 store 来单独存储，查询时不再通过 _source 获得冗余的信息，而只从 stored_fileds 中取</li>
+<li>ignore_malformed：忽略掉不正常的字段类型，默认为 false，即文档中有类型不匹配的字段就抛出异常，如果设为 true 则忽略掉出错的字段，正常处理其他字段</li>
+</ul>
+<h2 id="自定义Mapping"><a href="#自定义Mapping" class="headerlink" title="自定义Mapping"></a>自定义Mapping</h2><p>根据自己的数据与业务需求我们可以定义自己的 Mapping，并在创建索引时进行声明，我们这里给出一套常用的基本框架：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">      <span class="attr">"mappings"</span> : &#123;</span><br><span class="line">      <span class="comment">// 关闭动态mapping</span></span><br><span class="line">      <span class="attr">"dynamic"</span>: <span class="literal">false</span>,</span><br><span class="line">      <span class="comment">// 并不需要返回图书内容，所以关闭_source，在stored_fields中指定要返回的字段</span></span><br><span class="line">      <span class="attr">"_source"</span>: &#123;<span class="attr">"enabled"</span>: <span class="literal">false</span>&#125;,    </span><br><span class="line">      <span class="attr">"properties"</span> : &#123;</span><br><span class="line">        <span class="comment">// 作者名字不进行分析器处理，只能完全匹配</span></span><br><span class="line">        <span class="attr">"author"</span> : &#123;<span class="attr">"type"</span> : <span class="string">"keyword"</span>, <span class="attr">"store"</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">        <span class="comment">// URL不需要倒排索引</span></span><br><span class="line">        <span class="attr">"cover_url"</span> : &#123;<span class="attr">"type"</span> : <span class="string">"keyword"</span>, <span class="attr">"index"</span>: <span class="literal">false</span>, <span class="attr">"store"</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">        <span class="comment">// 图书简介与内容需要构建倒排，支持全文检索</span></span><br><span class="line">        <span class="attr">"description"</span> : &#123;<span class="attr">"type"</span> : <span class="string">"text"</span>, <span class="attr">"analyzer"</span>: <span class="string">"ik_smart"</span>, <span class="attr">"store"</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">        <span class="attr">"content"</span> : &#123;<span class="attr">"type"</span> : <span class="string">"text"</span>, <span class="attr">"analyzer"</span>: <span class="string">"ik_smart"</span>, <span class="attr">"store"</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">        <span class="comment">// 出版日期是date类型</span></span><br><span class="line">        <span class="attr">"public_date"</span> : &#123;<span class="attr">"type"</span> : <span class="string">"date"</span>, <span class="attr">"store"</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">        <span class="comment">// 图书标题同时支持全文检索（倒排式）与完全匹配（正排式）的检索</span></span><br><span class="line">        <span class="attr">"title"</span> : &#123;</span><br><span class="line">          <span class="attr">"type"</span> : <span class="string">"text"</span>,</span><br><span class="line">          <span class="attr">"analyzer"</span>: <span class="string">"ik_smart"</span>,</span><br><span class="line">          <span class="attr">"fields"</span> : &#123;</span><br><span class="line">            <span class="attr">"keyword"</span> : &#123;</span><br><span class="line">              <span class="attr">"type"</span> : <span class="string">"keyword"</span>,</span><br><span class="line">              <span class="attr">"ignore_above"</span> : <span class="number">100</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="attr">"store"</span>: <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>定义字段的数据类型，指定分析器，设置检索模式，以及存储方式是最常用的基本配置，可以参考上面的示例针对自己的业务数据进行 Mapping 的自定义配置。对于支持倒排索引的字段，最基本的分析器功能就是分词，可以直接将 analyzer 参数设置为 ES 内置的分词器 ik_smart。</p>
+<h2 id="使用Python-API"><a href="#使用Python-API" class="headerlink" title="使用Python API"></a>使用Python API</h2><p>结合前面一章《ElasticSearch：基础知识》的介绍，我们可以搭建 ES 环境，并根据自己的数据与业务特点设计 Mapping，我们给出了一套使用 Python API 进行 ES 操作的 client 框架，包括创建索引、导入数据以及查询。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> elasticsearch <span class="keyword">import</span> Elasticsearch</span><br><span class="line"><span class="keyword">from</span> elasticsearch.helpers <span class="keyword">import</span> bulk</span><br><span class="line"><span class="keyword">from</span> elasticsearch <span class="keyword">import</span> helpers</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ElasticSearchClient</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, host, port, user=None, pwd=None, bulk_volume=<span class="number">2000</span>)</span>:</span></span><br><span class="line">        self.es_servers = [&#123;</span><br><span class="line">            <span class="string">"host"</span>: host,</span><br><span class="line">            <span class="string">"port"</span>: port</span><br><span class="line">        &#125;]</span><br><span class="line">        self.es_auth = (user, pwd)</span><br><span class="line">        self.bulk_volume = bulk_volume</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> user == <span class="literal">None</span>:</span><br><span class="line">                <span class="comment"># 无用户名密码状态</span></span><br><span class="line">                self.es_instance = Elasticsearch(hosts=self.es_servers)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># 用户名密码状态</span></span><br><span class="line">                self.es_instance = Elasticsearch(hosts=self.es_servers, http_auth=self.es_auth)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            print(<span class="string">'连接失败'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">create_index</span><span class="params">(self, index_name)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        TODO: 进行创建一个索引</span></span><br><span class="line"><span class="string">        :param index_name:  索引名</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        self.es_instance.indices.create(index=index_name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">create_index_with_mapping</span><span class="params">(self, index_name, body)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        TODO: 按照指定的body(包含settings和mappings)创建一个index</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param body: 索引的配置，包含(`settings` 和 `mappings`)</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        self.es_instance.indices.create(index=index_name, body=body)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">delete_index</span><span class="params">(self, index_name)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        TODO: 删除一个索引</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        self.es_instance.indices.delete(index=index_name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_document</span><span class="params">(self, index_name, doc_obj)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        TODO: 单条插入ES</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param doc_obj: 一条document</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.es_instance.index(index=index_name, document=doc_obj, doc_type=<span class="string">'_doc'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_document_in_bulk</span><span class="params">(self, index_name, doc_obj_list)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        TODO: 批量插入ES</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param doc_obj_list  多条document组成的列表</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        load_data = []</span><br><span class="line">        i = <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> row_obj <span class="keyword">in</span> tqdm(doc_obj_list):</span><br><span class="line">            action = &#123;</span><br><span class="line">                <span class="string">"_index"</span>: index_name,</span><br><span class="line">                <span class="string">"_type"</span>: <span class="string">'_doc'</span>,</span><br><span class="line">                <span class="string">"_source"</span>: row_obj</span><br><span class="line">            &#125;</span><br><span class="line">            load_data.append(action)</span><br><span class="line">            i += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 批量处理</span></span><br><span class="line">            <span class="keyword">if</span> len(load_data) == self.bulk_volume:</span><br><span class="line">                print(<span class="string">'插入'</span>, i / self.bulk_volume, <span class="string">'批bulk'</span>)</span><br><span class="line">                success, failed = helpers.bulk(self.es_instance, load_data, index=index_name, raise_on_error=<span class="literal">True</span>)</span><br><span class="line">                print(success, failed)</span><br><span class="line">                load_data.clear()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 处理剩下不足 bulk_volume 的</span></span><br><span class="line">        <span class="keyword">if</span> len(load_data) &gt; <span class="number">0</span>:</span><br><span class="line">            success, failed = bulk(self.es_instance, load_data, index=index_name, raise_on_error=<span class="literal">True</span>)</span><br><span class="line">            <span class="keyword">del</span> load_data[<span class="number">0</span>:len(load_data)]</span><br><span class="line">            print(success, failed)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_document_by_id</span><span class="params">(self, index_name, _id, doc_obj)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        TODO: 根据给定的_id,更新ES文档</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param _id: ES中document的id</span></span><br><span class="line"><span class="string">        :param doc_obj: 一条document</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.es_instance.update(index=index_name, body=&#123;<span class="string">"doc"</span>: doc_obj&#125;, id=_id, doc_type=<span class="string">'_doc'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">delete_document_by_id</span><span class="params">(self, index_name, _id)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        TODO: 根据给定的id,删除文档</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param _id: ES中document的id</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.es_instance.delete(index=index_name, id=_id, doc_type=<span class="string">'_doc'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search_document_by_query</span><span class="params">(self, index_name, query)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        TODO: 根据查询的query语句，来搜索查询内容</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        :param query: 结构化的检索表达式</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        search_result = self.es_instance.search(index=index_name, body=query, doc_type=<span class="string">'_doc'</span>)</span><br><span class="line">        <span class="keyword">return</span> search_result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">clear_documents</span><span class="params">(self, index_name)</span>:</span></span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        TODO: 清空指定索引里的所有文档</span></span><br><span class="line"><span class="string">        :param index_name: 索引名</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        delete_by_all = &#123;<span class="string">"query"</span>: &#123;<span class="string">"match_all"</span>: &#123;&#125;&#125;&#125;</span><br><span class="line">        result = self.es_instance.delete_by_query(index=index_name, body=delete_by_all, doc_type=<span class="string">'_doc'</span>)</span><br><span class="line">        print(result)</span><br></pre></td></tr></table></figure></p>
+<p>这部分代码之所以如此简洁，是因为个性化的数据定义与查询都被封装成了 JSON（Python中的字典对象）以参数的形式传入，所以我们后面的章节都将围绕如何组合我们想要的 JSON 结构进行详细的讲解。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/" rel="tag"># 搜索引擎</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/06/elasticsearch-1/" rel="next" title="ElasticSearch：基础知识">
+                <i class="fa fa-chevron-left"></i> ElasticSearch：基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/07/13/pytorch-1/" rel="prev" title="PyTorch的数据操作">
+                PyTorch的数据操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mapping基本概念"><span class="nav-number">1.</span> <span class="nav-text">Mapping基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dynamic-Mapping"><span class="nav-number">2.</span> <span class="nav-text">Dynamic Mapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mapping常用参数"><span class="nav-number">3.</span> <span class="nav-text">Mapping常用参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义Mapping"><span class="nav-number">4.</span> <span class="nav-text">自定义Mapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Python-API"><span class="nav-number">5.</span> <span class="nav-text">使用Python API</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

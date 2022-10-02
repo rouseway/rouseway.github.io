@@ -1,0 +1,825 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="当前深度学习模型训练正在朝着大模型的趋势发展，这里包括海量的训练数据（预训练）以及亿级别的模型参数，而我们单张显卡的计算与存储资源是相对有限的，因此需要针对大规模数据进行分布式训练，甚至还要对模型进行并行化处理（有可能模型的参数多到 batch_size&#x3D;1 的数据都无法喂入）。尽管分布式训练听起来如此高大上，但请记住一点，分布式会产生通信开销，所以深度学习框架与底层硬件的分布式技术都是在 GPU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch实战：分布式训练">
+<meta property="og:url" content="http://yoursite.com/2022/04/06/pytorch-12/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="当前深度学习模型训练正在朝着大模型的趋势发展，这里包括海量的训练数据（预训练）以及亿级别的模型参数，而我们单张显卡的计算与存储资源是相对有限的，因此需要针对大规模数据进行分布式训练，甚至还要对模型进行并行化处理（有可能模型的参数多到 batch_size&#x3D;1 的数据都无法喂入）。尽管分布式训练听起来如此高大上，但请记住一点，分布式会产生通信开销，所以深度学习框架与底层硬件的分布式技术都是在 GPU">
+<meta property="article:published_time" content="2022-04-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:16.396Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/04/06/pytorch-12/"/>
+
+
+
+
+
+  <title> PyTorch实战：分布式训练 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/04/06/pytorch-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch实战：分布式训练
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-04-06T00:00:00+08:00">
+                2022-04-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>当前深度学习模型训练正在朝着大模型的趋势发展，这里包括海量的训练数据（预训练）以及亿级别的模型参数，而我们单张显卡的计算与存储资源是相对有限的，因此需要针对大规模数据进行分布式训练，甚至还要对模型进行并行化处理（有可能模型的参数多到 batch_size=1 的数据都无法喂入）。尽管分布式训练听起来如此高大上，但请记住一点，分布式会产生通信开销，所以深度学习框架与底层硬件的分布式技术都是在 GPU 的计算资源、显存资源与带宽资源上做文章。</p>
+<h2 id="集合通信"><a href="#集合通信" class="headerlink" title="集合通信"></a>集合通信</h2><p>在展开分布各种分布式训练技术细节之前，我们先统一一些基础的概念，也就是分布式技术中涉及到的集合通信原语：</p>
+<ul>
+<li><strong>Broadcast（广播）</strong>：当一台服务器计算完成了自己部分的参数数据，在分布式训练中想要把自己这部分数据同时发送给其他所有服务器，那么这种操作方式就叫做广播</li>
+<li><strong>Scatter（散射）</strong>：当一台服务器计算完成自己部分的参数数据，但是因为有时候服务器上全部的参数数据过大，于是我们想要把这台服务器上的数据切分成几个同等大小的数据块（buffer），再按照序列（rank index）向其他服务器发送其中的一个数据块，这就叫散射</li>
+<li><strong>Gather（聚集）</strong>：当服务器都做了散射之后，每个服务器获得了其他服务器的一个数据块，我们将一台服务器获得的数据块拼接在一起的操作就叫做聚集</li>
+<li><strong>AllGather（全聚集）</strong>：所有的服务器都将自己收到的数据块拼接在一起（都做聚集的操作），那么就是全聚集</li>
+<li><strong>Reduce（规约）</strong>：当所有服务器都做广播或散射的时候，我们作为接收方的服务器收到各服务器发来的数据，我们将这些收到的数据进行某种规约的操作（常见如求和，求最大值）后再存入自己服务器内存中，那么这就叫规约</li>
+<li><strong>AllReduce（全规约）</strong>：对所有服务器上的数据做一次规约操作，那么就是全规约</li>
+</ul>
+<p>在深度学习框架下，一张 GPU 就是上述的一台服务器，而 GPU 的底层计算架构（如CUDA）必须实现一定量的上述集合通信原语才能够支撑分布式的训练。</p>
+<h2 id="数据并行"><a href="#数据并行" class="headerlink" title="数据并行"></a>数据并行</h2><p>当将神经网络的训练并行化到多个 GPU 上时，我们关注一种称为数据并行随机梯度下降（SGD）的技术。在数据并行训练中，每个 GPU 都有整个神经网络模型的完整副本；对于每次迭代，每个 GPU 在其数据上运行网络的前向传播，随后进行误差反向传播，以计算损耗相对于网络参数的梯度；最后，GPU 相互通信以平均由不同 GPU 计算的梯度，将平均梯度应用于参数的更新。其效果与在单个 GPU 上执行 SGD 是一致的，但是我们通过在多个 GPU 之间分发数据与并行执行计算实现了训练的加速。</p>
+<p>在上述的基本原理中，汇总各 GPU 上的梯度求平均的过程就需要 <strong>AllReduce</strong> 集合通信原语来支撑，当模型有数亿个参数时，相应的梯度也需要几亿字节的空间，如果此时正在协调几十个 GPU 进行训练，实现 AllReduce 的通信机制就变得至关重要了。</p>
+<h3 id="DP-模式"><a href="#DP-模式" class="headerlink" title="DP 模式"></a>DP 模式</h3><p>Data Parallel 模式是最简单的一种单机多卡实践模式，其底层的分布式通信采用了参数服务器（Parameter Server）框架，以一台单机四卡的 GPU 服务器为例，假设 GPU-0（后面我们称其为主卡）被用作参数服务器，它负责将输入的 batch 向其他卡进行切分，并将网络结构向每张卡进行复制，同时存储着网络模型的参数。训练过程中，每张卡独立的进行前向传播，计算 loss，主卡会收集每张卡上的 loss 并以一个向量的形式返回；反向传播时，每张卡上的梯度都会与主卡进行通信与传输，主卡收集梯度进行归约（reduce），再进行参数更新，并将更新后的参数发送给每张卡。这种分布式通信机制又称为 <strong>Tree Allreduce</strong>（拓扑结构像一棵树）。</p>
+<p>这种模式在实现时非常简单，仅仅需要两行代码就可以搞定，需要注意的一点是执行 loss 的反向传播前，要对 loss 求均值：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model = torch.nn.DataParallel(model, device_ids[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>])</span><br><span class="line">...</span><br><span class="line">loss.mean().backward()</span><br></pre></td></tr></table></figure><br>另外，在推理时加载 DP 模式的模型需要加入 .module 方可取到模型，因为此时的模型是 DP 模型（也可以在保存时只保存 .module 部分）：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model = torch.load(model_path).module</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，DP 模式存在负载均衡与通信方式的问题，主卡要负责对所有梯度的归约以及参数分发，这就造成了主卡的资源占用率过高，且参数更新依赖于主卡的通信传输，这在模型较大的情况下会严重降低速度。</p>
+<h3 id="DDP-模式"><a href="#DDP-模式" class="headerlink" title="DDP 模式"></a>DDP 模式</h3><p>Distributed Data Parallel 模式不仅可以实现单机多卡的并行化，还可以实现多机多卡的并行化。该模式采用的分布式通信机制称为 <strong>Ring Allreduce</strong>（拓扑结构是无向环），其特点是网络单次通信量是一个恒定值，不会随着 GPU 数量的增加而增加。Ring Allreduce 机制将 GPU 集群组织成一个逻辑环，每个 GPU 只从其左邻居接收数据并发送给其右邻居，即每一次同步，每个 GPU 只获得最终结果的一个块（部分梯度更新），待走完一个完整的环，每个 GPU 就都获得了最终结果（完整的参数）。关于 Ring Allreduce 更详细的介绍可以参考简书上的这篇<a href="https://www.jianshu.com/p/8c0e7edbefb9" target="_blank" rel="noopener">博文</a>。</p>
+<p>我们还需要指出的一点是，在 DP 模式中，其参数服务器的设计理念加之受 Python GIL 的限制，使得只有一个进程来控制多个 GPU，这也是性能瓶颈的一部分。而 DDP 模式中已经没有了所谓主卡的概念，会启动多个进程，一个进程控制一个 GPU，它们都执行相同的任务，从一定程度上缓解了 GIL 带来的性能开销。</p>
+<p>下面，我们需要澄清一些 DDP 中的常用术语的概念，这里假设我们有 2 个计算节点，每个节点有 8 个 GPU，即 2 机 8 卡，并行数为 16：</p>
+<ul>
+<li><strong>group</strong>：进程组，默认情况下只有一个组</li>
+<li><strong>world_size</strong>：全局的并行数，本例中该值为 16 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.distributed.get_world_size() # 不同进程里都是一样的，其值为 16</span><br></pre></td></tr></table></figure></li>
+<li><strong>rank</strong>：当前进程的序号，用于进程间的通信，本例中取值为 0,1,2,…,15。注意：rank=0 的进程可以看做是“master进程”<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.distributed.get_rank() # 每个进程都有自己的序号，各不相同</span><br></pre></td></tr></table></figure></li>
+<li><strong>local_rank</strong>：每个计算节点上的进程序号，本例中取值为 0,1,2,…,7<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.distributed.local_rank() # 一般情况下，需要用来手动设置当前模型是跑在当前机器的哪块GPU上面</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>DDP 模式的代码相对 DP 模式多一些，首先要进行一番环境准备工作：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch,argparse</span><br><span class="line"><span class="comment"># 新增1:依赖</span></span><br><span class="line"><span class="keyword">import</span> torch.distributed <span class="keyword">as</span> dist</span><br><span class="line"><span class="keyword">from</span> torch.nn.parallel <span class="keyword">import</span> DistributedDataParallel <span class="keyword">as</span> DDP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增2：从外面得到local_rank参数，在调用DDP的时候，其会自动给出这个参数</span></span><br><span class="line">parser = argparse.ArgumentParser()</span><br><span class="line">parser.add_argument(<span class="string">"--local_rank"</span>, default=<span class="number">-1</span>, type=int)</span><br><span class="line">FLAGS = parser.parse_args()</span><br><span class="line">local_rank = FLAGS.local_rank</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增3：DDP backend初始化</span></span><br><span class="line"><span class="comment"># a.根据local_rank来设定当前使用哪块GPU</span></span><br><span class="line">torch.cuda.set_device(local_rank)</span><br><span class="line"><span class="comment"># b.初始化DDP，使用默认backend(nccl)就行</span></span><br><span class="line">dist.init_process_group(backend=<span class="string">'nccl'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增4：定义并把模型放置到单独的GPU上</span></span><br><span class="line">device = torch.device(<span class="string">"cuda"</span>, local_rank)</span><br><span class="line">model = nn.Linear(<span class="number">10</span>, <span class="number">10</span>).to(device)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增5：之后才是初始化DDP模型</span></span><br><span class="line">model = DDP(model, device_ids=[local_rank], output_device=local_rank)</span><br></pre></td></tr></table></figure><br>环境准备的关键是 init_process_group 这一步，各个进程会在这一步与 “master进程” 进行握手，建立连接，如果连接上的进程数量不足约定的 word_size，进程会一直等待。在初始化组的过程中，需要指定 dist_backend 参数设置后端的通信模式，一般 NV 的显卡默认是 “nccl”；另外，如果是多机多卡还需要传入 init_method 参数用以设置通信主机的地址与端口（如使用 TCP 通信方式来分享信息，则设置：tcp://192.168.10.103:23456）；local_rank 指定每个节点内启动的进程编号，以及 global_rank 指定显卡的全局编号。</p>
+<p>接下来最重要的是数据的并行化，DDP 模式不同于 DP 模式，它同时启动了多个进程，但是这些进程使用的都是同一份训练数据，那么就会有数据上的冗余性，我们需要对 DataLoader 做一些改造，这里用到了一个特殊的 sampler，来使得各个进程上的数据各不相同。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新增1：使用 DistributedSampler</span></span><br><span class="line">train_sampler = torch.utils.data.distributed.DistributedSampler(my_trainset)</span><br><span class="line"><span class="comment"># 需要注意的是，这里的 batch_size 指的是每个进程下的 batch_size</span></span><br><span class="line">trainloader = torch.utils.data.DataLoader(my_trainset, batch_size=batch_size, sampler=train_sampler)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> range(num_epochs):</span><br><span class="line">    <span class="comment"># 新增2：设置 sampler 的 epoch，DistributedSampler 需要这个来维持各个进程之间的相同随机数种子</span></span><br><span class="line">    trainloader.sampler.set_epoch(epoch)</span><br><span class="line">    <span class="comment"># 后面这部分，则与单机单卡的写法一模一样</span></span><br><span class="line">    <span class="keyword">for</span> data, label <span class="keyword">in</span> trainloader:</span><br><span class="line">        prediction = model(data)</span><br><span class="line">        loss = loss_fn(prediction, label)</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer = optim.SGD(ddp_model.parameters(), lr=<span class="number">0.001</span>)</span><br><span class="line">        optimizer.step()</span><br></pre></td></tr></table></figure></p>
+<p>模型的保存也需要进行改造，一方面保存的是 model.module，因为 model 已经变成了 DDP model 了，另一方面，只需要在某一个进程中保存就行了：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只需要在进程 0 上保存一次就行了，避免多次保存重复的东西</span></span><br><span class="line"><span class="keyword">if</span> dist.get_rank() == <span class="number">0</span>:</span><br><span class="line">    torch.save(model.module, <span class="string">"saved_model.ckpt"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>最后，我们需要用 <code>torch.distributed.launch</code> 来启动训练，而且需要传入一些重要的参数：</p>
+<ul>
+<li><strong>—nnodes</strong>：有多少台机器</li>
+<li><strong>—node_rank</strong>：当前是哪台机器</li>
+<li><strong>—nproc_per_node</strong>：每台机器有多少个进程</li>
+<li><strong>—master_addr</strong>：当进行多机多卡训练时，需要指明主节点的地址</li>
+<li><strong>—master_port</strong>：对应主节点的端口</li>
+<li><strong>—backend</strong>：通信后端，可选的包括：nccl（NVIDIA推出）、gloo（Facebook推出）、mpi（OpenMPI）</li>
+</ul>
+<p>单机多卡模式，假设我们只在一台机器上运行，可用卡数是 8，则执行命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">python -m torch.distributed.launch --nproc_per_node 8 main.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 假设我们只用4,5,6,7号卡</span></span><br><span class="line">CUDA_VISIBLE_DEVICES=<span class="string">"4,5,6,7"</span> python -m torch.distributed.launch --nproc_per_node 4 main.py</span><br></pre></td></tr></table></figure></p>
+<p>多机多卡模式，假设我们有 2 个计算节点，每个节点上有 8 张卡，则执行命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 机器1：</span></span><br><span class="line">python -m torch.distributed.launch --nnodes=2 --node_rank=0 --nproc_per_node 8 \</span><br><span class="line">  --master_adderss <span class="variable">$my_address</span> --master_port <span class="variable">$my_port</span> main.py</span><br><span class="line"><span class="comment"># 机器2：</span></span><br><span class="line">python -m torch.distributed.launch --nnodes=2 --node_rank=1 --nproc_per_node 8 \</span><br><span class="line">  --master_adderss <span class="variable">$my_address</span> --master_port <span class="variable">$my_port</span> main.py</span><br></pre></td></tr></table></figure></p>
+<p>很显然上述执行 DDP 模式训练的命令行与单卡训练时有很大的区别（DP 模式则不存在此问题），所以 PyTorch 引入了 torch.multiprocessing.spawn，可以使得单卡、DDP 下的外部调用一致：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">(world_size, ngpus_per_node)</span>:</span></span><br><span class="line">    mp.spawn(main_worker,</span><br><span class="line">             args=(world_size,),</span><br><span class="line">             nprocs=ngpus_per_node,</span><br><span class="line">             join=<span class="literal">True</span>)</span><br><span class="line">             </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main_worker</span><span class="params">(rank, world_size)</span>:</span></span><br><span class="line">    dist.init_process_group(<span class="string">"nccl"</span>, rank=rank, world_size=world_size)</span><br><span class="line">    <span class="comment"># training process ...</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure><br>该代码结构可以抽象为 <strong>主进程main函数+子进程main_worker函数</strong>，在主进程中用 spawn 函数启动每个子节点的子进程，而在子进程中需要对全部的进程分入一个 group 并初始化。</p>
+<p>上述的 DDP 实践过程需要我们可以实际操作物理主机，然而我们现在的很多深度学习训练平台并不向用户开放操作物理主机的权限，它们往往以 docker 镜像的方式将训练环境分发到需要的计算节点上，训练结束后在讲模型从 docker 中拷贝出来，这里我们给出一种基于此类环境的开发范式：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 主进程</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    parser = argparse.ArgumentParser()</span><br><span class="line">    parser.add_argument(...) <span class="comment"># 增加需要解析的参数</span></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line">    </span><br><span class="line">    ngpus_per_node = torch.cuda.device_count() <span class="comment"># 通过代码获取每个节点的GPU个数</span></span><br><span class="line">    args.world_size = ngpus_per_node * args.word_size <span class="comment"># 计算进程总数（此例中从平台传入的word_size是节点数），计算法方法因平台而异</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 在主进程中通过torch多进程spawn启动多个子进程</span></span><br><span class="line">    <span class="comment"># nprocs为每个节点启动的进程数，args为向子进程函数中传入的参数</span></span><br><span class="line">    mp.spawn(train, nprocs=ngpus_per_node, args=(ngpus_per_node, args))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 仅在0号节点上获取模型</span></span><br><span class="line">    <span class="keyword">if</span> args.rank == <span class="number">0</span>:</span><br><span class="line">        copy_model(src_path, dest_path)</span><br><span class="line">        </span><br><span class="line"><span class="comment"># 子进程</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(local_rank, ngpus_per_node, args)</span>:</span></span><br><span class="line">    <span class="comment">## local rank参数为主进程中mp.spawn自动传入的，需要放在第一个位置接收</span></span><br><span class="line">    global_rank = args.rank * (ngpus_per_node) + local_rank</span><br><span class="line">    </span><br><span class="line">    <span class="comment">## 初始化进程组，需要使用DDP的六要素</span></span><br><span class="line">    dist.init_process_group(backend=args.dist_backend, init_method=args.init_method,</span><br><span class="line">                            world_size=args.world_size, rank=global_rank)</span><br><span class="line">                            </span><br><span class="line">    <span class="comment">## 计算每个进程的batch_size，这里默认batch_size为所有进程的，比如你想让每个进程的batch_size为1，而你有12个8卡的机器，那么你的初始batch_size需要设为96（因平台而异）</span></span><br><span class="line">    args.train_batch_size = int(config.batch_size / args.world_size)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">## 锁定模型随机种子，保证每个进程的模型初始化相同</span></span><br><span class="line">    random.seed(args.seed)</span><br><span class="line">    np.random.seed(args.seed)</span><br><span class="line">    torch.manual_seed(args.seed)</span><br><span class="line">    torch.cuda.manual_seed_all(args.seed)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 设置device</span></span><br><span class="line">    torch.cuda.set_device(local_rank)</span><br><span class="line">    device = torch.device(<span class="string">"cuda"</span>, local_rank)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 对数据进行distributed sampler,保证每个进程采出的数据不一样</span></span><br><span class="line">    train_dataset = train_dataset.to(device)</span><br><span class="line">    train_sampler = DistributedSampler(train_dataset)</span><br><span class="line">    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.train_batch_size)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 初始化DDP模型，模型分布在不同GPU上</span></span><br><span class="line">    model = MyModel().to(device)</span><br><span class="line">    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], find_unused_parameters=<span class="literal">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 迭代训练</span></span><br><span class="line">    <span class="keyword">for</span> e <span class="keyword">in</span> range(int(args.num_train_epochs)):</span><br><span class="line">        train_sampler.set_epoch(e) <span class="comment"># 保证每个epoch启动相同的random</span></span><br><span class="line">        <span class="keyword">for</span> step, batch <span class="keyword">in</span> enumerate(train_dataloader):</span><br><span class="line">            ...</span><br><span class="line">            ...</span><br><span class="line">        <span class="comment"># 在global_rank = 0处保存模型即可（可以所有epoch迭代完再保存）</span></span><br><span class="line">        <span class="keyword">if</span> global_rank == <span class="number">0</span>:</span><br><span class="line">            save(model, args.output_dir, str(e + <span class="number">1</span>))</span><br></pre></td></tr></table></figure></p>
+<p>可以看到， PyTorch 提供了数据并行的原生方法，所以其实践应该说是比较简单的，当我们面临不是很大的模型（即单个 GPU 能够存储完整的模型），且训练数据是海量的，在这样的场景下数据并行的训练不失为一个最佳实践方案。</p>
+<p>但是我们也看到，近些年来超级大模型层出不穷，比如 GPT-3 模型的参数量达到 1750 亿，像这样的大模型根本无法在一张显卡上完整地存储，那么我们就要考虑对模型也进行并行化处理。</p>
+<h2 id="模型并行"><a href="#模型并行" class="headerlink" title="模型并行"></a>模型并行</h2><p>当一个神经网络模型的参数多到无法在单一 GPU 上保存和计算的时候，我们关注一种将模型进行切分的训练模式，即模型在 worker 之间进行划分，以便每个 worker 仅对模型参数的一个子集进行评估和更新，而每部分模型的激活和梯度是需要跨机器通信的：</p>
+<ul>
+<li><strong>层间模型并行</strong>：会在多个 worker 之间划分模型的各个层</li>
+<li><strong>层内模型并行</strong>：把每层的模型参数切分到多个设备。层内模型并行在有的论文里被叫做 “Tensor 级别的模型并行” ，是对某一层的参数（矩阵） Tensor 切分（基于矩阵乘法原理按行/列拆分），从而将大的模型 Tensor 分成多个相对较小的 Tensor 进行并行计算</li>
+</ul>
+<p>比较遗憾的是，目前的深度学习框架并没有提供对模型并行的原生支持，对模型的拆分需要我们手动构建传输过程，相当于直接对物理编程，所以对分布式使用的门槛更高。</p>
+<p>我们从包含两个线性层的玩具模型（toy model）开始。要在两个 GPU 上运行此模型，只需将每个线性层放在不同的 GPU 上，然后移动输入（input）和中间输出（intermediate outputs）以匹配层设备（layer devices）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ToyModel</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">    super(ToyModel, self).__init__()</span><br><span class="line">    self.net1 = torch.nn.Linear(<span class="number">10</span>, <span class="number">10</span>).to(<span class="string">'cuda:0'</span>)  <span class="comment"># 将net1放置在第1个GPU上</span></span><br><span class="line">    self.relu = torch.nn.ReLU()</span><br><span class="line">    self.net2 = torch.nn.Linear(<span class="number">10</span>, <span class="number">5</span>).to(<span class="string">'cuda:1'</span>)   <span class="comment"># 将net2放置在第2个GPU上</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x)</span>:</span></span><br><span class="line">    x = self.relu(self.net1(x.to(<span class="string">'cuda:0'</span>)))</span><br><span class="line">    <span class="keyword">return</span> self.net2(x.to(<span class="string">'cuda:1'</span>))</span><br></pre></td></tr></table></figure></p>
+<p>请注意对于 ToyModel ，除了四个用于将线性层和张量放置在适当的设备上的 to(device) 调用之外，以上内容与在单个 GPU 上实现该功能非常相似。backward() 和 torch.optim 会自动关注梯度，就好像模型是一个 GPU 一样。调用损失函数时，只需确保标签与输出在同一设备上。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">model = ToyModel()</span><br><span class="line">loss_fn = nn.MSELoss()</span><br><span class="line">optimizer = optim.SGD(model.paraeters(), lr=<span class="number">0.001</span>)</span><br><span class="line"></span><br><span class="line">optimizer.zero_grad()</span><br><span class="line">outputs = model(torch.randn(<span class="number">20</span>, <span class="number">10</span>))</span><br><span class="line">labels = torch.randn(<span class="number">20</span>, <span class="number">5</span>).to(<span class="string">'cuda:1'</span>) <span class="comment"># ToyMode 的 output 是在 'cuda:1' 上，此处的 label 也应该置于 'cuda:1' 上</span></span><br><span class="line">loss_fn(outputs,labels).backward()</span><br><span class="line">optimizer.step()</span><br></pre></td></tr></table></figure></p>
+<p>对于模型太大而无法放入单个 GPU 的情况，上述实现解决了该问题。但是，如果模型合适，这种模型并行的解决方案将比在单个 GPU 上运行要慢。这是因为在任何时间点，两个 GPU 中只有一个在工作，而另一个在那儿什么也没做；中间结果还要再 GPU 间复制，这使得性能进一步恶化。</p>
+<p>为了解决 GPU 闲置的问题，有一种选择是将每个批次进一步划分为拆分流水线，以便当一个拆分到达第二子网时，可以将下一个拆分馈入第一子网。这样，两个连续的拆分可以在两个GPU上同时运行</p>
+<h2 id="流水并行"><a href="#流水并行" class="headerlink" title="流水并行"></a>流水并行</h2><p>Pipeline 模型并行将模型的按层分成多个 stage，再把各个 sage 映射到多台设备上。为了提高设备资源的利用率，又将 mini-batch 划分成多个 micro-batch, 这样就能够使得不同设备在同一时刻处理不同 micro-batch 的数据。</p>
+<p>一种 Pipeline 并行方式(Gpipe) 要求反向计算要等所有设备的正向计算完成后才开始，而反向计算可能依赖于正向的输出，导致每个卡正向计算过程中累积的 activation 内存与 micro-batch 数量成正比，从而限制了 micro-batch 的数量。MindSpore 的 Pipeline 并行中，将反向提前，每个 micro-batch 计算完成后，就开始计算反向，有效降低 activation 存储时间，从而提升整体并行效率。</p>
+<p>为了训练如此大的模型，GPipe把一个多层网络分割成若干个复合层，然后每个复合层被部署到GPU/TPU之上。但是这若干个复合层只能顺序并行，这就严重影响了训练速度。所以GPipe引入了流水线并行机制（pipeline parallelism），在不同的GPU设备之间对层进行流水线处理。另外，GPipe 也使用了重新计算这个技巧来降低内存，这样可以训练更大的模型。</p>
+<p>微批量大小的选择会影响GPU的利用率。较小的微批量可以减少等待先前微批次输出的延迟，但较大的微批量可以更好地利用GPU。因此，关于微批次数量，存在了一个权衡，即每个微批次的GPU利用率和bubble总面积之间的权衡，用户需要为模型找到最佳的微批次数量。</p>
+<p>要使用GPipe训练模块，只需将其用 torchgpipe.GPipe 来包装即可，但是用户的模块必须是<torch.nn.Sequential> 的实例。</p>
+<p>GPipe 会将自动将模块分割为多个分区，分区是在单个设备上一起运行的一组连续层，其中：</p>
+<p>balance参数确定每个分区中的层数。</p>
+<p>chunks参数指定微批处理的数量。</p>
+<p>下面的示例代码显示了如何将具有四层的模块拆分为两个分区，每个分区有两层。此代码还将一个小批次 mini-batch 拆分为8个微批次（micro-batches）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torchgpipe <span class="keyword">import</span> GPipe</span><br><span class="line"></span><br><span class="line">model = nn.Sequential(a, b, c, d)</span><br><span class="line">model = GPipe(model, balance=[<span class="number">2</span>, <span class="number">2</span>], chunks=<span class="number">8</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1st partition: nn.Sequential(a, b) on cuda:0</span></span><br><span class="line"><span class="comment"># 2nd partition: nn.Sequential(c, d) on cuda:1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> input <span class="keyword">in</span> data_loader:</span><br><span class="line">   output = model(input)</span><br></pre></td></tr></table></figure>
+<p>~torchgpipe.GPipe使用CUDA进行训练。用户不需要自己将模块移动到GPU，因为~torchgpipe.GPipe自动把每个分区移动到不同的设备上。默认情况下，可用的GPU从cuda:0开始，并且按顺序为每个分区选择可用GPU。用户也可以利用device 参数指定使用的GPU。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">model = GPipe(model,</span><br><span class="line">             balance=[<span class="number">2</span>, <span class="number">2</span>],</span><br><span class="line">             devices=[<span class="number">4</span>, <span class="number">2</span>],  <span class="comment"># Specify GPUs.</span></span><br><span class="line">             chunks=<span class="number">8</span>)</span><br></pre></td></tr></table></figure></p>
+<p>与典型module不同，GPipe之中，输入设备与输出设备不同，除非只有一个分区。这是因为第一个分区和最后一个分区被放置在不同的设备上。因此，必须将输入和目标移动到相应的设备。可以通过 torchgpipe.GPipe.devices 的属性来完成，这个属性保存了每个分区的设备列表。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">in_device = model.devices[<span class="number">0</span>]</span><br><span class="line">out_device = model.devices[<span class="number">-1</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> input, target <span class="keyword">in</span> data_loader:</span><br><span class="line">   <span class="comment"># input on in_device</span></span><br><span class="line">   input = input.to(in_device, non_blocking=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">   <span class="comment"># target on out_device</span></span><br><span class="line">   target = target.to(out_device, non_blocking=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">   <span class="comment"># output on out_device</span></span><br><span class="line">   output = model(input)</span><br><span class="line">   loss = F.cross_entropy(output, target)</span><br><span class="line">   loss.backward()</span><br><span class="line">   ...</span><br></pre></td></tr></table></figure></p>
+<p>当~torchgpipe.GPipe拆分一个<torch.nn.Sequential>module时候，它将模块的每个子模块视为单一的、不可分割的层。然而，模型事实上并不一定这样，有些子模块可能是另一个顺序模块，可能需要进一步拆分它们。</p>
+<p>GPipe 不会支持这些嵌套的 Sequentials module，所以用户需要把module打平（flatten the module）。还好，这在PyTorch中并不难。以下代码段显示了嵌套顺序模块如何展平：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">_3_layers = nn.Sequential(...)  <span class="comment"># len(_3_layers) == 3</span></span><br><span class="line">_4_layers = nn.Sequential(...)  <span class="comment"># len(_4_layers) == 4</span></span><br><span class="line">model = nn.Sequential(_3_layers, _4_layers)  <span class="comment"># len(model) == 2</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">flatten_sequential</span><span class="params">(module)</span>:</span></span><br><span class="line">   <span class="function"><span class="keyword">def</span> <span class="title">_flatten</span><span class="params">(module)</span>:</span></span><br><span class="line">       <span class="keyword">for</span> name, child <span class="keyword">in</span> module.named_children():</span><br><span class="line">           <span class="keyword">if</span> isinstance(child, nn.Sequential):</span><br><span class="line">               <span class="keyword">for</span> sub_name, sub_child <span class="keyword">in</span> _flatten(child):</span><br><span class="line">                   <span class="keyword">yield</span> (<span class="string">f'<span class="subst">&#123;name&#125;</span>_<span class="subst">&#123;sub_name&#125;</span>'</span>, sub_child)</span><br><span class="line">           <span class="keyword">else</span>:</span><br><span class="line">               <span class="keyword">yield</span> (name, child)</span><br><span class="line">   <span class="keyword">return</span> nn.Sequential(OrderedDict(_flatten(module)))</span><br><span class="line"></span><br><span class="line">model = flatten_sequential(model)  <span class="comment"># len(model) == 7</span></span><br><span class="line">model = GPipe(model, balance=[<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>], chunks=<span class="number">4</span>)</span><br></pre></td></tr></table></figure></p>
+<p>典型的模型并行（Typical Model Parallelism）是GPipe的一个特例。模型并行性是相当于禁用了微批处理和检查点的GPipe，可以通过chunks=1 和 checkpoint=’never’ 来做到。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model = GPipe(model, balance=[<span class="number">2</span>, <span class="number">2</span>], chunks=<span class="number">1</span>, checkpoint=<span class="string">'never'</span>)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/02/26/pytorch-11/" rel="next" title="PyTorch实战：基于BERT的NER">
+                <i class="fa fa-chevron-left"></i> PyTorch实战：基于BERT的NER
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#集合通信"><span class="nav-number">1.</span> <span class="nav-text">集合通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据并行"><span class="nav-number">2.</span> <span class="nav-text">数据并行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DP-模式"><span class="nav-number">2.1.</span> <span class="nav-text">DP 模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDP-模式"><span class="nav-number">2.2.</span> <span class="nav-text">DDP 模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型并行"><span class="nav-number">3.</span> <span class="nav-text">模型并行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流水并行"><span class="nav-number">4.</span> <span class="nav-text">流水并行</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

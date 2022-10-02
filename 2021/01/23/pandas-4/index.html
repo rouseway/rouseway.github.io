@@ -1,0 +1,769 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="将两张表通过连接、拼接等操作合并成一张表的操作是对表格数据最常用的操作。 关系型连接把两张相关的表按照某一个或某一组键连接起来是一种常见操作，例如学生期末考试各个科目的成绩表按照姓名和班级连接成总的成绩表。在 Pandas 中的关系型连接函数有 merge() 和 join()，它们最重要的参数有两个，一个是 “on” 参数，用来指定连接的键；另一个是 “how” 参数，用来指定连接形式，分为左连">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas连接合并">
+<meta property="og:url" content="http://yoursite.com/2021/01/23/pandas-4/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="将两张表通过连接、拼接等操作合并成一张表的操作是对表格数据最常用的操作。 关系型连接把两张相关的表按照某一个或某一组键连接起来是一种常见操作，例如学生期末考试各个科目的成绩表按照姓名和班级连接成总的成绩表。在 Pandas 中的关系型连接函数有 merge() 和 join()，它们最重要的参数有两个，一个是 “on” 参数，用来指定连接的键；另一个是 “how” 参数，用来指定连接形式，分为左连">
+<meta property="article:published_time" content="2021-01-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:43.016Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/01/23/pandas-4/"/>
+
+
+
+
+
+  <title> Pandas连接合并 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/01/23/pandas-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas连接合并
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-23T00:00:00+08:00">
+                2021-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>将两张表通过连接、拼接等操作合并成一张表的操作是对表格数据最常用的操作。</p>
+<h2 id="关系型连接"><a href="#关系型连接" class="headerlink" title="关系型连接"></a>关系型连接</h2><p>把两张相关的表按照某一个或某一组键连接起来是一种常见操作，例如学生期末考试各个科目的成绩表按照姓名和班级连接成总的成绩表。在 Pandas 中的关系型连接函数有 <strong>merge()</strong> 和 <strong>join()</strong>，它们最重要的参数有两个，一个是 “on” 参数，用来指定连接的键；另一个是 “how” 参数，用来指定连接形式，分为左连接 left 、右连接 right 、内连接 inner 、外连接 outer，所谓左连接即以左边的键为准，如果右边表中的键于左边存在，那么就添加到左边，否则处理为缺失值，右连接的处理类似。内连接只负责合并两边同时出现的键，而外连接则会在内连接的基础上包含只在左边出现以及只在右边出现的值，因此外连接又叫全连接。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line"><span class="comment"># DataFrame.merge()又称作“值连接”</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>,<span class="string">'Si Li'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">30</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'Si Li'</span>,<span class="string">'Wu Wang'</span>], <span class="string">'Gender'</span>:[<span class="string">'F'</span>,<span class="string">'M'</span>]&#125;)</span><br><span class="line">print(df1.merge(df2, on=<span class="string">'Name'</span>, how=<span class="string">'left'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Name  Age Gender</span></span><br><span class="line"><span class="string">0  San Zhang   20    NaN</span></span><br><span class="line"><span class="string">1      Si Li   30      F</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果两个表中想要连接的列不具备相同的列名，可以通过left_on和right_on指定</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'df1_name'</span>:[<span class="string">'San Zhang'</span>,<span class="string">'Si Li'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">30</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'df2_name'</span>:[<span class="string">'Si Li'</span>,<span class="string">'Wu Wang'</span>], <span class="string">'Gender'</span>:[<span class="string">'F'</span>,<span class="string">'M'</span>]&#125;)</span><br><span class="line">print(df1.merge(df2, left_on=<span class="string">'df1_name'</span>, right_on=<span class="string">'df2_name'</span>, how=<span class="string">'left'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">    df1_name  Age df2_name Gender</span></span><br><span class="line"><span class="string">0  San Zhang   20      NaN    NaN</span></span><br><span class="line"><span class="string">1      Si Li   30    Si Li      F</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果两个表中的列出现了重复的列名，那么可以通过suffixes参数指定</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>],<span class="string">'Grade'</span>:[<span class="number">70</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>],<span class="string">'Grade'</span>:[<span class="number">80</span>]&#125;)</span><br><span class="line">print(df1.merge(df2, on=<span class="string">'Name'</span>, how=<span class="string">'left'</span>, suffixes=[<span class="string">'_Chinese'</span>,<span class="string">'_Math'</span>]))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Name  Grade_Chinese  Grade_Math</span></span><br><span class="line"><span class="string">0  San Zhang             70          80</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据多个列的值进行连接，on参数为多个列名组成的列表</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>, <span class="string">'San Zhang'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>, <span class="number">21</span>], <span class="string">'Class'</span>:[<span class="string">'one'</span>, <span class="string">'two'</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>, <span class="string">'San Zhang'</span>], <span class="string">'Gender'</span>:[<span class="string">'F'</span>, <span class="string">'M'</span>], <span class="string">'Class'</span>:[<span class="string">'two'</span>, <span class="string">'one'</span>]&#125;)</span><br><span class="line">print(df1.merge(df2, on=[<span class="string">'Name'</span>, <span class="string">'Class'</span>], how=<span class="string">'left'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Name  Age Class Gender</span></span><br><span class="line"><span class="string">0  San Zhang   20   one      M</span></span><br><span class="line"><span class="string">1  San Zhang   21   two      F</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># DataFrame.join()又称作“索引连接”</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">30</span>]&#125;, index=pd.Series([<span class="string">'San Zhang'</span>,<span class="string">'Si Li'</span>],name=<span class="string">'Name'</span>))</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Gender'</span>:[<span class="string">'F'</span>,<span class="string">'M'</span>]&#125;, index=pd.Series([<span class="string">'Si Li'</span>,<span class="string">'Wu Wang'</span>],name=<span class="string">'Name'</span>))</span><br><span class="line">print(df1.join(df2, how=<span class="string">'left'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">           Age Gender</span></span><br><span class="line"><span class="string">Name                 </span></span><br><span class="line"><span class="string">San Zhang   20    NaN</span></span><br><span class="line"><span class="string">Si Li       30      F</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 对重复的列指定左右后缀lsuffix和rsuffix</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>],<span class="string">'Grade'</span>:[<span class="number">70</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>],<span class="string">'Grade'</span>:[<span class="number">80</span>]&#125;)</span><br><span class="line">print(df1.join(df2, how=<span class="string">'left'</span>, lsuffix=<span class="string">'_Chinese'</span>, rsuffix=<span class="string">'_Math'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">  Name_Chinese  Grade_Chinese  Name_Math  Grade_Math</span></span><br><span class="line"><span class="string">0    San Zhang             70  San Zhang          80</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果想要进行类似于merge中以多列为键的操作的时候，join需要使用多级索引</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">21</span>]&#125;, index=pd.MultiIndex.from_arrays(</span><br><span class="line">    [[<span class="string">'San Zhang'</span>, <span class="string">'San Zhang'</span>],[<span class="string">'one'</span>, <span class="string">'two'</span>]], names=(<span class="string">'Name'</span>,<span class="string">'Class'</span>)))</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Gender'</span>:[<span class="string">'F'</span>, <span class="string">'M'</span>]&#125;, index=pd.MultiIndex.from_arrays(</span><br><span class="line">    [[<span class="string">'San Zhang'</span>, <span class="string">'San Zhang'</span>],[<span class="string">'two'</span>, <span class="string">'one'</span>]], names=(<span class="string">'Name'</span>,<span class="string">'Class'</span>)))</span><br><span class="line">print(df1.join(df2))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">                 Age Gender</span></span><br><span class="line"><span class="string">Name      Class            </span></span><br><span class="line"><span class="string">San Zhang one     20      M</span></span><br><span class="line"><span class="string">          two     21      F</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>对于一张表中出现重复的键，只需把握一个原则，即只要两边同时出现的值，就以<strong>笛卡尔积</strong>的方式加入。</p>
+<h2 id="方向性拼接"><a href="#方向性拼接" class="headerlink" title="方向性拼接"></a>方向性拼接</h2><p>方向拼接为我们提供将两个或多个表按照<strong>纵向</strong>或<strong>横向</strong>的方向进行直接拼接的操作，对应的函数是<strong>concat()</strong>，其最常用三个参数是 axis（拼接方向）, join（连接方式）, keys（在新表中指示来自于哪一张旧表的名字）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 纵向拼接各表中人的信息</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>,<span class="string">'Si Li'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">30</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'Wu Wang'</span>], <span class="string">'Age'</span>:[<span class="number">40</span>]&#125;)</span><br><span class="line">print(pd.concat([df1, df2]))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Name  Age</span></span><br><span class="line"><span class="string">0  San Zhang   20</span></span><br><span class="line"><span class="string">1      Si Li   30</span></span><br><span class="line"><span class="string">0    Wu Wang   40</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 横向拼接各表中的字段</span></span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Grade'</span>:[<span class="number">80</span>, <span class="number">90</span>]&#125;)</span><br><span class="line">df3 = pd.DataFrame(&#123;<span class="string">'Gender'</span>:[<span class="string">'M'</span>, <span class="string">'F'</span>]&#125;)</span><br><span class="line">print(pd.concat([df1, df2, df3], <span class="number">1</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">        Name  Age  Grade Gender</span></span><br><span class="line"><span class="string">0  San Zhang   20     80      M</span></span><br><span class="line"><span class="string">1      Si Li   30     90      F</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过keys参数产生多级索引进行标记</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>,<span class="string">'Si Li'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>,<span class="number">21</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'Wu Wang'</span>],<span class="string">'Age'</span>:[<span class="number">21</span>]&#125;)</span><br><span class="line">print(pd.concat([df1, df2], keys=[<span class="string">'one'</span>, <span class="string">'two'</span>]))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">            Name  Age</span></span><br><span class="line"><span class="string">one 0  San Zhang   20</span></span><br><span class="line"><span class="string">    1      Si Li   21</span></span><br><span class="line"><span class="string">two 0    Wu Wang   21</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>在默认状态下的 axis=0 ，表示纵向拼接多个表，常常用于多个样本的拼接；而 axis=1 表示横向拼接多个表，常用于多个字段或特征的拼接。纵向拼接会根据列索引对齐，默认状态下 join=outer ，表示保留所有的列，并将不存在的值设为缺失；join=inner 表示保留两个表都出现过的列。横向拼接则根据行索引对齐。</p>
+<h2 id="表追加序列"><a href="#表追加序列" class="headerlink" title="表追加序列"></a>表追加序列</h2><p>利用 concat 可以实现多个表之间的方向拼接，如果想要把一个序列追加到表的行末或者列末，则可以分别使用 <strong>append()</strong> 和 <strong>assign()</strong> 方法。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([<span class="string">'Wu Wang'</span>, <span class="number">21</span>], index = df1.columns)</span><br><span class="line">print(df1.append(s, ignore_index=<span class="literal">True</span>))</span><br><span class="line"></span><br><span class="line">df_test = pd.DataFrame()</span><br><span class="line">s_test= pd.Series(&#123;<span class="string">"x"</span>:<span class="number">1</span>,<span class="string">"y"</span>:<span class="number">2</span>&#125;, name=<span class="string">"a"</span>)</span><br><span class="line">print(df_test.append(s_test))</span><br><span class="line"></span><br><span class="line">s = pd.Series([<span class="number">80</span>, <span class="number">90</span>])</span><br><span class="line">print(df1.assign(Grade=s))</span><br></pre></td></tr></table></figure></p>
+<p>在 append 中，如果原表是默认整数序列的索引，那么可以使用 ignore_index=True 对新序列对应索引的自动标号，否则必须对 Series 指定 name 属性。使用 [] 添加新的列会直接在原表上进行改动，而 assign 返回的是一个临时副本。</p>
+<h2 id="类连接操作"><a href="#类连接操作" class="headerlink" title="类连接操作"></a>类连接操作</h2><p>我们可以把 Pandas 中对两个表同时进行某些操作的函数也看做是类连接的操作，这里重点介绍 <strong>compare()</strong> 比较函数和 <strong>combine()</strong> 组合函数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 比较两个表或者序列的不同处并将其汇总展示</span></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>, <span class="string">'Si Li'</span>, <span class="string">'Wu Wang'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>, <span class="number">21</span> ,<span class="number">21</span>], <span class="string">'Class'</span>:[<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'three'</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'Name'</span>:[<span class="string">'San Zhang'</span>, <span class="string">'Li Si'</span>, <span class="string">'Wu Wang'</span>], <span class="string">'Age'</span>:[<span class="number">20</span>, <span class="number">21</span> ,<span class="number">21</span>], <span class="string">'Class'</span>:[<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'Three'</span>]&#125;)</span><br><span class="line">print(df1.compare(df2))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">    Name         Class       </span></span><br><span class="line"><span class="string">    self  other   self  other</span></span><br><span class="line"><span class="string">1  Si Li  Li Si    NaN    NaN</span></span><br><span class="line"><span class="string">2    NaN    NaN  three  Three</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 选出对应索引位置较小的元素</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">choose_min</span><span class="params">(s1, s2)</span>:</span></span><br><span class="line">    s2 = s2.reindex_like(s1)</span><br><span class="line">    res = s1.where(s1&lt;s2, s2)</span><br><span class="line">    res = res.mask(s1.isna())</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'A'</span>:[<span class="number">1</span>,<span class="number">2</span>], <span class="string">'B'</span>:[<span class="number">3</span>,<span class="number">4</span>], <span class="string">'C'</span>:[<span class="number">5</span>,<span class="number">6</span>]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'B'</span>:[<span class="number">5</span>,<span class="number">6</span>], <span class="string">'C'</span>:[<span class="number">7</span>,<span class="number">8</span>], <span class="string">'D'</span>:[<span class="number">9</span>,<span class="number">10</span>]&#125;, index=[<span class="number">1</span>,<span class="number">2</span>])</span><br><span class="line">print(df1.combine(df2, choose_min))</span><br><span class="line"><span class="comment"># 设置overtwrite=False可以保留被调用表中未出现在传入的参数表中的列，而不会设置未缺失值</span></span><br><span class="line">print(df1.combine(df2, choose_min, overwrite=<span class="literal">False</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">    A    B    C   D</span></span><br><span class="line"><span class="string">0 NaN  NaN  NaN NaN</span></span><br><span class="line"><span class="string">1 NaN  4.0  6.0 NaN</span></span><br><span class="line"><span class="string">2 NaN  NaN  NaN NaN</span></span><br><span class="line"><span class="string">     A    B    C   D</span></span><br><span class="line"><span class="string">0  1.0  NaN  NaN NaN</span></span><br><span class="line"><span class="string">1  2.0  4.0  6.0 NaN</span></span><br><span class="line"><span class="string">2  NaN  NaN  NaN NaN</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#combine_first方法，其功能是在对两张表组合时，若第二张表中的值在第一张表中对应索引位置的值不是缺失状态，那么就使用第一张表的值填充</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">df1 = pd.DataFrame(&#123;<span class="string">'A'</span>:[<span class="number">1</span>,<span class="number">2</span>], <span class="string">'B'</span>:[<span class="number">3</span>,np.nan]&#125;)</span><br><span class="line">df2 = pd.DataFrame(&#123;<span class="string">'A'</span>:[<span class="number">5</span>,<span class="number">6</span>], <span class="string">'B'</span>:[<span class="number">7</span>,<span class="number">8</span>]&#125;, index=[<span class="number">1</span>,<span class="number">2</span>])</span><br><span class="line">print(df1.combine_first(df2))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">     A    B</span></span><br><span class="line"><span class="string">0  1.0  3.0</span></span><br><span class="line"><span class="string">1  2.0  7.0</span></span><br><span class="line"><span class="string">2  6.0  8.0</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>compare 函数展示的结果中返回了不同值所在的行列，如果相同则会被填充为缺失值 NaN ，其中 other 和 self 分别指代传入的参数表和被调用的表自身，如果想要完整显示表中所有元素的比较情况，可以设置 keep_shape=True。combine 函数能够让两张表按照一定的规则进行组合，在进行规则比较时会自动进行列索引的对齐。对于传入的函数而言，每一次操作中输入的参数是来自两个表的同名 Series ，依次传入的列是两个表列名的并集。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/01/02/pandas-3/" rel="next" title="Pandas缺失处理">
+                <i class="fa fa-chevron-left"></i> Pandas缺失处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/02/16/pandas-5/" rel="prev" title="Pandas表格变形">
+                Pandas表格变形 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#关系型连接"><span class="nav-number">1.</span> <span class="nav-text">关系型连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方向性拼接"><span class="nav-number">2.</span> <span class="nav-text">方向性拼接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#表追加序列"><span class="nav-number">3.</span> <span class="nav-text">表追加序列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类连接操作"><span class="nav-number">4.</span> <span class="nav-text">类连接操作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

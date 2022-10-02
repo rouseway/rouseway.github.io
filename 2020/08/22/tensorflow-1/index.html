@@ -87,12 +87,12 @@
 
 
 
-<meta name="description" content="这一篇博文我们集中梳理了Tensorflow常用的基础操作与对应的函数，熟练掌握这些操作可以为后续使用Tensorflow构建深度神经网络扫清障碍。 数据操作算术运算   函数 描述    tf.assign(x, y, name&#x3D;None) 令x&#x3D;y   tf.add(x, y, name&#x3D;None) 求和   tf.subtract(x, y, name&#x3D;None) 相减   tf.multi">
+<meta name="description" content="这一篇博文我们集中梳理了Tensorflow常用的基础操作与对应的函数，熟练掌握这些操作可以为后续使用Tensorflow构建深度神经网络扫清障碍。 数据操作算术运算    函数 描述     tf.assign(x, y, name&#x3D;None) 令x&#x3D;y   tf.add(x, y, name&#x3D;None) 求和   tf.subtract(x, y, name&#x3D;None) 相减   tf.mul">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Tensorflow的基本操作">
 <meta property="og:url" content="http://yoursite.com/2020/08/22/tensorflow-1/index.html">
 <meta property="og:site_name" content="思维驿站">
-<meta property="og:description" content="这一篇博文我们集中梳理了Tensorflow常用的基础操作与对应的函数，熟练掌握这些操作可以为后续使用Tensorflow构建深度神经网络扫清障碍。 数据操作算术运算   函数 描述    tf.assign(x, y, name&#x3D;None) 令x&#x3D;y   tf.add(x, y, name&#x3D;None) 求和   tf.subtract(x, y, name&#x3D;None) 相减   tf.multi">
+<meta property="og:description" content="这一篇博文我们集中梳理了Tensorflow常用的基础操作与对应的函数，熟练掌握这些操作可以为后续使用Tensorflow构建深度神经网络扫清障碍。 数据操作算术运算    函数 描述     tf.assign(x, y, name&#x3D;None) 令x&#x3D;y   tf.add(x, y, name&#x3D;None) 求和   tf.subtract(x, y, name&#x3D;None) 相减   tf.mul">
 <meta property="article:published_time" content="2020-08-22T15:03:35.541Z">
 <meta property="article:modified_time" content="2020-08-25T15:22:21.429Z">
 <meta property="article:author" content="rouseway">
@@ -257,7 +257,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="rouseway">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -369,14 +369,16 @@
 
       
         <p>这一篇博文我们集中梳理了Tensorflow常用的基础操作与对应的函数，熟练掌握这些操作可以为后续使用Tensorflow构建深度神经网络扫清障碍。</p>
-<h2 id="数据操作"><a href="#数据操作" class="headerlink" title="数据操作"></a>数据操作</h2><h3 id="算术运算"><a href="#算术运算" class="headerlink" title="算术运算"></a>算术运算</h3><table>
+<h2 id="数据操作"><a href="#数据操作" class="headerlink" title="数据操作"></a>数据操作</h2><h3 id="算术运算"><a href="#算术运算" class="headerlink" title="算术运算"></a>算术运算</h3><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>函数</th>
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>tf.assign(x, y, name=None)</td>
 <td>令x=y</td>
 </tr>
@@ -468,17 +470,20 @@
 <td>tf.cond(pred, true_fn=None, false_fn=None, strict=False, name=None, fn1=None, fn2=None)</td>
 <td>满足条件就执行true_fn，否则执行false_fn</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="comment"># 参与算数运算的变量类型必须一致（都设为float）</span></span><br><span class="line">x = tf.Variable(tf.constant(<span class="number">0.0</span>), dtype=tf.float32)</span><br><span class="line">y = tf.Variable(tf.constant(<span class="number">2.0</span>), dtype=tf.float32)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    sess.run(tf.initialize_all_variables())</span><br><span class="line">    print(sess.run(x))</span><br><span class="line">    sess.run(tf.assign(x, <span class="number">10</span>)) <span class="comment"># assign的对象必须是Variable创建的</span></span><br><span class="line">    print(sess.run(x))</span><br><span class="line">    sums = tf.add(x, <span class="number">5</span>) <span class="comment"># 加和</span></span><br><span class="line">    diff = tf.subtract(x, <span class="number">5</span>) <span class="comment"># 相减</span></span><br><span class="line">    prod = tf.multiply(x, y) <span class="comment"># 相乘</span></span><br><span class="line">    div = tf.divide(x, y) <span class="comment"># 相除</span></span><br><span class="line">    mod = tf.mod(x, y) <span class="comment"># 取模</span></span><br><span class="line">    absv = tf.abs(x) <span class="comment"># 取绝对值</span></span><br><span class="line">    neg = tf.negative(y) <span class="comment"># 取负</span></span><br><span class="line">    sign = tf.sign(x) <span class="comment"># 取符号</span></span><br><span class="line">    inv = tf.reciprocal(x) <span class="comment"># 取倒数</span></span><br><span class="line">    sqr = tf.square(y) <span class="comment"># 求平方</span></span><br><span class="line">    rnd = tf.round(<span class="number">0.9</span>) <span class="comment"># 舍入最接近的整数</span></span><br><span class="line">    power = tf.pow(y, <span class="number">3</span>) <span class="comment"># 求幂次方</span></span><br><span class="line">    exp = tf.exp(y) <span class="comment"># e的幂次方</span></span><br><span class="line">    log = tf.log(x) <span class="comment"># 求log</span></span><br><span class="line">    maxi = tf.maximum(x, y) <span class="comment"># 返回二者较大的</span></span><br><span class="line">    mini = tf.minimum(x, y) <span class="comment"># 返回二者较小的</span></span><br><span class="line">    cos = tf.cos(x) <span class="comment"># 求余弦值</span></span><br><span class="line">    sin = tf.sin(x) <span class="comment"># 求正弦值</span></span><br><span class="line">    tan = tf.tan(x) <span class="comment"># 求正切值</span></span><br><span class="line">    cot = tf.atan(x) <span class="comment"># 求反正切值</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">f1</span><span class="params">()</span>:</span> <span class="keyword">return</span> tf.add(x, <span class="number">1</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">f2</span><span class="params">()</span>:</span> <span class="keyword">return</span> tf.multiply(y, <span class="number">3</span>)</span><br><span class="line">    cond = tf.cond(tf.less(x, y), f1, f2) <span class="comment"># 条件执行</span></span><br><span class="line">    </span><br><span class="line">    result = sess.run([sums, diff, prod, div, mod, absv, neg, sign, inv, sqr, rnd, power, exp, \</span><br><span class="line">                       log, maxi, mini, cos, sin, tan, cot, cond])</span><br><span class="line">    print(<span class="string">"x+5=&#123;ret[0]&#125;, x-5=&#123;ret[1]&#125;, x*y=&#123;ret[2]&#125;, x/y=&#123;ret[3]&#125;, x%y=&#123;ret[4]&#125;,\n \</span></span><br><span class="line"><span class="string">    |x|=&#123;ret[5]&#125;, -y=&#123;ret[6]&#125;, the sign of x is &#123;ret[7]&#125;, 1/x=&#123;ret[8]&#125;, y**2=&#123;ret[9]&#125;, 0.9-&gt;&#123;ret[10]&#125;,\n \</span></span><br><span class="line"><span class="string">    y**3=&#123;ret[11]&#125;, e**y=&#123;ret[12]&#125;, log(x)=&#123;ret[13]&#125;, max(x,y)=&#123;ret[14]&#125;, min(x,y)=&#123;ret[15]&#125;,\n \</span></span><br><span class="line"><span class="string">    cos(x)=&#123;ret[16]&#125;, sin(x)=&#123;ret[17]&#125;, tan(x)=&#123;ret[18]&#125;, cot(x)=&#123;ret[19]&#125;,\n \</span></span><br><span class="line"><span class="string">    if x &lt; y: x + 1 else: y*3 -&gt; &#123;ret[20]&#125;"</span>.format(</span><br><span class="line">        ret=result))</span><br></pre></td></tr></table></figure>
-
-<h3 id="矩阵运算"><a href="#矩阵运算" class="headerlink" title="矩阵运算"></a>矩阵运算</h3><table>
+<h3 id="矩阵运算"><a href="#矩阵运算" class="headerlink" title="矩阵运算"></a>矩阵运算</h3><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>函数</th>
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>tf.diag(diagonal, name=None)</td>
 <td>返回一个给定对角值的对角矩阵</td>
 </tr>
@@ -518,17 +523,20 @@
 <td>tf.matrix_solve(matrix, rhs, adjoint=None, name=None)</td>
 <td>求解矩阵方程，输入系数矩阵matrix与值矩阵rhs，返回答案矩阵</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    matrix_a = tf.diag([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line">    print(sess.run(matrix_a)) <span class="comment"># 返回以[1, 2, 3, 4]作为对角线的矩阵</span></span><br><span class="line">    diag_a = tf.diag_part(matrix_a) <span class="comment"># 返回矩阵的对角线部分</span></span><br><span class="line">    print(sess.run(diag_a))</span><br><span class="line">    trace_a = tf.trace(matrix_a) <span class="comment"># 返回矩阵的迹</span></span><br><span class="line">    print(sess.run(trace_a))</span><br><span class="line">    </span><br><span class="line">    matrix_b = [[[[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>],[<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>],[<span class="number">8</span>,<span class="number">9</span>,<span class="number">10</span>,<span class="number">11</span>]],[[<span class="number">12</span>,<span class="number">13</span>,<span class="number">14</span>,<span class="number">15</span>],[<span class="number">16</span>,<span class="number">17</span>,<span class="number">18</span>,<span class="number">19</span>],[<span class="number">20</span>,<span class="number">21</span>,<span class="number">22</span>,<span class="number">23</span>]]]] <span class="comment"># 四阶张量</span></span><br><span class="line">    matrix_c = tf.transpose(matrix_b, [<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>]) <span class="comment"># 按照新的维度顺序对张量进行转置（矩阵转置不用指定维度顺序）</span></span><br><span class="line">    print(sess.run(matrix_c))</span><br><span class="line">    matrix_d = tf.reverse(matrix_b, [<span class="number">1</span>, <span class="number">2</span>]) <span class="comment"># 对第2和第3个轴上的数据进行翻转（颠倒顺序）</span></span><br><span class="line">    print(sess.run(matrix_d))</span><br><span class="line">    </span><br><span class="line">    matrix_e = [[<span class="number">4.</span>, <span class="number">12.</span>, <span class="number">-16.</span>], [<span class="number">12.</span>, <span class="number">37.</span>, <span class="number">-43.</span>], [<span class="number">-16.</span>, <span class="number">-43.</span>, <span class="number">98.</span>]]</span><br><span class="line">    det_e = tf.matrix_determinant(matrix_e) <span class="comment"># 返回方阵的行列式（不支持int类型）</span></span><br><span class="line">    print(sess.run(det_e))</span><br><span class="line">    matrix_inv = tf.matrix_inverse(matrix_e) <span class="comment"># 返回方阵的逆矩阵（不支持int类型）</span></span><br><span class="line">    print(sess.run(matrix_inv))</span><br><span class="line">    decomp = tf.cholesky(matrix_e) <span class="comment"># 返回方阵的Cholesky分解矩阵（不支持int类型）</span></span><br><span class="line">    print(sess.run(decomp))</span><br><span class="line">    prod = tf.matmul(matrix_e, decomp) <span class="comment"># 矩阵乘法（不支持int类型）</span></span><br><span class="line">    print(sess.run(prod))</span><br><span class="line">    coef = tf.constant([[<span class="number">2.</span>,<span class="number">3.</span>],[<span class="number">1.</span>,<span class="number">1.</span>]])</span><br><span class="line">    print(sess.run(tf.matrix_solve(coef, [[<span class="number">12.</span>],[<span class="number">5.</span>]]))) <span class="comment"># 求解方程组： 2x+3y=12   x+y=5</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="规约运算"><a href="#规约运算" class="headerlink" title="规约运算"></a>规约运算</h3><table>
+<h3 id="规约运算"><a href="#规约运算" class="headerlink" title="规约运算"></a>规约运算</h3><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>函数</th>
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>tf.reduce_sum(input_tensor, axis=None, name=None)</td>
 <td>按照指定的轴对元素求和</td>
 </tr>
@@ -556,17 +564,20 @@
 <td>tf.reduce_any(input_tensor, axis=None, name=None)</td>
 <td>按照指定的轴对元素做或运算</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    matrix = [[<span class="number">2</span>,<span class="number">3</span>],[<span class="number">4</span>,<span class="number">5</span>]]</span><br><span class="line">    print(sess.run(tf.reduce_sum(matrix, <span class="number">0</span>))) <span class="comment"># axis=0 按列规约</span></span><br><span class="line">    print(sess.run(tf.reduce_prod(matrix, <span class="number">1</span>))) <span class="comment"># axis=1 按行规约</span></span><br><span class="line">    print(sess.run(tf.reduce_max(matrix, <span class="number">0</span>)))</span><br><span class="line">    print(sess.run(tf.reduce_min(matrix, <span class="number">0</span>)))</span><br><span class="line">    print(sess.run(tf.reduce_mean(matrix, <span class="number">0</span>)))</span><br><span class="line">    matrix_logic = [[<span class="literal">True</span>, <span class="literal">True</span>], [<span class="literal">True</span>, <span class="literal">False</span>]]</span><br><span class="line">    print(sess.run(tf.reduce_all(matrix_logic))) <span class="comment"># 不设置axis对所有元素进行规约</span></span><br><span class="line">    print(sess.run(tf.reduce_any(matrix_logic, <span class="number">0</span>)))</span><br></pre></td></tr></table></figure>
-
-<h3 id="索引运算"><a href="#索引运算" class="headerlink" title="索引运算"></a>索引运算</h3><table>
+<h3 id="索引运算"><a href="#索引运算" class="headerlink" title="索引运算"></a>索引运算</h3><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>函数</th>
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>tf.argmin(input, axis, name=None)</td>
 <td>返回指定轴上最小元素的索引</td>
 </tr>
@@ -590,7 +601,9 @@
 <td>tf.random_shuffle(input)</td>
 <td>沿着input的第一维随机重新排列</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    matrix = [[<span class="number">0</span>,<span class="number">1</span>,<span class="number">-1</span>],[<span class="number">2</span>,<span class="number">0</span>,<span class="number">-3</span>]]</span><br><span class="line">    print(sess.run(tf.argmin(matrix, <span class="number">0</span>))) <span class="comment"># axis=0 按列计算</span></span><br><span class="line">    print(sess.run(tf.argmax(matrix, <span class="number">0</span>))) <span class="comment"># axis=1 按行计算</span></span><br><span class="line">    x = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">    y = [<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>]</span><br><span class="line">    cond = [<span class="literal">True</span>, <span class="literal">False</span>, <span class="literal">False</span>, <span class="literal">True</span>]</span><br><span class="line">    print(sess.run(tf.where(cond))) <span class="comment"># 如果没有x, y则返回条件表达式中True的下标</span></span><br><span class="line">    print(sess.run(tf.where(cond, x, y))) <span class="comment"># 条件表达式中True的下标对应x的值，False下标对应y的值</span></span><br><span class="line">    z = [<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">7</span>, <span class="number">8</span>]</span><br><span class="line">    z_uni,idx = tf.unique(z) <span class="comment"># 返回z中的唯一值列表，以及唯一值下标在z中的序列</span></span><br><span class="line">    print(sess.run([z_uni, idx]))</span><br><span class="line">    w = [<span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>]</span><br><span class="line">    print(sess.run(tf.invert_permutation(w))) <span class="comment"># 用z的值作为下标返回一个新序列（w中元素不能有重复）</span></span><br><span class="line">    print(sess.run(tf.random_shuffle(matrix))) <span class="comment"># 随机地将张量沿着第一维度(最外层括号内部)打乱</span></span><br></pre></td></tr></table></figure>
       
     </div>
@@ -709,7 +722,7 @@
       <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.gif"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
                alt="rouseway" />
           <p class="site-author-name" itemprop="name">rouseway</p>
            
@@ -721,7 +734,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -732,7 +745,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">18</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -743,7 +756,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

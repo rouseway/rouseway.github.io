@@ -1,0 +1,785 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="PyTorch中的数据可以分为：张量（Tensor）、变量（Variable）、参数（Parameter） 三种： 张量张量是一个具有特定类型数值组成的高阶数组，其形状表现为沿着每一阶对应的轴上按指定的维度展开。在pytorch中，张量支持GPU加速计算，同时可以实现自动微分。123456789101112131415import torchdevice_gpu &#x3D; torch.device(&#39;c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch的数据操作">
+<meta property="og:url" content="http://yoursite.com/2021/07/13/pytorch-1/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="PyTorch中的数据可以分为：张量（Tensor）、变量（Variable）、参数（Parameter） 三种： 张量张量是一个具有特定类型数值组成的高阶数组，其形状表现为沿着每一阶对应的轴上按指定的维度展开。在pytorch中，张量支持GPU加速计算，同时可以实现自动微分。123456789101112131415import torchdevice_gpu &#x3D; torch.device(&#39;c">
+<meta property="article:published_time" content="2021-07-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:16.399Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/07/13/pytorch-1/"/>
+
+
+
+
+
+  <title> PyTorch的数据操作 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/07/13/pytorch-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch的数据操作
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-13T00:00:00+08:00">
+                2021-07-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>PyTorch中的数据可以分为：<strong>张量（Tensor）、变量（Variable）、参数（Parameter）</strong> 三种：</p>
+<h2 id="张量"><a href="#张量" class="headerlink" title="张量"></a>张量</h2><p>张量是一个具有特定类型数值组成的高阶数组，其形状表现为沿着每一阶对应的轴上按指定的维度展开。在pytorch中，张量支持GPU加速计算，同时可以实现自动微分。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">device_gpu = torch.device(<span class="string">'cuda'</span>) <span class="comment"># GPU设备</span></span><br><span class="line">x = torch.ones((<span class="number">2</span>, <span class="number">2</span>), requires_grad=<span class="literal">True</span>) <span class="comment"># 需要计算梯度</span></span><br><span class="line"></span><br><span class="line">x.to(device_gpu) <span class="comment"># 使用GPU加速</span></span><br><span class="line">y = x + <span class="number">2</span></span><br><span class="line">z = y * y * <span class="number">3</span></span><br><span class="line">out = z.mean()</span><br><span class="line">out.backward() <span class="comment"># 反向传播</span></span><br><span class="line">print(x.grad) <span class="comment"># 自动微分 (x+2)(x+2)*3/4 -&gt; (1.5x+3)|x=1</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([[ 4.5000,  4.5000],</span></span><br><span class="line"><span class="string">        [ 4.5000,  4.5000]])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure><br>对张量数据的操作可以归类为：创建、运算、索引、变换、归约等：</p>
+<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>张量由三个关键属性来定义：<strong>轴的个数（阶）、形状、数据类型</strong>：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">12</span>)</span><br><span class="line">print(x) <span class="comment"># tensor([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])</span></span><br><span class="line">print(x.ndim) <span class="comment"># 1 （向量的阶为1）</span></span><br><span class="line">print(x.shape) <span class="comment"># 等同于x.size()，结果为：torch.Size([12])</span></span><br><span class="line">print(x.numel()) <span class="comment"># 12 （元素的个数，注意：pytorch的tensor没有size属性）</span></span><br><span class="line">print(x.dtype) <span class="comment"># torch.int64</span></span><br></pre></td></tr></table></figure></p>
+<p>使用全0、全1、其他常量来初始化矩阵：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x_0 = torch.zeros((<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)) <span class="comment"># 三阶张量（注意：参数是tuple表示形状，元素对应各个轴上的维度）</span></span><br><span class="line">x_1 = torch.ones((<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line">x_2 = torch.full((<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>), fill_value=<span class="number">2</span>) <span class="comment"># 所有元素初始化为2</span></span><br></pre></td></tr></table></figure></p>
+<p>从某个概率分布中随机采样来得到张量中每个元素的值：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x_0 = torch.rand((<span class="number">3</span>, <span class="number">4</span>)) <span class="comment"># [0,1)内的均匀分布随机数</span></span><br><span class="line">x_1 = torch.randn((<span class="number">3</span>, <span class="number">4</span>)) <span class="comment"># 标准正态分布N(0,1)的随机数</span></span><br><span class="line">x_2 = torch.normal(mean, std, out=<span class="literal">None</span>) <span class="comment"># 正态分布（注意：mean和std都是tensor）</span></span><br></pre></td></tr></table></figure></p>
+<p>通过提供包含数值的Python列表（或嵌套列表）来为所需张量中的每个元素赋予确定值：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x = torch.tensor([[<span class="number">2</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>], [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]])</span><br></pre></td></tr></table></figure></p>
+<p>创建形状相同的全0、全1张量：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x_0 = torch.zeros_like(x) <span class="comment"># 创建和x张量形状相同的全0张量</span></span><br><span class="line">x_1 = torch.ones_like(x)</span><br></pre></td></tr></table></figure></p>
+<h3 id="运算"><a href="#运算" class="headerlink" title="运算"></a>运算</h3><p>按元素计算（element-wise），即两个张量对应位置上的元素进行运算。这里涉及到广播机制，即通过适当复制元素来扩展一个或两个数组，以便在转换之后，两个张量具有相同的形状可以进行按元素计算<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">a = torch.rand(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">b = torch.rand(<span class="number">4</span>)</span><br><span class="line">  </span><br><span class="line">c_0 = a + b <span class="comment"># 也可以：torch.add(a, b)</span></span><br><span class="line">c_1 = a - b <span class="comment"># 也可以：torch.sub(a, b)</span></span><br><span class="line">c_2 = a * b <span class="comment"># 也可以：torch.mul(a, b) 该乘法为对应元素相乘</span></span><br><span class="line">c_3 = a / b <span class="comment"># 也可以：torch.div(a, b)</span></span><br><span class="line">c_4 = a.pow(<span class="number">2</span>) <span class="comment"># 幂运算</span></span><br><span class="line">c_5 = a.sqrt() <span class="comment"># 开平方根</span></span><br><span class="line">c_6 = a.rsqrt() <span class="comment"># 平方根倒数</span></span><br><span class="line">c_7 = torch.exp(a) <span class="comment"># 指数</span></span><br><span class="line">c_8 = torch.log(a) <span class="comment"># 对数（e为底）</span></span><br><span class="line">c_9 = a.floor() <span class="comment"># 向下取整</span></span><br><span class="line">c_10 = a.ceil() <span class="comment"># 向上取整</span></span><br><span class="line">c_11 = a.trunc() <span class="comment"># 取整数部分</span></span><br><span class="line">c_12 = a.frac() <span class="comment"># 取小数部分</span></span><br><span class="line">c_13 = a.round() <span class="comment"># 四舍五入</span></span><br><span class="line">c_14 = a.clamp(<span class="number">0.5</span>， <span class="number">0.8</span>) <span class="comment"># 裁剪，最小值为0.5，最大值为0.8，最值以外的元素都用最值代替（注意：可以只给定最大值或最小值）</span></span><br><span class="line">c_15 = (a == b) <span class="comment"># 返回布尔张量，每个元素表示a和b对应位置是否相等</span></span><br></pre></td></tr></table></figure></p>
+<p>线性代数运算，包括向量的点积、矩阵的乘法等<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">v_1 = torch.tensor([<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>])</span><br><span class="line">v_2 = torch.tensor([<span class="number">-1</span>, <span class="number">2</span>, <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">x = torch.dot(v_1, v_2) <span class="comment"># 向量内积</span></span><br><span class="line"></span><br><span class="line">m_1 = torch.tensor([[<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>]])</span><br><span class="line">m_2 = torch.tensor([[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]])</span><br><span class="line"></span><br><span class="line">y = torch.mm(m_1, m_2) <span class="comment"># 也可以：torch.matmul(m_1, m_2) 或 m_1@m_2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用矩阵乘法实现向量外积</span></span><br><span class="line">torch.mm(v_1.T, v_2) <span class="comment"># v_1.T表示v_1的转置</span></span><br><span class="line"></span><br><span class="line">a_1 = torch.eye(<span class="number">5</span>) <span class="comment"># 创建5*5的单位矩阵</span></span><br><span class="line">a_2 = torch.diag(torch.tensor([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>])) <span class="comment"># 创建对角阵（注意：参数是对角线元素构成的一阶张量）</span></span><br><span class="line">a_3 = m_1.transpose(<span class="number">1</span>, <span class="number">0</span>) <span class="comment"># 第0轴和第1轴交换，也就是矩阵的转置</span></span><br><span class="line">a_4 = torch.det(m_1) <span class="comment"># 矩阵对应的行列式</span></span><br><span class="line">a_5 = torch.inverse(m_1) <span class="comment"># 矩阵的逆</span></span><br><span class="line">a_6 = torch.pinverse(m_1) <span class="comment"># 矩阵的伪逆</span></span><br><span class="line">a_7 = torch.matrix_rank(m_1) <span class="comment"># 矩阵的秩</span></span><br><span class="line">a_8 = torch.trace(m_1) <span class="comment"># 矩阵的迹</span></span><br></pre></td></tr></table></figure><br>当然，张量支持的运算还有很多，比如三角函数、对数函数、激活函数等等，这里就不一一列举了。</p>
+<h3 id="索引与切片"><a href="#索引与切片" class="headerlink" title="索引与切片"></a>索引与切片</h3><p>假设我们有4张3通道（RGB）的图片（28*28），我们使用类似python的索引与切片方式来访问需要的数据：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">data = torch.randn((<span class="number">4</span>, <span class="number">3</span>, <span class="number">28</span>, <span class="number">28</span>))</span><br><span class="line"></span><br><span class="line">print(data[<span class="number">0</span>].shape) <span class="comment"># 第0张图片的形状：torch.Size([3,28,28])</span></span><br><span class="line">print(data[<span class="number">0</span>,<span class="number">0</span>].shape) <span class="comment"># 第0张图片第0个通道的形状：torch.Size([28,28])</span></span><br><span class="line">print(data[<span class="number">0</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">4</span>]) <span class="comment"># 第0张图片的第0个通道的第2行第4列的像素点的值：tensor(0.8082)</span></span><br><span class="line">print(data[:<span class="number">2</span>].shape) <span class="comment"># 取第0、1张图片：torch.Size([2,3,28,28])</span></span><br><span class="line">print(data[:<span class="number">2</span>,<span class="number">-1</span>:,:,:].shape) <span class="comment"># 取第0、1张图片的最后一个通道：torch.Size(2,1,28,28)</span></span><br><span class="line">print(data[:,:,<span class="number">0</span>:<span class="number">28</span>:<span class="number">2</span>,<span class="number">0</span>:<span class="number">28</span>:<span class="number">2</span>].shape) <span class="comment"># 图片的矩阵进行隔行与隔列索引：torch.Size([4,3,14,14])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用省略号...进行任意多的维度索引</span></span><br><span class="line">print(data[...].shape) <span class="comment"># torch.Size([4, 3, 28, 28])</span></span><br><span class="line">print(data[<span class="number">0</span>,<span class="number">1</span>,...].shape) <span class="comment"># torch.Size([28, 28])</span></span><br><span class="line">print(data[...,<span class="number">2</span>].shape) <span class="comment"># torch.Size([4, 3, 28])</span></span><br></pre></td></tr></table></figure></p>
+<p>支持使用不规则间隔、掩码以及平铺开来计算的索引等复杂索引：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># index_select(dim, indices)，其中indices必须是tensor</span></span><br><span class="line">print(data.index_select(<span class="number">0</span>, torch.tensor([<span class="number">0</span>,<span class="number">2</span>])).shape) <span class="comment"># 取0轴上的，第0,2个元素（即第0,2张图片）：torch.Size([2, 3, 28, 28])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># masked_select(x, mask)，返回的结果会被打平</span></span><br><span class="line">mask = data.ge(<span class="number">0.5</span>)</span><br><span class="line">print(torch.mask_select(data, mask)) <span class="comment"># data中大于0.5的元素组成的一阶张量</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># take(src, torch.tensor([index]))，平铺后按index索引元素</span></span><br><span class="line">print(torch.take(data, torch.tensor([<span class="number">0</span>, <span class="number">2</span>, <span class="number">5</span>])))</span><br></pre></td></tr></table></figure><br>另外两种切片操作也值得关注，<strong>narrow(dim, start, length)</strong> 和 <strong>unbind(dim=0)</strong>：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">9.</span>).reshape(<span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">print(x.narrow(<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>)) <span class="comment"># 返回张量与输入张量共享内存</span></span><br><span class="line">print(x.unbind(<span class="number">1</span>)) <span class="comment"># 沿指定轴拆解张量，返回一个元组，包含了沿着指定轴切片后的结果</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([[3., 4., 5.],</span></span><br><span class="line"><span class="string">        [6., 7., 8.]])</span></span><br><span class="line"><span class="string">(tensor([0., 3., 6.]), tensor([1., 4., 7.]), tensor([2., 5., 8.]))</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="变换"><a href="#变换" class="headerlink" title="变换"></a>变换</h3><p>张量的变换包括形状的改变、轴的互换、轴的扩展与压缩、拼接与拆分等，我们先初始化一个张量，在此基础上对其进行各种变换：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">12</span>)</span><br></pre></td></tr></table></figure><br>改变张量的形状，可以使用 <strong>reshape</strong> 或 <strong>view</strong> 函数，需要注意的是 view 只能改变连续存储的(contiguous) 张量，所以一旦原始的张量经过了轴的互换（transpose或permute）之后就不能直接使用 view 了，必须先调用 cotiguous；reshape则不受限制（x.reshape() == x.contiguous().view()）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x_1 = x.reshape(<span class="number">3</span>, <span class="number">4</span>) <span class="comment"># 也可以由tensor自己计算部分维度：x.reshape(3, -1)</span></span><br><span class="line">x_2 = x.view(<span class="number">2</span>, <span class="number">2</span>, <span class="number">-1</span>)</span><br></pre></td></tr></table></figure><br>在改变形状中-1是一个很特殊的参数，它表示“自动计算”，这样可以只指定部分轴上的维度，由张量自己去计算剩下的维度。所以如果想把一个高阶张量变换为一个向量，可以写成 x.reshape(-1) 或 torch.reshape(x, (-1, ))。</p>
+<p>一个张量中轴的位置调整最常见的就是矩阵的转置：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x_3 = x_1.transpose(<span class="number">1</span>, <span class="number">0</span>) <span class="comment"># 只能进行两个轴的互换，x_1并没有改变</span></span><br></pre></td></tr></table></figure><br>当要进行多个轴的位置互换时需要使用 <strong>permute</strong>，注意传入的参数是所有轴的索引下标对应的新排列：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x_4 = x_2.permute(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>) <span class="comment"># 可以进行多个轴的互换，x_2并没有改变</span></span><br></pre></td></tr></table></figure><br>在一个张量指定的位置插入一个维度为1的轴实现扩展，或删除维度为1的轴实现压缩：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x_5 = x_1.unsqueeze(<span class="number">0</span>) <span class="comment"># 位置可以是负数，按照python列表下标的负值去理解</span></span><br><span class="line">x_6 = x_5.squeeze(<span class="number">0</span>) <span class="comment"># 可以不输入位置参数，则删除所有维度为1的轴</span></span><br></pre></td></tr></table></figure><br>需要注意的是，这两个操作返回的张量与输入张量共享内存，改变其中一个的内容另一个也会改变。之所以只能增加或删除维度为1的轴，是因为维度为1的轴并没有实际用途，增加只是为了让张量间的形状一致而可以运算，删除则是为了加快计算。</p>
+<p>拼接张量的函数有 <strong>cat</strong> 和 <strong>stack</strong>，两者的区别在于，<strong>cat</strong> 是按照指定的轴拼接张量，<strong>stack</strong> 则是沿着一个新的轴对输入的张量进行拼接：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">a = torch.arange(<span class="number">3</span>)</span><br><span class="line">print(torch.cat((a, a, a), <span class="number">0</span>)) <span class="comment"># cat传入的张量必须有相同数量的轴，且除了指定的轴以外的其他轴需要有相同的尺寸</span></span><br><span class="line">print(torch.stack((a, a, a), <span class="number">0</span>)) <span class="comment"># stack传入的张量都应该有相同的形状</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([0, 1, 2, 0, 1, 2, 0, 1, 2])</span></span><br><span class="line"><span class="string">tensor([[0, 1, 2],</span></span><br><span class="line"><span class="string">        [0, 1, 2],</span></span><br><span class="line"><span class="string">        [0, 1, 2]])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>拆分张量可以通过指定每个分块的大小或需要拆分得到的分块数量进行：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">print(a.split(<span class="number">2</span>, <span class="number">0</span>)) <span class="comment"># 在0轴上按split_size=2进行分割，不能整除部分在最后一块中</span></span><br><span class="line">print(a.chunk(<span class="number">3</span>, <span class="number">0</span>)) <span class="comment"># 在0轴上拆分出3个分块来，不能整分的部分在最后一块中</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">(tensor([0, 1]), tensor([2]))</span></span><br><span class="line"><span class="string">(tensor([0]), tensor([1]), tensor([2]))</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="归约"><a href="#归约" class="headerlink" title="归约"></a>归约</h3><p>归约操作表示输出的张量是对输入张量进行整体或指定轴上的数学操作，比如求均值、求方差、求最小值、求最大值等:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">a = torch.tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]], dtype=torch.float32)</span><br><span class="line"></span><br><span class="line">print(torch.argmin(a, dim=<span class="number">0</span>))  <span class="comment"># 第0轴上的最小值的下标</span></span><br><span class="line">print(torch.argmax(a, dim=<span class="number">1</span>, keepdim=<span class="literal">True</span>)) <span class="comment"># 第1轴上最大值的下标（返回结果与原张量同阶） </span></span><br><span class="line">print(torch.sum(a)) <span class="comment"># 所有元素之和</span></span><br><span class="line">print(torch.max(a, dim=<span class="number">0</span>)) <span class="comment"># 第0轴上的最大值（返回值包含值和下标）</span></span><br><span class="line">print(torch.mean(a)) <span class="comment"># 所有元素的平均值</span></span><br><span class="line">b = torch.std(a) <span class="comment"># 标准差</span></span><br><span class="line">b = torch.median(a) <span class="comment"># 中位数</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([0, 0, 0])</span></span><br><span class="line"><span class="string">tensor([[2],</span></span><br><span class="line"><span class="string">        [2]])</span></span><br><span class="line"><span class="string">tensor(21.)</span></span><br><span class="line"><span class="string">torch.return_types.max(values=tensor([4., 5., 6.]), indices=tensor([1, 1, 1]))</span></span><br><span class="line"><span class="string">tensor(3.5000)</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<h3 id="选择"><a href="#选择" class="headerlink" title="选择"></a>选择</h3><p>使用 <strong>gather</strong> 函数对张量指定轴上的元素按照新的索引进行重新聚合，按新的索引在指定的那个轴上顺次（其他轴从0开始连续递增）取值：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">t = torch.tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]])</span><br><span class="line">print(torch.gather(t, <span class="number">0</span>, torch.tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>], [<span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>], [<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>]])))</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string"># 在0轴上，按照新的索引生成一个3*3（索引的形状）的矩阵A，其中A[0][0]=t[1][0]=4，A[0][1]=t[2][1]=8, A[0][3]=t[0][2]=3, ...</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">tensor([[4, 8, 3],</span></span><br><span class="line"><span class="string">        [7, 2, 9],</span></span><br><span class="line"><span class="string">        [1, 5, 6]])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure><br>返回非零元素的下标：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">print(torch.nonzero(torch.tensor([[<span class="number">0.6</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>],</span><br><span class="line">                                [<span class="number">0.0</span>, <span class="number">0.4</span>, <span class="number">0.0</span>, <span class="number">0.0</span>],</span><br><span class="line">                                [<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.2</span>, <span class="number">0.0</span>]])))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([[ 0,  0],</span></span><br><span class="line"><span class="string">        [ 1,  1],</span></span><br><span class="line"><span class="string">        [ 2,  2]])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<p>通过 <strong>torch.where(condition, x=None, y=None)</strong> 函数使用某种逻辑条件进行元素筛选，如果条件成立则使用 x，否则使用 y：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">9.</span>).reshape(<span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">print(torch.where(x &gt; <span class="number">5</span>)) <span class="comment"># 只指定条件，返回元组以构成满足条件元素的下标</span></span><br><span class="line">print(torch.where(x &lt; <span class="number">5</span>, x,  torch.tensor(<span class="number">-1.0</span>))) <span class="comment"># x中小于5的元素保持不变，大于等于5的元素被替换为-1</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">(tensor([2, 2, 2]), tensor([0, 1, 2])) # 即x[2][0], x[2][1], x[2][2]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">tensor([[ 0.,  1.,  2.],</span></span><br><span class="line"><span class="string">       [ 3.,  4., -1.],</span></span><br><span class="line"><span class="string">       [-1., -1., -1.]])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">a = torch.Tensor([[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]])</span><br><span class="line">b = torch.Tensor([[<span class="number">1</span>, <span class="number">1</span>], [<span class="number">4</span>, <span class="number">4</span>]])</span><br><span class="line"></span><br><span class="line">print(torch.equal(a, b)) <span class="comment"># 如果两个张量有相同的形状和元素值，则返回true，否则False</span></span><br><span class="line">print(torch.eq(a, b)) <span class="comment">#  比较元素是否相等，第二个参数可以是一个数，或者是第一个参数同类型形状的张量，返回张量为每个位置的比较结果（Boolean）</span></span><br><span class="line">torch.ne(a, b) <span class="comment"># 比较元素不等于，同上</span></span><br><span class="line">torch.ge(a, b) <span class="comment"># 比较元素大于等于，同上</span></span><br><span class="line">torch.gt(a, b) <span class="comment"># 比较元素大于，同上</span></span><br><span class="line">torch.le(a, b) <span class="comment"># 比较元素小于等于，同上</span></span><br><span class="line">torch.lt(a, b)  <span class="comment"># 比较元素小于，同上</span></span><br><span class="line"></span><br><span class="line">print(torch.kthvalue(a, <span class="number">1</span>, dim=<span class="number">0</span>)) <span class="comment"># 返回指定轴上第k小的值（如果不指定dim。默认为最后一个轴）</span></span><br><span class="line">print(torch.topk(a, <span class="number">1</span>)) <span class="comment"># 返回指定轴上第k大的值，同上</span></span><br><span class="line"></span><br><span class="line">sorted, indices = torch.sort(a) <span class="comment"># 对指定轴进行升序排序，如果不指定dim，默认是最后一个轴，descending=True则为降序</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">False</span></span><br><span class="line"><span class="string">tensor([[ True, False],</span></span><br><span class="line"><span class="string">        [False,  True]])</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">torch.return_types.kthvalue(</span></span><br><span class="line"><span class="string">values=tensor([1., 2.]),</span></span><br><span class="line"><span class="string">indices=tensor([0, 0]))</span></span><br><span class="line"><span class="string">torch.return_types.topk(</span></span><br><span class="line"><span class="string">values=tensor([[2.],</span></span><br><span class="line"><span class="string">        [4.]]),</span></span><br><span class="line"><span class="string">indices=tensor([[1],</span></span><br><span class="line"><span class="string">        [1]]))</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>Variable 和 Tensor 本质上没有区别，不过 Variable 会被放入一个计算图中，然后进行前向传播、反向传播。Variable 有三个重要的组成属性：data，grad 和 grad_fn。通过 data 可以取出 Variable 里面的 Tensor 值，grad_fn 表示的是得到这个 Variable 的操作，比如通过加减还是乘除得到的，最后 grad 是这个 Variable 的反向传播梯度。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch.autograd <span class="keyword">import</span> Variable</span><br><span class="line"><span class="comment"># create Variable</span></span><br><span class="line">x = Variable(torch.Tensor([<span class="number">1</span>]), requires_grad=<span class="literal">True</span>)</span><br><span class="line">w = Variable(torch.Tensor([<span class="number">2</span>]), requires_grad=<span class="literal">True</span>)</span><br><span class="line">b = Variable(torch.Tensor([<span class="number">3</span>]), requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build a computational graph</span></span><br><span class="line">y = w * x + b</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看变量x里面的三个组成属性，此时还未自动求导，所以x.grad_fn,x_grad都为None</span></span><br><span class="line">print(x.data, x.grad_fn, x.grad)  <span class="comment"># x.data = 1, x.grad_fn = None, x.grad = None</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Compute gradients</span></span><br><span class="line">y.backward() <span class="comment"># same as y.backward(torch.Tensor([1]))</span></span><br><span class="line"><span class="comment"># print out the gradients</span></span><br><span class="line">print(x.grad, x.grad_fn, x.data)  <span class="comment"># x.grad = 2, x.grad_fn = None, x.data = 1</span></span><br><span class="line">print(y.grad, y.grad_fn, y.data)  <span class="comment"># y.grad = None, y.grad_fn = &lt;AddBackward0 object at 0x0000022B482E4978&gt;, y.data = 5</span></span><br></pre></td></tr></table></figure></p>
+<p>要将一个 tensor 变为 Variable 也非常简单，比如想让一个 tensor a 变为 Variable，只需要 Variable(a) 就可以了。</p>
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><p>PyTorch 主要通过引入 nn.Parameter 类型的变量和 optimizer 机制来解决模型训练过程中频繁的更新操作。Parameter 是 Variable 的子类，本质上和后者一样，只不过 Parameter 默认是求梯度的，同时一个网络 net 中的 Parameter 变量是可以通过 net.parameters() 来很方便地访问到的，只需将网络中所有需要训练更新的参数定义为 Parameter 类型，再佐以 optimizer，就能够完成所有参数的更新了。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">optimizer = torch.optim.Adam(net.parameters(), lr=<span class="number">1e-3</span>)</span><br><span class="line">torch.nn.utils.clip_grad_norm_(net.parameters(), <span class="number">0.5</span>)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/25/elasticsearch-2/" rel="next" title="ElasticSearch：存储数据">
+                <i class="fa fa-chevron-left"></i> ElasticSearch：存储数据
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/07/28/pytorch-2/" rel="prev" title="PyTorch数据预处理">
+                PyTorch数据预处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#张量"><span class="nav-number">1.</span> <span class="nav-text">张量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建"><span class="nav-number">1.1.</span> <span class="nav-text">创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运算"><span class="nav-number">1.2.</span> <span class="nav-text">运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引与切片"><span class="nav-number">1.3.</span> <span class="nav-text">索引与切片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变换"><span class="nav-number">1.4.</span> <span class="nav-text">变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#归约"><span class="nav-number">1.5.</span> <span class="nav-text">归约</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择"><span class="nav-number">1.6.</span> <span class="nav-text">选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#比较"><span class="nav-number">1.7.</span> <span class="nav-text">比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量"><span class="nav-number">2.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数"><span class="nav-number">3.</span> <span class="nav-text">参数</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

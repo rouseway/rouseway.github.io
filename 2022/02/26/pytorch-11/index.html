@@ -1,0 +1,793 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="命名实体识别（NER）是 NLP 中传统的序列标注任务，随着近年来预训练语言模型的兴起，很多 NLP 的传统任务都演化为了“基于预训练模型的微调”这样的范式。所以，本节我们将使用 BERT+BiLSTM+CRF 的框架来实现中文命名实体识别的任务，我们使用 CLUENER2020 的数据进行实验，我们需要使用 transformers 包中的 BERT 模型。 数据预处理下载的数据已经划分好了训练">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch实战：基于BERT的NER">
+<meta property="og:url" content="http://yoursite.com/2022/02/26/pytorch-11/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="命名实体识别（NER）是 NLP 中传统的序列标注任务，随着近年来预训练语言模型的兴起，很多 NLP 的传统任务都演化为了“基于预训练模型的微调”这样的范式。所以，本节我们将使用 BERT+BiLSTM+CRF 的框架来实现中文命名实体识别的任务，我们使用 CLUENER2020 的数据进行实验，我们需要使用 transformers 包中的 BERT 模型。 数据预处理下载的数据已经划分好了训练">
+<meta property="article:published_time" content="2022-02-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:45.431Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/02/26/pytorch-11/"/>
+
+
+
+
+
+  <title> PyTorch实战：基于BERT的NER | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/02/26/pytorch-11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch实战：基于BERT的NER
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-02-26T00:00:00+08:00">
+                2022-02-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>命名实体识别（NER）是 NLP 中传统的序列标注任务，随着近年来预训练语言模型的兴起，很多 NLP 的传统任务都演化为了“基于预训练模型的微调”这样的范式。所以，本节我们将使用 BERT+BiLSTM+CRF 的框架来实现中文命名实体识别的任务，我们使用 <a href="https://www.cluebenchmarks.com/introduce.html" target="_blank" rel="noopener">CLUENER2020</a> 的数据进行实验，我们需要使用 transformers 包中的 BERT 模型。</p>
+<h2 id="数据预处理"><a href="#数据预处理" class="headerlink" title="数据预处理"></a>数据预处理</h2><p>下载的数据已经划分好了训练、验证与测试集了，但是其格式需要再处理成 <strong>“文本字符序列[TAB]标签序列”</strong> 这样的格式：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">preprocess</span><span class="params">(input_dir, output_dir)</span>:</span></span><br><span class="line">    text_lst = []</span><br><span class="line">    label_lst = []</span><br><span class="line">    <span class="keyword">for</span> file <span class="keyword">in</span> glob.glob(input_dir+<span class="string">'/*.json'</span>):</span><br><span class="line">        <span class="keyword">with</span> open(file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">            <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">                json_dict = json.loads(sline.strip())</span><br><span class="line">                char_lst = list(json_dict[<span class="string">'text'</span>])</span><br><span class="line">                label_entities = json_dict.get(<span class="string">'label'</span>, <span class="literal">None</span>)</span><br><span class="line">                labels = [<span class="string">'O'</span>] * len(char_lst)</span><br><span class="line">                <span class="keyword">if</span> label_entities <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                    <span class="keyword">for</span> key, value <span class="keyword">in</span> label_entities.items():</span><br><span class="line">                        <span class="keyword">for</span> sub_name, sub_index <span class="keyword">in</span> value.items():</span><br><span class="line">                            <span class="keyword">for</span> start_index, end_index <span class="keyword">in</span> sub_index:</span><br><span class="line">                                <span class="keyword">assert</span> <span class="string">''</span>.join(char_lst[start_index:end_index + <span class="number">1</span>]) == sub_name</span><br><span class="line">                                <span class="keyword">if</span> start_index == end_index:</span><br><span class="line">                                    labels[start_index] = <span class="string">'S-'</span> + key</span><br><span class="line">                                <span class="keyword">else</span>:</span><br><span class="line">                                    labels[start_index] = <span class="string">'B-'</span> + key</span><br><span class="line">                                    labels[start_index + <span class="number">1</span>:end_index + <span class="number">1</span>] = [<span class="string">'I-'</span> + key] * (len(sub_name) - <span class="number">1</span>)</span><br><span class="line">                text_lst.append(char_lst)</span><br><span class="line">                label_lst.append(labels)</span><br><span class="line">        fout = open(output_dir+<span class="string">'/'</span>+os.path.split(file)[<span class="number">-1</span>][:<span class="number">-5</span>]+<span class="string">'.tsv'</span>, <span class="string">'w'</span>, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(text_lst)):</span><br><span class="line">            fout.write(<span class="string">"%s\t%s\n"</span> % (text_lst[i], label_lst[i]))</span><br><span class="line">        fout.close()</span><br><span class="line">        <span class="comment"># 单独保存label标签ID</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">'train'</span> <span class="keyword">in</span> file:</span><br><span class="line">            label2id = &#123;&#125;</span><br><span class="line">            <span class="keyword">for</span> labels <span class="keyword">in</span> label_lst:</span><br><span class="line">                <span class="keyword">for</span> label <span class="keyword">in</span> labels:</span><br><span class="line">                    <span class="keyword">if</span> label <span class="keyword">not</span> <span class="keyword">in</span> label2id:</span><br><span class="line">                        label2id[label] = len(label2id)</span><br><span class="line">            fout = open(os.path.join(output_dir, <span class="string">'label2id.json'</span>), <span class="string">'w'</span>, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">            fout.write(<span class="string">"%s\n"</span> % json.dumps(label2id, ensure_ascii=<span class="literal">False</span>))</span><br><span class="line">            fout.close()</span><br></pre></td></tr></table></figure></p>
+<p>由于我们使用的是 BERT+ 的模式，所以我们不需要构建词汇表，而是直接使用预训练模型本身对应的词汇表；我们只需要自己构建和保存好 label 的编号映射。</p>
+<h2 id="加载数据"><a href="#加载数据" class="headerlink" title="加载数据"></a>加载数据</h2><p>我们首先来构造 Dataset，其中使用 BERT 的分词器来进行文本序列 ID 化（由于我们是基于字符建模，所以不需要进行分词），同时需要按照 BERT 要求的 fine-tuning 数据格式，在文本序列的开头增加一个 [CLS] token。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> BertTokenizer</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NERDataset</span><span class="params">(Dataset)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, text_lst, label_lst, label2id, bert_tokenizer)</span>:</span></span><br><span class="line">        self.charseq_labelindex = []</span><br><span class="line">        self.labels = []</span><br><span class="line">        <span class="comment"># 变成单个字的列表，开头加上[CLS]</span></span><br><span class="line">        <span class="keyword">for</span> text <span class="keyword">in</span> text_lst:</span><br><span class="line">            words = [<span class="string">'[CLS]'</span>] + [token <span class="keyword">for</span> token <span class="keyword">in</span> text]</span><br><span class="line">            token_start_idxs = <span class="number">1</span> + np.cumsum([<span class="number">0</span>] + [<span class="number">1</span>]*(len(words)<span class="number">-1</span>))</span><br><span class="line">            self.charseq_labelindex.append((bert_tokenizer.convert_tokens_to_ids(words), token_start_idxs))</span><br><span class="line">        <span class="keyword">for</span> tag <span class="keyword">in</span> label_lst:</span><br><span class="line">            label_id = [label2id.get(t) <span class="keyword">for</span> t <span class="keyword">in</span> tag]</span><br><span class="line">            self.labels.append(label_id)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.labels)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, idx)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.charseq_labelindex[idx], self.labels[idx]</span><br></pre></td></tr></table></figure></p>
+<p>我们构造的 Dataset 数据结构为：[(char_seq, label_index), label_seq]，其中 label_index 标记了真实序列中存在标签的位置（[CLS] token 没有标签）。通过 DataLoader 来实现批量数据的生成：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader</span><br><span class="line"></span><br><span class="line">device = torch.device(<span class="string">'cuda:0'</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">'cpu'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_loader</span><span class="params">(corpus_file, label2id, bert_tokenizer, batch_size, word_pad_idx=<span class="number">0</span>, label_pad_idx=<span class="number">-1</span>)</span>:</span></span><br><span class="line">    text_lst = []</span><br><span class="line">    label_lst = []</span><br><span class="line">    <span class="keyword">with</span> open(corpus_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">            text, label = sline.strip().split(<span class="string">'\t'</span>)</span><br><span class="line">            text_lst.append(eval(text))</span><br><span class="line">            label_lst.append(eval(label))</span><br><span class="line"></span><br><span class="line">    dataset = NERDataset(text_lst, label_lst, label2id, bert_tokenizer)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">collate_fn</span><span class="params">(batch_input)</span>:</span></span><br><span class="line">        batch_size = len(batch_input) <span class="comment"># 输入数据结构： [(char_seq, label_index), label_seq]</span></span><br><span class="line">        max_len = max([len(s[<span class="number">0</span>][<span class="number">0</span>]) <span class="keyword">for</span> s <span class="keyword">in</span> batch_input])</span><br><span class="line">        max_label_len = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 组建批量的文本序列，使用0进行padding，并生成标签位置标记序列</span></span><br><span class="line">        batch_data = word_pad_idx * np.ones((batch_size, max_len))</span><br><span class="line">        batch_label_starts = []</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(batch_size):</span><br><span class="line">            cur_len = len(batch_input[j][<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">            batch_data[j][:cur_len] = batch_input[j][<span class="number">0</span>][<span class="number">0</span>]</span><br><span class="line">            <span class="comment"># 标记有NER标签的元素，对应位置为1，无标签位置为0（[CLS]位置、padding位置）</span></span><br><span class="line">            label_start_idx = batch_input[j][<span class="number">0</span>][<span class="number">1</span>]</span><br><span class="line">            label_starts = np.zeros(max_len)</span><br><span class="line">            label_starts[[idx <span class="keyword">for</span> idx <span class="keyword">in</span> label_start_idx <span class="keyword">if</span> idx &lt; max_len]] = <span class="number">1</span></span><br><span class="line">            batch_label_starts.append(label_starts)</span><br><span class="line">            max_label_len = max(int(sum(label_starts)), max_label_len)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 组建批量的label序列，使用-1进行padding</span></span><br><span class="line">        batch_labels = label_pad_idx * np.ones((batch_size, max_label_len))</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(batch_size):</span><br><span class="line">            cur_tags_len = len(batch_input[j][<span class="number">1</span>])</span><br><span class="line">            batch_labels[j][:cur_tags_len] = batch_input[j][<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        batch_data = torch.tensor(batch_data, dtype=torch.long).to(device)</span><br><span class="line">        batch_label_starts = torch.tensor(batch_label_starts, dtype=torch.long).to(device)</span><br><span class="line">        batch_labels = torch.tensor(batch_labels, dtype=torch.long).to(device)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> batch_data, batch_label_starts, batch_labels</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> DataLoader(dataset=dataset, batch_size=batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                      collate_fn=collate_fn, drop_last=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
+<p>最终返回三组数据构成的迭代器，包括：采取批量数据中最长序列的长度进行补齐后的字符 ID 序列，相应的补齐后的标签序列，真实标签序列的标记序列。</p>
+<h2 id="定义网络"><a href="#定义网络" class="headerlink" title="定义网络"></a>定义网络</h2><p>使用 BERT+ 的框架，可以简单地认为使用 BERT 网络替换 embedding 层，我们先给出代码，再做详细解释：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.models.bert <span class="keyword">import</span> BertPreTrainedModel,BertModel</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"><span class="keyword">from</span> torchcrf <span class="keyword">import</span> CRF</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BertNER</span><span class="params">(BertPreTrainedModel)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, config, lstm_embedding_size, lstm_dropout_prob)</span>:</span></span><br><span class="line">        super(BertNER, self).__init__(config)</span><br><span class="line">        self.bert = BertModel(config)</span><br><span class="line">        self.dropout = nn.Dropout(config.hidden_dropout_prob)</span><br><span class="line">        self.bilstm = nn.LSTM(</span><br><span class="line">            input_size=lstm_embedding_size,</span><br><span class="line">            hidden_size=config.hidden_size // <span class="number">2</span>,</span><br><span class="line">            batch_first=<span class="literal">True</span>,</span><br><span class="line">            num_layers=<span class="number">2</span>,</span><br><span class="line">            dropout=lstm_dropout_prob,</span><br><span class="line">            bidirectional=<span class="literal">True</span></span><br><span class="line">        )</span><br><span class="line">        self.classifier = nn.Linear(config.hidden_size, config.num_labels)</span><br><span class="line">        self.crf = CRF(config.num_labels, batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        self.init_weights()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, input_data, token_type_ids=None, attention_mask=None, labels=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                position_ids=None, inputs_embeds=None, head_mask=None)</span>:</span></span><br><span class="line">        input_ids, input_token_starts = input_data</span><br><span class="line">        outputs = self.bert(input_ids,</span><br><span class="line">                            attention_mask=attention_mask,</span><br><span class="line">                            token_type_ids=token_type_ids,</span><br><span class="line">                            position_ids=position_ids,</span><br><span class="line">                            head_mask=head_mask,</span><br><span class="line">                            inputs_embeds=inputs_embeds)</span><br><span class="line">        sequence_output = outputs[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 去除[CLS]标签等位置，获得与label对齐的pre_label表示</span></span><br><span class="line">        origin_sequence_output = [layer[starts.nonzero().squeeze(<span class="number">1</span>)]</span><br><span class="line">                                  <span class="keyword">for</span> layer, starts <span class="keyword">in</span> zip(sequence_output, input_token_starts)]</span><br><span class="line">        <span class="comment"># 将sequence_output的pred_label维度padding到最大长度</span></span><br><span class="line">        padded_sequence_output = pad_sequence(origin_sequence_output, batch_first=<span class="literal">True</span>)</span><br><span class="line">        <span class="comment"># dropout pred_label的一部分feature</span></span><br><span class="line">        padded_sequence_output = self.dropout(padded_sequence_output)</span><br><span class="line">        lstm_output, _ = self.bilstm(padded_sequence_output)</span><br><span class="line">        <span class="comment"># 得到判别值</span></span><br><span class="line">        logits = self.classifier(lstm_output)</span><br><span class="line">        outputs = (logits,)</span><br><span class="line">        <span class="keyword">if</span> labels <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            loss_mask = labels.gt(<span class="number">-1</span>)</span><br><span class="line">            loss = self.crf(logits, labels, loss_mask) * (<span class="number">-1</span>)</span><br><span class="line">            outputs = (loss,) + outputs</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure></p>
+<p>transformers 包里封装很多基于 Transformer 实现的预训练语言模型（如 BERT、RoBERTa、XLNet 等），其中的核心三大组件包括 <strong>Configuration 配置类、Tokenizer 分词类、Model 模型类</strong>。Model 类封装了预训练模型的计算图过程，遵循着相同的范式，如根据 token ids 进行 embedding matrix 映射，紧接着多个self-attention 层做编码，最后一层 task-specific 做预测。我们这里需要使用 BertModel，其构造函数和接口定义如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BertModel</span><span class="params">(BertPreTrainedModel)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, config)</span>:</span></span><br><span class="line">        super().__init__(config)</span><br><span class="line">        self.config = config</span><br><span class="line">        self.embeddings = BertEmbeddings(config)</span><br><span class="line">        self.encoder = BertEncoder(config)</span><br><span class="line">        self.pooler = BertPooler(config)</span><br><span class="line">        self.init_weights()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, input_ids=None, attention_mask=None,token_type_ids=None,    </span></span></span><br><span class="line"><span class="function"><span class="params">                position_ids=None, head_mask=None, inputs_embeds=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                encoder_hidden_states=None, encoder_attention_mask=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                output_attentions=None, output_hidden_states=None,)</span>:</span></span><br><span class="line">        ...</span><br><span class="line">        <span class="comment"># sequence_output, pooled_output, (hidden_states), (attentions)</span></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure></p>
+<p>我们重点解释一下接口的参数含义：</p>
+<ul>
+<li>input_ids: 带特殊标记([CLS]、[SEP])的token ids序列，其形状为 [batch_size, seq_len]</li>
+<li>inputs_embeds: 和 input_ids 参数二选一。inputs_embeds 代表给定了输入 tokens 对应的token embeddings，比如用 word2vec 作为 token embeddings</li>
+<li>attention_mask: 可选，形状和 input_ids 一致。当对 encoder 端的序列做 self-attention 时，默认全为1；decoder 端序列做 self-attention 时，默认为类似下三角矩阵的形式</li>
+<li>token_type_ids: 可选，形状和 input_ids 一致，单语句输入时，取值全为 0；在“语句对”的输入中，前一句为全 0，后一句全 1。</li>
+<li>head_mask: 想用哪些 head，就为 1 或者 None，不想用的 head 就为 0。形状为 [num_heads] 或者 [num_hidden_layers x num_heads]，即：可以每层每个 head 单独设置 mask</li>
+<li>position_ids: 可选，位置 id，默认就是 0~seq_len</li>
+<li>encoder_hidden_states/encoder_attention_mask：decoder 端对 encoder 端做 cross-attention 时使用，此时 K 和 V 即通过 encoder_hidden_states 得到</li>
+</ul>
+<p>另外，从 BertModel 的构造函数中也可以看出，BertEmbedding 可以获取序列的 embedding；BertEncoder 可以完成对序列的编码，获取 sequence token-level encoding；BertPooler 对 [CLS] 对应的 hidden state 进行非线性变换得到 sequence-level encoding。最终返回 sequence token-level encoding 和 sequence-level encoding。</p>
+<p>网络定义中还需要注意的是 config 参数是 BERT 自带的配置，下载公开的中文预训练<a href="https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz" target="_blank" rel="noopener">BERT模型</a>，解压模型包请修改配置文件的名字为 “config.json”，并与模型保持在同一文件夹下。模型对应的<a href="https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt" target="_blank" rel="noopener">词典</a>也可以下载参考，尽管当前任务并不需要。另外，CRF 的安装命令是：pip install pytorch-crf 别装错了。</p>
+<h2 id="开始训练"><a href="#开始训练" class="headerlink" title="开始训练"></a>开始训练</h2><p>我们照例把训练相关的超参数，定义到一个配置类里：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, label_file)</span>:</span></span><br><span class="line">        self.batch_size = <span class="number">64</span></span><br><span class="line">        self.epoch_num = <span class="number">5</span></span><br><span class="line">        self.clip_grad = <span class="number">5</span> <span class="comment"># 进行梯度剪裁时的最大梯度范数</span></span><br><span class="line">        self.patience = <span class="number">0.0002</span> <span class="comment"># 训练精度提升的最小阈值</span></span><br><span class="line">        self.patience_num = <span class="number">10</span> <span class="comment"># 未达到提升阈值的次数超过该值则提前终止训练</span></span><br><span class="line">        self.learning_rate = <span class="number">3e-5</span></span><br><span class="line">        self.bert_model = <span class="string">'./model/bert-chn/'</span></span><br><span class="line">        self.model_dir = <span class="string">'./model/ner/'</span></span><br><span class="line">        <span class="keyword">with</span> open(label_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">            self.label2id = json.loads(fin.readline().strip())</span><br></pre></td></tr></table></figure></p>
+<p>训练过程的实现和其他模型基本一致，这里通过精度提升的变化来控制训练，即精度不再提升（或提升很有限）则提前终止训练：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_epoch</span><span class="params">(train_loader, model, optimizer, scheduler, epoch, config)</span>:</span></span><br><span class="line">    model.train()</span><br><span class="line">    train_losses = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> idx, batch_samples <span class="keyword">in</span> enumerate(tqdm(train_loader)):</span><br><span class="line">        batch_data, batch_token_starts, batch_labels = batch_samples</span><br><span class="line">        batch_masks = batch_data.gt(<span class="number">0</span>) </span><br><span class="line">        loss = model((batch_data, batch_token_starts),</span><br><span class="line">                     token_type_ids=<span class="literal">None</span>, attention_mask=batch_masks, labels=batch_labels)[<span class="number">0</span>]</span><br><span class="line">        train_losses += loss.item()</span><br><span class="line">        model.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        <span class="comment"># 进行梯度剪裁</span></span><br><span class="line">        nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=config.clip_grad)</span><br><span class="line">        optimizer.step()</span><br><span class="line">        scheduler.step()</span><br><span class="line">    train_loss = float(train_losses) / len(train_loader)</span><br><span class="line">    logging.info(<span class="string">"Epoch: &#123;&#125;, train loss: &#123;&#125;"</span>.format(epoch, train_loss))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(train_loader, dev_loader, model, optimizer, scheduler, config)</span>:</span></span><br><span class="line">    best_val_f1 = <span class="number">0.0</span></span><br><span class="line">    patience_counter = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(<span class="number">1</span>, config.epoch_num + <span class="number">1</span>):</span><br><span class="line">        train_epoch(train_loader, model, optimizer, scheduler, epoch, config)</span><br><span class="line">        val_metrics = evaluate(dev_loader, model, config, mode=<span class="string">'dev'</span>)</span><br><span class="line">        val_f1 = val_metrics[<span class="string">'f1'</span>]</span><br><span class="line">        logging.info(<span class="string">"Epoch: &#123;&#125;, dev loss: &#123;&#125;, f1 score: &#123;&#125;"</span>.format(epoch, val_metrics[<span class="string">'loss'</span>], val_f1))</span><br><span class="line">        improve_f1 = val_f1 - best_val_f1</span><br><span class="line">        <span class="keyword">if</span> improve_f1 &gt; <span class="number">1e-5</span>:</span><br><span class="line">            best_val_f1 = val_f1</span><br><span class="line">            model.save_pretrained(config.model_dir)</span><br><span class="line">            logging.info(<span class="string">"--------Save best model!--------"</span>)</span><br><span class="line">            <span class="keyword">if</span> improve_f1 &lt; config.patience:</span><br><span class="line">                patience_counter += <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                patience_counter = <span class="number">0</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            patience_counter += <span class="number">1</span></span><br><span class="line">        <span class="comment"># 多次精度提升有限后提前终止训练</span></span><br><span class="line">        <span class="keyword">if</span> (patience_counter &gt;= config.patience_num <span class="keyword">and</span> epoch &gt; config.min_epoch_num) <span class="keyword">or</span> epoch == config.epoch_num:</span><br><span class="line">            logging.info(<span class="string">"Best val f1: &#123;&#125;"</span>.format(best_val_f1))</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    logging.info(<span class="string">"Training Finished!"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>由于篇幅有限，我们不再给出训练过程中涉及的 evaluate 方法的具体实现，大家可以参考<a href="https://github.com/hemingkx/CLUENER2020/blob/main/BERT-LSTM-CRF/metrics.py" target="_blank" rel="noopener">Github</a>上的实现。最后，我们把训练的流程串起来，调用 BertNER 的时候需要显式地传递一个 num_labels 的参数（也可以通过在 BERT 的配置文件里增加一个字段），该参数会自动增加到 config 的参数中：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.optimization <span class="keyword">import</span> get_cosine_schedule_with_warmup, AdamW</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">()</span>:</span></span><br><span class="line">    config = Config(<span class="string">'./data/NER/output/label2id.json'</span>)</span><br><span class="line"></span><br><span class="line">    bert_tokenizer = BertTokenizer.from_pretrained(config.bert_model, do_lower_case=<span class="literal">True</span>)</span><br><span class="line">    train_loader = create_loader(<span class="string">'./data/NER/output/train.tsv'</span>, config.label2id,</span><br><span class="line">                                 bert_tokenizer, config.batch_size)</span><br><span class="line">    eval_loader = create_loader(<span class="string">'./data/NER/output/dev.tsv'</span>, config.label2id,</span><br><span class="line">                                 bert_tokenizer, config.batch_size)</span><br><span class="line"></span><br><span class="line">    model = BertNER.from_pretrained(config.bert_model, num_labels=len(config.label2id),</span><br><span class="line">                                    lstm_embedding_size=<span class="number">768</span>, lstm_dropout_prob=<span class="number">0.5</span>)</span><br><span class="line">    model.to(device)</span><br><span class="line">    param_optimizer = list(model.classifier.named_parameters())</span><br><span class="line">    optimizer_grouped_parameters = [&#123;<span class="string">'params'</span>: [p <span class="keyword">for</span> n, p <span class="keyword">in</span> param_optimizer]&#125;]</span><br><span class="line">    optimizer = AdamW(optimizer_grouped_parameters, lr=config.learning_rate, correct_bias=<span class="literal">False</span>)</span><br><span class="line">    train_data_size = <span class="number">13436</span></span><br><span class="line">    train_steps_per_epoch = train_data_size // config.batch_size</span><br><span class="line">    scheduler = get_cosine_schedule_with_warmup(optimizer,</span><br><span class="line">                                                num_warmup_steps=(config.epoch_num // <span class="number">10</span>) * train_steps_per_epoch,</span><br><span class="line">                                                num_training_steps=config.epoch_num * train_steps_per_epoch)</span><br><span class="line"></span><br><span class="line">    train(train_loader, eval_loader, model, optimizer, scheduler, config)</span><br></pre></td></tr></table></figure></p>
+<p>我们使用 AdamW(Adam + weight decay) 作为优化器，AdamW 是对传统的 Adam + L2 regularization 的改进。我们使用cosine schedule with warmup 调整学习率。我们将 warmup steps 设置为总训练轮次的十分之一。因此，学习率会在前十分之一的训练轮次线性递增到设置的学习率数值，在之后余弦下降。训练采取了简化操作，即只 Fine-Tune 最上面的分类层（classifier）。</p>
+<h2 id="基于BERT的其他任务"><a href="#基于BERT的其他任务" class="headerlink" title="基于BERT的其他任务"></a>基于BERT的其他任务</h2><p>在上面的实现中可以总结 BERT+ 的范式为 <u>使用 BertModel 的输出替换任务基本框架中的 embedding 层</u>，所以在其他的 NLP 任务上使用 BERT 应该说是可以举一反三的。不过，transformers 的 Model 组件中还做了一些灵活的扩展以用于下游任务，例如在预训练好的 Base 模型基础上，添加 task-specific heads。其代码级接口通常命名为，XXXForSequenceClassification 等，其中 XXX 是模型的名称（如Bert）， 结尾是下游任务的类型(SequenceClassification)。</p>
+<ol>
+<li><strong>BertForTokenClassification做命名实体识别</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.models.bert <span class="keyword">import</span> BertForTokenClassification</span><br><span class="line"></span><br><span class="line">model = BertForTokenClassification.from_pretrained(bert_model_dir, num_labels=config.num_labels)</span><br><span class="line">out = model(input_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span>, </span><br><span class="line">            token_type_ids=<span class="literal">None</span>, position_ids=<span class="literal">None</span>,</span><br><span class="line">            head_mask=<span class="literal">None</span>, inputs_embeds=<span class="literal">None</span>, labels=<span class="literal">None</span>,</span><br><span class="line">            output_attentions=<span class="literal">None</span>, output_hidden_states=<span class="literal">None</span>)</span><br><span class="line"><span class="comment"># (loss), scores, (hidden_states), (attentions)</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>BertForSequenceClassification做文本分类</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.models.bert <span class="keyword">import</span> BertForSequenceClassification</span><br><span class="line"></span><br><span class="line">model = BertForSequenceClassification.from_pretrained(bert_model_dir, num_labels=config.num_labels)</span><br><span class="line">out = model(input_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span>, </span><br><span class="line">            token_type_ids=<span class="literal">None</span>, position_ids=<span class="literal">None</span>,</span><br><span class="line">            head_mask=<span class="literal">None</span>, inputs_embeds=<span class="literal">None</span>, labels=<span class="literal">None</span>,</span><br><span class="line">            output_attentions=<span class="literal">None</span>, output_hidden_states=<span class="literal">None</span>)</span><br><span class="line"><span class="comment"># (loss), logits, (hidden_states), (attentions)</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>BertForMultipleChoice做多项选择</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.models.bert <span class="keyword">import</span> BertForMultipleChoice</span><br><span class="line"></span><br><span class="line">model = BertForMultipleChoice.from_pretrained(bert_model_dir, num_labels=config.num_labels)</span><br><span class="line">out = model(input_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span>, </span><br><span class="line">            token_type_ids=<span class="literal">None</span>, position_ids=<span class="literal">None</span>, head_mask=<span class="literal">None</span>,         </span><br><span class="line">            inputs_embeds=<span class="literal">None</span>, labels=<span class="literal">None</span>, output_attentions=<span class="literal">None</span>, </span><br><span class="line">            output_hidden_states=<span class="literal">None</span>, return_dict=<span class="literal">None</span>)</span><br><span class="line"><span class="comment"># (loss), logits, (hidden_states), (attentions)</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>BertForQuestionAnswering做SQuAD任务</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers.models.bert <span class="keyword">import</span> BertForQuestionAnswering</span><br><span class="line"></span><br><span class="line">model = BertForQuestionAnswering.from_pretrained(bert_model_dir, num_labels=config.num_labels)</span><br><span class="line">out = model(input_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span>,</span><br><span class="line">            token_type_ids=<span class="literal">None</span>, position_ids=<span class="literal">None</span>,</span><br><span class="line">            head_mask=<span class="literal">None</span>, inputs_embeds=<span class="literal">None</span>,</span><br><span class="line">            start_positions=<span class="literal">None</span>, end_positions=<span class="literal">None</span>,</span><br><span class="line">            output_attentions=<span class="literal">None</span>, output_hidden_states=<span class="literal">None</span>)</span><br><span class="line"><span class="comment"># (loss), start_logits, end_logits, (hidden_states), (attentions)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>直接使用它们会更加快速地构建 BERT+ 模型以完成特定的 NLP 任务，输出中括号括住的部分表示可选，其中 loss 只有在训练过程中传入了 labels 才会返回。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/22/pytorch-10/" rel="next" title="PyTorch实战：聊天机器人">
+                <i class="fa fa-chevron-left"></i> PyTorch实战：聊天机器人
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/04/06/pytorch-12/" rel="prev" title="PyTorch实战：分布式训练">
+                PyTorch实战：分布式训练 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据预处理"><span class="nav-number">1.</span> <span class="nav-text">数据预处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载数据"><span class="nav-number">2.</span> <span class="nav-text">加载数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定义网络"><span class="nav-number">3.</span> <span class="nav-text">定义网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始训练"><span class="nav-number">4.</span> <span class="nav-text">开始训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于BERT的其他任务"><span class="nav-number">5.</span> <span class="nav-text">基于BERT的其他任务</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

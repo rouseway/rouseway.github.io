@@ -257,7 +257,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="rouseway">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -387,10 +387,8 @@
 </ul>
 <p>当然，除过这些常见任务之外的特定问题可能需要我们自己定义损失函数。对于优化器的选择，无论你的问题是什么，<strong>RMSprop</strong>优化器通常都是足够好的选择。在Keras中，你需要把选择好的损失函数与优化器放入你所构建的网络模型中进行编译，如下面这段代码：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> optimizers</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=optimizers.RMSprop(lr=<span class="number">0.001</span>), loss=<span class="string">'mse'</span>, </span><br><span class="line">	      metrics=[<span class="string">'accuracy'</span>])</span><br></pre></td></tr></table></figure>
-
 <p>最后，学习的过程就是通过fit()方法将输入数据的Numpy数组（以及对应的目标值）传入模型：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model.fit(input_tensor, target_tensor, batch_size=<span class="number">128</span>, epochs=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-
 <p>以上，就是使用Keras构建神经网络的基本思路，这只是我们用Keras进行深度学习的基本脉络，实践中的方法论我们将在下一节讨论，它们包括如何处理数据、如何调参、如何防止过拟合，以及如何评价模型的好坏。</p>
 
       
@@ -501,7 +499,7 @@
       <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.gif"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
                alt="rouseway" />
           <p class="site-author-name" itemprop="name">rouseway</p>
            
@@ -513,7 +511,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -524,7 +522,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">18</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -535,7 +533,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

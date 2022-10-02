@@ -1,0 +1,788 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="时间序列的概念在日常生活中十分常见，但对于一个具体的时序事件而言，可以从多个时间对象的角度来描述。例如 “2020 年 9 月 7 日周一早上 8 点整需要到教室上课，这个课会在当天早上 10 点结束”，其中包含了如下一些时序概念：  时间戳： 即 ’2020-9-7 08\:00:00’ 和 ’2020-9-7 10\:00:00’这两个时间点分别代表了上课和下课的时刻，在 Pandas 中称为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas时序数据">
+<meta property="og:url" content="http://yoursite.com/2021/03/24/pandas-7/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="时间序列的概念在日常生活中十分常见，但对于一个具体的时序事件而言，可以从多个时间对象的角度来描述。例如 “2020 年 9 月 7 日周一早上 8 点整需要到教室上课，这个课会在当天早上 10 点结束”，其中包含了如下一些时序概念：  时间戳： 即 ’2020-9-7 08\:00:00’ 和 ’2020-9-7 10\:00:00’这两个时间点分别代表了上课和下课的时刻，在 Pandas 中称为">
+<meta property="article:published_time" content="2021-03-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:38:05.374Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/03/24/pandas-7/"/>
+
+
+
+
+
+  <title> Pandas时序数据 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/03/24/pandas-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas时序数据
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-24T00:00:00+08:00">
+                2021-03-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>时间序列的概念在日常生活中十分常见，但对于一个具体的时序事件而言，可以从多个时间对象的角度来描述。例如 “2020 年 9 月 7 日周一早上 8 点整需要到教室上课，这个课会在当天早上 10 点结束”，其中包含了如下一些时序概念：</p>
+<ul>
+<li><strong>时间戳：</strong> 即 ’2020-9-7 08\:00:00’ 和 ’2020-9-7 10\:00:00’这两个时间点分别代表了上课和下课的时刻，在 Pandas 中称为 <strong>Timestamp</strong> 。多个时间戳可以构成一个 <strong>DatetimeIndex</strong> 对象，该对象的 dtype 为 <strong>datetime64[ns]</strong> ，如果涉及时区则为 datetime64[ns, tz] ， tz 是 timezone 的简写。</li>
+<li><strong>时间差：</strong> 即上课需要的时间，通过两个 Timestamp 做差就可以计算出时间差，Pandas 中用 <strong>Timedelta</strong> 来表示。多个时间差可以构成一个 <strong>TimedeltaIndex</strong> 对象，该对象的 dtype 为 <strong>timedelta64[ns]</strong> 。</li>
+<li><strong>时间段：</strong> 即在 8 点到 10 点这个区间都会持续地在上课，在 Pandas 利用 <strong>Period</strong> 来表示。一系列的时间段组成了 <strong>PeriodIndex</strong> ，而将它放到 Series 中后，该 Series 的类型就变为了 <strong>Period</strong>。</li>
+<li><strong>日期偏置：</strong> 想要知道 2020 年 9 月 7 日后的第 30 个工作日是哪一天， Pandas 提供了多种 Offset 对象来完成相应的计算。但是，Pandas 并没有为一系列的时间偏置专门设计存储类型。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br></pre></td></tr></table></figure>
+<p>由于时间段对象 Period/PeriodIndex 的使用频率并不高，因此将不进行讲解，我们只重点介绍时间戳序列、时间差序列和日期偏置的相关内容。</p>
+<h2 id="时间戳"><a href="#时间戳" class="headerlink" title="时间戳"></a>时间戳</h2><p>常见的时间格式串可以直接传入 pd.Timestamp( ) 中转换成时间戳对象，该对象包含了 year, month, day, hour, minute, second 等属性。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">print(pd.Timestamp(<span class="string">'2020/1/1'</span>))</span><br><span class="line"><span class="string">''''</span></span><br><span class="line"><span class="string">2020-01-01 00:00:00</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">ts = pd.Timestamp(<span class="string">'2020-1-1 08:10:30'</span>)</span><br><span class="line">print(ts)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01 08:10:30</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020 1 1 8 10 30</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>在 Pandas 中，时间戳的最小精度为纳秒 ns，由于时间戳本身是一个纳秒数值，所以可以通过 pd.Timestamp.max 和 pd.Timestamp.min 获取时间戳的表示范围。</p>
+<h3 id="Datatime序列"><a href="#Datatime序列" class="headerlink" title="Datatime序列"></a>Datatime序列</h3><p>多个时间戳对象可以组成 DatatimeIndex，通过 to_datetime( ) 和 date_range( ) 来生成。其中，to_datetime( ) 的输入可以是时间格式串或时间戳对象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 由一系列的Timstamp对象生成DatetimeIndex对象</span></span><br><span class="line">ts_lst = [pd.Timestamp(<span class="string">'2020/1/1'</span>), pd.Timestamp(<span class="string">'2020/1/3'</span>), pd.Timestamp(<span class="string">'2020/1/6'</span>)]</span><br><span class="line">print(pd.to_datetime(ts_lst))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">DatetimeIndex(['2020-01-01', '2020-01-03', '2020-01-06'], dtype='datetime64[ns]', freq=None)</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 直接由时间格式串生成DatetimeIndex对象，时间格式不满足转换时，可以强制使用format进行匹配</span></span><br><span class="line">temp = pd.to_datetime([<span class="string">'2020\\1\\1'</span>,<span class="string">'2020\\1\\3'</span>],format=<span class="string">'%Y\\%m\\%d'</span>)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">DatetimeIndex(['2020-01-01', '2020-01-03'], dtype='datetime64[ns]', freq=None)</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>date_range() 是一种生成连续间隔时间的一种方法，其重要的参数为 start, end, freq, periods ，它们分别表示开始时间，结束时间，时间间隔，时间戳个数。其中，四个中的三个参数决定了，那么剩下的一个就随之确定了。这里要注意，开始或结束日期如果作为端点则它会被包含。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">print(pd.date_range(<span class="string">'2020-1-1'</span>,<span class="string">'2020-1-21'</span>, freq=<span class="string">'10D'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">DatetimeIndex(['2020-01-01', '2020-01-11', '2020-01-21'], dtype='datetime64[ns]', freq='10D')</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(pd.date_range(<span class="string">'2020-1-1'</span>, <span class="string">'2020-2-28'</span>, periods=<span class="number">6</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">DatetimeIndex(['2020-01-01 00:00:00', '2020-01-12 14:24:00',</span></span><br><span class="line"><span class="string">               '2020-01-24 04:48:00', '2020-02-04 19:12:00',</span></span><br><span class="line"><span class="string">               '2020-02-16 09:36:00', '2020-02-28 00:00:00'],</span></span><br><span class="line"><span class="string">              dtype='datetime64[ns]', freq=None)</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>另外，DatatimeIndex 对象经过 Series 转换后就形成了 <strong>“Datetime 序列”</strong>：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 上文生成的DatetimeIndex对象转换为Series</span></span><br><span class="line">print(pd.Series(temp).head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0   2020-01-01</span></span><br><span class="line"><span class="string">1   2020-01-03</span></span><br><span class="line"><span class="string">dtype: datetime64[ns]</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>如果传入的不是多个时间戳的列表，而是时间戳或时间格式串组成的 Series，那么 to_datetime( ) 函数将直接返回一个 Datetime 序列。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(<span class="string">'data/learn_pandas.csv'</span>)</span><br><span class="line">ds = pd.to_datetime(df.Time_Record)</span><br><span class="line">print(ds.head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0   2021-07-31 00:04:34</span></span><br><span class="line"><span class="string">1   2021-07-31 00:04:20</span></span><br><span class="line"><span class="string">2   2021-07-31 00:05:22</span></span><br><span class="line"><span class="string">3   2021-07-31 00:04:08</span></span><br><span class="line"><span class="string">4   2021-07-31 00:05:22</span></span><br><span class="line"><span class="string">Name: Time_Record, dtype: datetime64[ns]</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 把表的多列时间属性拼接转为时间序列，此时的列名必须和以下给定的时间关键词列名一致</span></span><br><span class="line">df_date_cols = pd.DataFrame(&#123;<span class="string">'year'</span>: [<span class="number">2020</span>, <span class="number">2020</span>], <span class="string">'month'</span>: [<span class="number">1</span>, <span class="number">1</span>],</span><br><span class="line">                             <span class="string">'day'</span>: [<span class="number">1</span>, <span class="number">2</span>], <span class="string">'hour'</span>: [<span class="number">10</span>, <span class="number">20</span>],</span><br><span class="line">                             <span class="string">'minute'</span>: [<span class="number">30</span>, <span class="number">50</span>], <span class="string">'second'</span>: [<span class="number">20</span>, <span class="number">40</span>]&#125;)</span><br><span class="line">print(pd.to_datetime(df_date_cols))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0   2020-01-01 10:30:20</span></span><br><span class="line"><span class="string">1   2020-01-02 20:50:40</span></span><br><span class="line"><span class="string">dtype: datetime64[ns]</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>Pandas 对于 Datetime 序列定义了 <strong>dt 对象</strong>来完成许多时间序列的相关操作。针对 datetime64[ns] 类型而言，可以大致分为三类操作：取出时间相关的属性、判断时间戳是否满足条件、取整操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series(pd.date_range(<span class="string">'2020-1-1'</span>,<span class="string">'2020-1-3'</span>, freq=<span class="string">'D'</span>))</span><br><span class="line">print(s.dt.month_name())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0    January</span></span><br><span class="line"><span class="string">1    January</span></span><br><span class="line"><span class="string">2    January</span></span><br><span class="line"><span class="string">dtype: object</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(s.dt.is_year_start)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0     True</span></span><br><span class="line"><span class="string">1    False</span></span><br><span class="line"><span class="string">2    False</span></span><br><span class="line"><span class="string">dtype: bool</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">s = pd.Series(pd.date_range(<span class="string">'2020-1-1 20:35:00'</span>, <span class="string">'2020-1-1 22:35:00'</span>, freq=<span class="string">'45min'</span>))</span><br><span class="line">print(s.dt.round(<span class="string">'1H'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0   2020-01-01 21:00:00</span></span><br><span class="line"><span class="string">1   2020-01-01 21:00:00</span></span><br><span class="line"><span class="string">2   2020-01-01 22:00:00</span></span><br><span class="line"><span class="string">dtype: datetime64[ns]</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>第一类操作的常用属性包括：date, time, year, month, day, hour, minute, second, microsecond, nanosecond, dayofweek, dayofyear, weekofyear, daysinmonth, quarter ，其中，dayofweek 返回周中的星期情况，周一为0、周二为1，以此类推； daysinmonth, quarter 分别表示月中的第几天和季度。另外还有类属性的方法，month_name(), day_name() 返回英文的月名和星期名。第二类判断操作主要用于测试是否为月/季/年的第一天或者最后一天。第三类的取整操作包含 round, ceil, floor ，它们的公共参数为 freq ，常用的包括 H, min, S （小时、分钟、秒）。</p>
+<h3 id="索引与切片"><a href="#索引与切片" class="headerlink" title="索引与切片"></a>索引与切片</h3><p>Datetime 序列常作为索引使用，如果想要选出某个子时间戳序列，第一类方法是利用 dt 对象和布尔<br>条件联合使用，另一种方式是利用切片，后者常用于连续时间戳。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="comment"># 时间戳的切片与索引</span></span><br><span class="line">s = pd.Series(np.random.randint(<span class="number">2</span>,size=<span class="number">366</span>),</span><br><span class="line">              index=pd.date_range(<span class="string">'2020-01-01'</span>,<span class="string">'2020-12-31'</span>))</span><br><span class="line">idx = pd.Series(s.index).dt</span><br><span class="line">print(s.head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01    1</span></span><br><span class="line"><span class="string">2020-01-02    1</span></span><br><span class="line"><span class="string">2020-01-03    1</span></span><br><span class="line"><span class="string">2020-01-04    1</span></span><br><span class="line"><span class="string">2020-01-05    1</span></span><br><span class="line"><span class="string">Freq: D, dtype: int32</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每月的第一天或者最后一天</span></span><br><span class="line">print(s[(idx.is_month_start|idx.is_month_end).values].head())</span><br><span class="line"><span class="comment"># 双休日</span></span><br><span class="line">print(s[idx.dayofweek.isin([<span class="number">5</span>,<span class="number">6</span>]).values].head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-04    1</span></span><br><span class="line"><span class="string">2020-01-05    1</span></span><br><span class="line"><span class="string">2020-01-11    1</span></span><br><span class="line"><span class="string">2020-01-12    0</span></span><br><span class="line"><span class="string">2020-01-18    0</span></span><br><span class="line"><span class="string">dtype: int32</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取出七月</span></span><br><span class="line">print(s[<span class="string">'2020-07'</span>].head())</span><br><span class="line"><span class="comment"># 取出5月初至7月15日</span></span><br><span class="line">print(s[<span class="string">'2020-05'</span>:<span class="string">'2020-7-15'</span>].head())</span><br></pre></td></tr></table></figure></p>
+<p>最后，我们介绍一种改变序列采样频率的方法 asfreq()：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series(np.random.rand(<span class="number">5</span>),</span><br><span class="line">              index=pd.to_datetime([<span class="string">'2020-1-%d'</span>%i <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">10</span>,<span class="number">2</span>)]))</span><br><span class="line">print(s.head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01    0.930396</span></span><br><span class="line"><span class="string">2020-01-03    0.697312</span></span><br><span class="line"><span class="string">2020-01-05    0.852363</span></span><br><span class="line"><span class="string">2020-01-07    0.215163</span></span><br><span class="line"><span class="string">2020-01-09    0.993382</span></span><br><span class="line"><span class="string">dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(s.asfreq(<span class="string">'D'</span>).head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01    0.930396</span></span><br><span class="line"><span class="string">2020-01-02         NaN</span></span><br><span class="line"><span class="string">2020-01-03    0.697312</span></span><br><span class="line"><span class="string">2020-01-04         NaN</span></span><br><span class="line"><span class="string">2020-01-05    0.852363</span></span><br><span class="line"><span class="string">Freq: D, dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure><br>可以看到，我们将时间序列的索引转换为了指定的频率，函数也提供了设置填充方法，来填充缺失值，返回一个符合指定频率的新索引的原始数据。</p>
+<h2 id="时间差"><a href="#时间差" class="headerlink" title="时间差"></a>时间差</h2><p>时间差可以理解为两个时间戳的差，可以显式地通过 pd.Timedelta 来构造。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">temp = pd.Timestamp(<span class="string">'20200102 08:00:00'</span>)-pd.Timestamp(<span class="string">'20200101 07:35:00'</span>)</span><br><span class="line">print(temp)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">1 days 00:25:00</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(pd.Timedelta(days=<span class="number">1</span>, minutes=<span class="number">25</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">1 days 00:25:00</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>与时间戳类似，多个时间差对象可以组成 TimeDeltaIndex，通过 to_timedelta( ) 和 timedelta_range( ) 来生成。TimeDeltaIndex 对象经过 Series 转换或者直接传给 to_timedelta( ) 时间差组成的 Series，就可以得到 “TimeDelta 序列”。Pandas 为 TimeDelta 序列同样定义了 dt 对象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">print(pd.to_timedelta([temp]))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">TimedeltaIndex(['1 days 00:25:00'], dtype='timedelta64[ns]', freq=None)</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">s = pd.to_timedelta(df.Time_Record)</span><br><span class="line">print(s.head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0   0 days 00:04:34</span></span><br><span class="line"><span class="string">1   0 days 00:04:20</span></span><br><span class="line"><span class="string">2   0 days 00:05:22</span></span><br><span class="line"><span class="string">3   0 days 00:04:08</span></span><br><span class="line"><span class="string">4   0 days 00:05:22</span></span><br><span class="line"><span class="string">Name: Time_Record, dtype: timedelta64[ns]</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(s.dt.seconds) <span class="comment"># seconds不是指单纯的秒，而是对天数取余后剩余的秒数</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0    274</span></span><br><span class="line"><span class="string">1    260</span></span><br><span class="line"><span class="string">2    322</span></span><br><span class="line"><span class="string">3    248</span></span><br><span class="line"><span class="string">4    322</span></span><br><span class="line"><span class="string">Name: Time_Record, dtype: int64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(pd.timedelta_range(<span class="string">'0s'</span>, <span class="string">'1000s'</span>, freq=<span class="string">'6min'</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">TimedeltaIndex(['0 days 00:00:00', '0 days 00:06:00', '0 days 00:12:00'], dtype='timedelta64[ns]', freq='6T')</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Timedelta-的运算"><a href="#Timedelta-的运算" class="headerlink" title="Timedelta 的运算"></a>Timedelta 的运算</h3><p>时间差支持的常用运算有三类：与标量的乘法运算、与时间戳的加减法运算、与时间差的加减法与除法运算：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">td1 = pd.Timedelta(days=<span class="number">1</span>)</span><br><span class="line">td2 = pd.Timedelta(days=<span class="number">3</span>)</span><br><span class="line">ts = pd.Timestamp(<span class="string">'20200101'</span>)</span><br><span class="line"></span><br><span class="line">print(td1 * <span class="number">2</span>) <span class="comment">#&gt;&gt;&gt; 2 days 00:00:00</span></span><br><span class="line">print(td2 - td1) <span class="comment">#&gt;&gt;&gt; 2 days 00:00:00</span></span><br><span class="line">print(ts + td1) <span class="comment">#&gt;&gt;&gt; 2020-01-02 00:00:00</span></span><br><span class="line">print(ts - td1) <span class="comment">#&gt;&gt;&gt; 2019-12-31 00:00:00</span></span><br></pre></td></tr></table></figure><br>这些运算都可以移植到时间差序列上。</p>
+<h2 id="日期偏置"><a href="#日期偏置" class="headerlink" title="日期偏置"></a>日期偏置</h2><p>日期偏置是一种和日历相关的特殊时间差，例如回到第一节中的两个问题：如何求 2020 年 9 月第一个周一的日期，以及如何求 2020 年 9 月 7 日后的第 30 个工作日是哪一天：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">print(pd.Timestamp(<span class="string">'20200831'</span>) + pd.offsets.WeekOfMonth(week=<span class="number">0</span>,weekday=<span class="number">0</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-09-07 00:00:00</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(pd.Timestamp(<span class="string">'20200907'</span>) - pd.offsets.BDay(<span class="number">30</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-10-19 00:00:00</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>从上面的实现可以看到，Pandas 为我们提供了<strong>Offset 对象</strong>来计算日期偏置，它们在 pd.offsets 中被定义。当使用 + 运算时获取离其最近的下一个日期，当使用 - 时获取离其最近的上一个日期：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">print(pd.Timestamp(<span class="string">"2018-06-25"</span>) + pd.offsets.DateOffset(weeks=<span class="number">2</span>, days=<span class="number">5</span>))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2018-07-14 00:00:00</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(pd.Timestamp(<span class="string">'20200907'</span>) + pd.offsets.MonthEnd())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-09-30 00:00:00</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">my_filter = pd.offsets.CDay(n=<span class="number">1</span>, weekmask=<span class="string">'Wed Fri'</span>, holidays=[<span class="string">'20200109'</span>])</span><br><span class="line">dr = pd.date_range(<span class="string">'20200108'</span>, <span class="string">'20200111'</span>)</span><br><span class="line">print([i + my_filter <span class="keyword">for</span> i <span class="keyword">in</span> dr])</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">[Timestamp('2020-01-10 00:00:00'), # 20200108开始后的第一个周三或周五，且不是1月9号</span></span><br><span class="line"><span class="string">Timestamp('2020-01-10 00:00:00'), </span></span><br><span class="line"><span class="string">Timestamp('2020-01-15 00:00:00'), </span></span><br><span class="line"><span class="string">Timestamp('2020-01-15 00:00:00')] # 20200111开始后的第一个周三或周五</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>上面的几个 offset 对象中需要特别介绍的是 CDay，其参数 n 表示 offset 增量是一天， holidays, weekmask 参数能够分别对自定义的日期和星期进行过滤，前者传入了需要过滤的日期列表，后者传入的是三个字母的星期缩写构成的星期字符串，其作用是只保留字符串中出现的星期。</p>
+<h3 id="偏置字符串"><a href="#偏置字符串" class="headerlink" title="偏置字符串"></a>偏置字符串</h3><p>使用 date_range 生成时间序列的 freq 参数取值可以是 Offset 对象，同时在 Pandas 中几乎每一个 Offset 对象绑定了日期偏置字符串来表示特定的时间偏移量。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pd.date_range(<span class="string">'20200101'</span>,<span class="string">'20200331'</span>, freq=<span class="string">'MS'</span>) <span class="comment"># 月初</span></span><br><span class="line">pd.date_range(<span class="string">'20200101'</span>,<span class="string">'20200331'</span>, freq=<span class="string">'M'</span>) <span class="comment"># 月末</span></span><br><span class="line">pd.date_range(<span class="string">'20200101'</span>,<span class="string">'20200110'</span>, freq=<span class="string">'B'</span>) <span class="comment"># 工作日</span></span><br><span class="line">pd.date_range(<span class="string">'20200101'</span>,<span class="string">'20200201'</span>, freq=<span class="string">'W-MON'</span>) <span class="comment"># 周一</span></span><br><span class="line">pd.date_range(<span class="string">'20200101'</span>,<span class="string">'20200201'</span>, freq=<span class="string">'WOM-1MON'</span>) <span class="comment"># 每月第一个周一</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h2><p>回忆我们在《Pandas基础知识》一节中介绍的“滑窗函数”（rolling/shift/diff/pct_change），如果适用到时序数据上，可以把滑动窗口用 freq 关键词代替之：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟绘制股票市场中的布林指标</span></span><br><span class="line">idx = pd.date_range(<span class="string">'20200101'</span>, <span class="string">'20201231'</span>, freq=<span class="string">'B'</span>)</span><br><span class="line">np.random.seed(<span class="number">2020</span>)</span><br><span class="line">data = np.random.randint(<span class="number">-1</span>,<span class="number">2</span>,len(idx)).cumsum() <span class="comment"># 随机游动构造模拟序列</span></span><br><span class="line">s = pd.Series(data,index=idx)</span><br><span class="line"></span><br><span class="line">r = s.rolling(<span class="string">'30D'</span>) <span class="comment"># window参数兼容使用freq关键词</span></span><br><span class="line"></span><br><span class="line">plt.plot(s)</span><br><span class="line">plt.title(<span class="string">'BOLL LINES'</span>)</span><br><span class="line">plt.plot(r.mean())</span><br><span class="line">plt.plot(r.mean()+r.std()*<span class="number">2</span>)</span><br><span class="line">plt.plot(r.mean()-r.std()*<span class="number">2</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">s.shift(freq=<span class="string">'50D'</span>).head() <span class="comment"># 指定freq参数</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-02-20   -1</span></span><br><span class="line"><span class="string">2020-02-21   -2</span></span><br><span class="line"><span class="string">2020-02-22   -1</span></span><br><span class="line"><span class="string">2020-02-25   -1</span></span><br><span class="line"><span class="string">2020-02-26   -2</span></span><br><span class="line"><span class="string">dtype: int32</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="重采样"><a href="#重采样" class="headerlink" title="重采样"></a>重采样</h2><p>重采样对象 resample 可以看做是针对时间序列的分组计算而设计的分组对象（Groupby对象）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">print(s.resample(<span class="string">'10D'</span>).mean().head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01   -2.000000</span></span><br><span class="line"><span class="string">2020-01-11   -3.166667</span></span><br><span class="line"><span class="string">2020-01-21   -3.625000</span></span><br><span class="line"><span class="string">2020-01-31   -4.000000</span></span><br><span class="line"><span class="string">2020-02-10   -0.375000</span></span><br><span class="line"><span class="string">Freq: 10D, dtype: float64</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(s.resample(<span class="string">'10D'</span>).apply(<span class="keyword">lambda</span> x:x.max()-x.min()).head()) <span class="comment"># 极差</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">2020-01-01    3</span></span><br><span class="line"><span class="string">2020-01-11    4</span></span><br><span class="line"><span class="string">2020-01-21    4</span></span><br><span class="line"><span class="string">2020-01-31    2</span></span><br><span class="line"><span class="string">2020-02-10    4</span></span><br><span class="line"><span class="string">Freq: 10D, dtype: int32</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure><br>在 resample 中要特别注意组边界值的处理情况，默认情况下起始值的计算方法是从最小值时间戳对应日期的午夜 00\:00:00 开始增加 freq ，直到不超过该最小时间戳的最大时间戳，由此对应的时间戳为起始值，然后每次累加 freq 参数作为分割结点进行分组，区间情况为左闭右开。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/07/pandas-6/" rel="next" title="Pandas分组操作">
+                <i class="fa fa-chevron-left"></i> Pandas分组操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/04/09/front-end-1/" rel="prev" title="HTML知识点汇总">
+                HTML知识点汇总 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#时间戳"><span class="nav-number">1.</span> <span class="nav-text">时间戳</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Datatime序列"><span class="nav-number">1.1.</span> <span class="nav-text">Datatime序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引与切片"><span class="nav-number">1.2.</span> <span class="nav-text">索引与切片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时间差"><span class="nav-number">2.</span> <span class="nav-text">时间差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Timedelta-的运算"><span class="nav-number">2.1.</span> <span class="nav-text">Timedelta 的运算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日期偏置"><span class="nav-number">3.</span> <span class="nav-text">日期偏置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#偏置字符串"><span class="nav-number">3.1.</span> <span class="nav-text">偏置字符串</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#滑动窗口"><span class="nav-number">4.</span> <span class="nav-text">滑动窗口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重采样"><span class="nav-number">5.</span> <span class="nav-text">重采样</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

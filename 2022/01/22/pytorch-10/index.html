@@ -1,0 +1,772 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="数据预处理我们使用Cornell Movie-Dialogs Corpus的电影剧本作为聊天机器人的训练语料，下载解压后主要使用 movie_lines.txt 和 movie_conversations.txt 这两个文件。两者都是以 “ +++$+++ ” 作为分隔符的结构化数据，前者包含了 (lineID, characterID, movieID, character, text) 字段，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch实战：聊天机器人">
+<meta property="og:url" content="http://yoursite.com/2022/01/22/pytorch-10/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="数据预处理我们使用Cornell Movie-Dialogs Corpus的电影剧本作为聊天机器人的训练语料，下载解压后主要使用 movie_lines.txt 和 movie_conversations.txt 这两个文件。两者都是以 “ +++$+++ ” 作为分隔符的结构化数据，前者包含了 (lineID, characterID, movieID, character, text) 字段，">
+<meta property="article:published_time" content="2022-01-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:47.630Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/01/22/pytorch-10/"/>
+
+
+
+
+
+  <title> PyTorch实战：聊天机器人 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/01/22/pytorch-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch实战：聊天机器人
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-22T00:00:00+08:00">
+                2022-01-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="数据预处理"><a href="#数据预处理" class="headerlink" title="数据预处理"></a>数据预处理</h2><p>我们使用<a href="https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html" target="_blank" rel="noopener">Cornell Movie-Dialogs Corpus</a>的电影剧本作为聊天机器人的训练语料，下载解压后主要使用 movie_lines.txt 和 movie_conversations.txt 这两个文件。两者都是以 “ +++$+++ ” 作为分隔符的结构化数据，前者包含了 (lineID, characterID, movieID, character, text) 字段，后者的结构是 (character1ID, character2ID, movieID, utteranceIDs)，其中 utternaceIDs 是一个列表，其中对应的就是前者文件中的 lineID，以此归类就可以得到电影剧本中的对话上下文。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rebuild_corpus_format</span><span class="params">(movie_lines_file, movie_convers_file, output_file)</span>:</span></span><br><span class="line">    <span class="comment"># 将movie_lines.txt的每一行拆分为字段(lineID, characterID, movieID, character, text)组合的字典</span></span><br><span class="line">    MOVIE_LINES_FIELDS = [<span class="string">"lineID"</span>, <span class="string">"characterID"</span>, <span class="string">"movieID"</span>, <span class="string">"character"</span>, <span class="string">"text"</span>]</span><br><span class="line">    fin = open(movie_lines_file, encoding=<span class="string">'iso-8859-1'</span>)</span><br><span class="line">    movie_lines = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">        values = sline.split(<span class="string">' +++$+++ '</span>)</span><br><span class="line">        line_obj = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> i,field <span class="keyword">in</span> enumerate(MOVIE_LINES_FIELDS):</span><br><span class="line">            line_obj[field] = values[i]</span><br><span class="line">        movie_lines[line_obj[<span class="string">"lineID"</span>]] = line_obj</span><br><span class="line">    fin.close()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 根据movie_conversations.txt将movie_lines中的每一行数据进行归类</span></span><br><span class="line">    MOVIE_CONVERSATIONS_FIELDS = [<span class="string">"character1ID"</span>, <span class="string">"character2ID"</span>, <span class="string">"movieID"</span>, <span class="string">"utteranceIDs"</span>]</span><br><span class="line">    fin = open(movie_convers_file, encoding=<span class="string">'iso-8859-1'</span>)</span><br><span class="line">    conversations = []</span><br><span class="line">    <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">        values = sline.split(<span class="string">' +++$+++ '</span>)</span><br><span class="line">        conv_obj = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> i, field <span class="keyword">in</span> enumerate(MOVIE_CONVERSATIONS_FIELDS):</span><br><span class="line">            conv_obj[field] = values[i]</span><br><span class="line">        line_ids = eval(conv_obj[<span class="string">"utteranceIDs"</span>])</span><br><span class="line">        conv_obj[<span class="string">"lines"</span>] = []</span><br><span class="line">        <span class="keyword">for</span> line_id <span class="keyword">in</span> line_ids:</span><br><span class="line">            conv_obj[<span class="string">'lines'</span>].append(movie_lines[line_id])</span><br><span class="line">        conversations.append(conv_obj)</span><br><span class="line">    fin.close()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">remove_punc</span><span class="params">(string)</span>:</span></span><br><span class="line">        punctuations = <span class="string">'''!()-[]&#123;&#125;;:'"\,&lt;&gt;./?@#$%^&amp;*_~\t'''</span></span><br><span class="line">        no_punct = <span class="string">""</span></span><br><span class="line">        <span class="keyword">for</span> char <span class="keyword">in</span> string:</span><br><span class="line">            <span class="keyword">if</span> char <span class="keyword">not</span> <span class="keyword">in</span> punctuations:</span><br><span class="line">                no_punct = no_punct + char</span><br><span class="line">        <span class="keyword">return</span> no_punct.lower()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 从对话中抽取句子对</span></span><br><span class="line">    fout = open(output_file, <span class="string">'w'</span>, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">    <span class="keyword">for</span> conversation <span class="keyword">in</span> conversations:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(conversation[<span class="string">"lines"</span>]) - <span class="number">1</span>):</span><br><span class="line">            input_line = remove_punc(conversation[<span class="string">"lines"</span>][i][<span class="string">"text"</span>].strip())</span><br><span class="line">            target_line = remove_punc(conversation[<span class="string">"lines"</span>][i + <span class="number">1</span>][<span class="string">"text"</span>].strip())</span><br><span class="line">            <span class="keyword">if</span> input_line <span class="keyword">and</span> target_line:</span><br><span class="line">                fout.write(<span class="string">"%s\t%s\n"</span> % (input_line, target_line))</span><br><span class="line">    fout.close()</span><br></pre></td></tr></table></figure></p>
+<p>归类后的数据，我们按照 “上句[TAB]下句” 为一行的格式保存起来。基于这份数据我们进行训练集、验证集、测试集的划分，并从训练集中构建词汇表，将所有数据转换为词汇 ID 编码的整数序列：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json,pickle</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode_pair_data</span><span class="params">(src_list, tgt_list, word_map, max_len)</span>:</span></span><br><span class="line">    pairs_encoded = []</span><br><span class="line">    <span class="keyword">for</span> pair <span class="keyword">in</span> zip(src_list, tgt_list):</span><br><span class="line">        qus = [word_map.get(word, word_map[<span class="string">'&lt;unk&gt;'</span>]) <span class="keyword">for</span> word <span class="keyword">in</span> pair[<span class="number">0</span>]] + [word_map[<span class="string">'&lt;pad&gt;'</span>]] * (</span><br><span class="line">                    max_len - len(pair[<span class="number">0</span>]))</span><br><span class="line">        ans = [word_map[<span class="string">'&lt;bos&gt;'</span>]] + [word_map.get(word, word_map[<span class="string">'&lt;unk&gt;'</span>]) <span class="keyword">for</span> word <span class="keyword">in</span> pair[<span class="number">1</span>]] + \</span><br><span class="line">              [word_map[<span class="string">'&lt;eos&gt;'</span>]] + [word_map[<span class="string">'&lt;pad&gt;'</span>]] * (max_len - len(pair[<span class="number">1</span>]))</span><br><span class="line">        pairs_encoded.append([qus, ans])</span><br><span class="line">    <span class="keyword">return</span> pairs_encoded</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">construct_corpus</span><span class="params">(input_file, output_dir, min_word_freq, max_len)</span>:</span></span><br><span class="line">    src_list = []</span><br><span class="line">    tgt_list = []</span><br><span class="line">    <span class="keyword">with</span> open(input_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">            src,tgt = sline.strip().split(<span class="string">'\t'</span>)</span><br><span class="line">            src_list.append(src.split()[:max_len])</span><br><span class="line">            tgt_list.append(tgt.split()[:max_len])</span><br><span class="line">    src_train, src_test, tgt_train, tgt_test = train_test_split(src_list, tgt_list, test_size=<span class="number">0.1</span>, shuffle=<span class="literal">True</span>)</span><br><span class="line">    src_train, src_eval, tgt_train, tgt_eval = train_test_split(src_train, tgt_train, test_size=<span class="number">0.1</span>, shuffle=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 从训练数据中构建词汇表</span></span><br><span class="line">    word_freq = Counter()</span><br><span class="line">    <span class="keyword">for</span> pair <span class="keyword">in</span> zip(src_train, tgt_train):</span><br><span class="line">        word_freq.update(pair[<span class="number">0</span>])</span><br><span class="line">        word_freq.update(pair[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    words = [w <span class="keyword">for</span> w <span class="keyword">in</span> word_freq.keys() <span class="keyword">if</span> word_freq[w] &gt; min_word_freq]</span><br><span class="line">    word_map = &#123;k: v + <span class="number">1</span> <span class="keyword">for</span> v, k <span class="keyword">in</span> enumerate(words)&#125;</span><br><span class="line">    word_map[<span class="string">'&lt;unk&gt;'</span>] = len(word_map) + <span class="number">1</span></span><br><span class="line">    word_map[<span class="string">'&lt;bos&gt;'</span>] = len(word_map) + <span class="number">1</span></span><br><span class="line">    word_map[<span class="string">'&lt;eos&gt;'</span>] = len(word_map) + <span class="number">1</span></span><br><span class="line">    word_map[<span class="string">'&lt;pad&gt;'</span>] = <span class="number">0</span></span><br><span class="line">    print(<span class="string">"Total words are: &#123;&#125;"</span>.format(len(word_map)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> open(output_dir+<span class="string">'/vocab.json'</span>, <span class="string">'w'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        json.dump(word_map, fout)</span><br><span class="line"></span><br><span class="line">    train_data = encode_pair_data(src_train, tgt_train, word_map, max_len)</span><br><span class="line">    <span class="keyword">with</span> open(output_dir+<span class="string">'/train_data.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump(train_data, fout)</span><br><span class="line">    eval_data = encode_pair_data(src_eval, tgt_eval, word_map, max_len)</span><br><span class="line">    <span class="keyword">with</span> open(output_dir+<span class="string">'/eval_data.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump(eval_data, fout)</span><br><span class="line">    test_data = encode_pair_data(src_test, tgt_test, word_map, max_len)</span><br><span class="line">    <span class="keyword">with</span> open(output_dir+<span class="string">'/test_data.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump(test_data, fout)</span><br></pre></td></tr></table></figure></p>
+<p>我们把出现频次大于5的单词保存到词汇表中，并对序列的最大长度进行了25个单词的限制。</p>
+<h2 id="数据加载"><a href="#数据加载" class="headerlink" title="数据加载"></a>数据加载</h2><p>前面的预处理已经完成了很多转换操作，所以加载数据只需要构建 Dataset 与 DataLoader：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">import</span> torch.utils.data</span><br><span class="line"></span><br><span class="line">device = torch.device(<span class="string">'cuda'</span>) <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> torch.device(<span class="string">'cpu'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChatbotDataset</span><span class="params">(Dataset)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, data_file)</span>:</span></span><br><span class="line">        <span class="keyword">with</span> open(data_file, <span class="string">'rb'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">            self.pairs = pickle.load(fin)</span><br><span class="line">        self.dataset_size = len(self.pairs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, i)</span>:</span></span><br><span class="line">        question = torch.LongTensor(self.pairs[i][<span class="number">0</span>]).to(device)</span><br><span class="line">        reply = torch.LongTensor(self.pairs[i][<span class="number">1</span>]).to(device)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> question, reply</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.dataset_size</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">train_loader = torch.utils.data.DataLoader(ChatbotDataset(<span class="string">'./data/Chatbot/train_data.pkl'</span>), batch_size=<span class="number">64</span>, shuffle=<span class="literal">True</span>)</span><br><span class="line">eval_loader = torch.utils.data.DataLoader(ChatbotDataset(<span class="string">'./data/Chatbot/eval_data.pkl'</span>), batch_size=<span class="number">64</span>, shuffle=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
+<h2 id="定义网络"><a href="#定义网络" class="headerlink" title="定义网络"></a>定义网络</h2><p>实现一个聊天机器人本质上也是一个 Seq2Seq 的网络框架，在这里我们选择一个与前面机器翻译不同的模型 —— Transformer，该网络本身就是一个“编码-解码”的结构，但不同于 RNN 类型的序列模型，其使用自注意力机制来对序列建模，从而提高了模型的并行化训练能力。我们仍然先将网络所需的超参数整合到一个 Config 类中：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.vocab_size = <span class="number">16103</span> <span class="comment"># 词汇表的大小</span></span><br><span class="line">        self.d_model = <span class="number">200</span> <span class="comment"># Transformer编码-解码的输入维度（当前任务下等于embed_size)</span></span><br><span class="line">        self.n_head = <span class="number">20</span> <span class="comment"># 多头注意力的头数</span></span><br><span class="line">        self.num_encoder_layers = <span class="number">2</span> <span class="comment"># 编码层个数</span></span><br><span class="line">        self.num_decoder_layers = <span class="number">2</span> <span class="comment"># 解码层个数</span></span><br><span class="line">        self.dim_feedforward = <span class="number">200</span> <span class="comment"># 前向网络层维度（=编码器的输出维度=embed_size）</span></span><br><span class="line">        self.dropout = <span class="number">0.1</span> <span class="comment"># dropout率</span></span><br><span class="line">        self.embed_size = <span class="number">200</span> <span class="comment"># 词向量的维度</span></span><br><span class="line">        self.maxlen = <span class="number">27</span> <span class="comment"># 序列最大长度=max_len + 2(&lt;bos&gt;, &lt;eos&gt;)</span></span><br><span class="line">        self.epochs = <span class="number">200</span> <span class="comment"># 迭代轮数</span></span><br><span class="line">        self.batch_size = <span class="number">64</span> <span class="comment"># 批量大小</span></span><br><span class="line">        self.learning_rate = <span class="number">1e-4</span> <span class="comment"># 学习率</span></span><br><span class="line">        self.summary_step = <span class="number">2000</span> <span class="comment"># 多少步训练后做一次验证总结</span></span><br></pre></td></tr></table></figure></p>
+<p>由于 Transformer 失去了序列模型天然的对位置敏感的特性，所以我们需要额外实现一个位置的 embedding，并把它加到 token 的语义 embedding 上，来补充位置特征，其中位置编码的算法我们按照<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">论文</a>中的 sin/cos 计算方式实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PositionalEmbedding</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, d_model, max_len)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line"></span><br><span class="line">        pe = torch.zeros(max_len, d_model).float()</span><br><span class="line">        pe.require_grad = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">        position = torch.arange(<span class="number">0</span>, max_len).float().unsqueeze(<span class="number">1</span>)</span><br><span class="line">        div_term = (torch.arange(<span class="number">0</span>, d_model, <span class="number">2</span>).float() * -(math.log(<span class="number">10000.0</span>) / d_model)).exp()</span><br><span class="line"></span><br><span class="line">        pe[:, <span class="number">0</span>::<span class="number">2</span>] = torch.sin(position * div_term)</span><br><span class="line">        pe[:, <span class="number">1</span>::<span class="number">2</span>] = torch.cos(position * div_term)</span><br><span class="line"></span><br><span class="line">        pe = pe.unsqueeze(<span class="number">0</span>)</span><br><span class="line">        self.register_buffer(<span class="string">'pe'</span>, pe)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.pe[:, :x.size(<span class="number">1</span>)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Embeddings</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, config)</span>:</span></span><br><span class="line">        super(Embeddings, self).__init__()</span><br><span class="line">        self.token_embedding = nn.Embedding(config.vocab_size, config.embed_size, padding_idx=<span class="number">0</span>)</span><br><span class="line">        self.pos_embedding = PositionalEmbedding(d_model = config.embed_size, max_len=config.maxlen)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        token_embed = self.token_embedding(x)</span><br><span class="line">        pos_embed = self.pos_embedding(x)</span><br><span class="line">        <span class="keyword">return</span> token_embed + pos_embed</span><br></pre></td></tr></table></figure></p>
+<p>在《PyTorch常用网络层》一节中，我们已经介绍了 Transformer 层的简单使用方法，这里我们需要使用完整的 Transformer 网络用于“编码-解码”的任务，值得注意的是其中的 MASK 如何配置：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransformerChatbot</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, config)</span>:</span></span><br><span class="line">        super(TransformerChatbot, self).__init__()</span><br><span class="line">        <span class="comment"># 语义embedding + 位置embedding的输出</span></span><br><span class="line">        self.input_embedding = Embeddings(config=config)</span><br><span class="line">        <span class="comment"># 完整的Transformer网络</span></span><br><span class="line">        self.transfomrer = torch.nn.Transformer(d_model=config.d_model, nhead=config.n_head, </span><br><span class="line">                                                num_encoder_layers=config.num_encoder_layers, </span><br><span class="line">                                                num_decoder_layers=config.num_decoder_layers, </span><br><span class="line">                                                dim_feedforward=config.dim_feedforward, dropout=config.dropout)</span><br><span class="line">        <span class="comment"># 编码器的输出向词汇表进行映射</span></span><br><span class="line">        self.proj_vocab_layer = nn.Linear(in_features=config.dim_feedforward, out_features=config.vocab_size)</span><br><span class="line"></span><br><span class="line">        self.apply(self._initailze)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, enc_input, dec_input)</span>:</span></span><br><span class="line">        <span class="comment"># 输入的张量形状为[batch_size, seq_len, embed_dim]</span></span><br><span class="line">        x_enc_embed = self.input_embedding(enc_input.long())</span><br><span class="line">        x_dec_embed = self.input_embedding(dec_input.long())</span><br><span class="line">        <span class="comment"># 掩盖住输入、输出中不同序列的padding部分</span></span><br><span class="line">        src_key_padding_mask = enc_input == <span class="number">0</span></span><br><span class="line">        tgt_key_padding_mask = dec_input == <span class="number">0</span></span><br><span class="line">        <span class="comment"># 掩盖Encoder输出的memory中不同序列的padding部分</span></span><br><span class="line">        memory_key_padding_mask = src_key_padding_mask</span><br><span class="line">        <span class="comment"># Decoder中掩盖当前位置之后的所有位置</span></span><br><span class="line">        tgt_mask = self.transfomrer.generate_square_subsequent_mask(dec_input.size(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 轴位置互换为[seq_len, batch_size, embed_dim]</span></span><br><span class="line">        x_enc_embed = x_enc_embed.permute(<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>)</span><br><span class="line">        x_dec_embed = x_dec_embed.permute(<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        feature = self.transfomrer(src = x_enc_embed,</span><br><span class="line">                                   tgt = x_dec_embed,</span><br><span class="line">                                   src_key_padding_mask = src_key_padding_mask,</span><br><span class="line">                                   tgt_key_padding_mask = tgt_key_padding_mask,</span><br><span class="line">                                   memory_key_padding_mask=memory_key_padding_mask,</span><br><span class="line">                                   tgt_mask = tgt_mask.to(device))</span><br><span class="line"></span><br><span class="line">        logits = self.proj_vocab_layer(feature)</span><br><span class="line">        <span class="comment"># 轴位置恢复为[batch_size, seq_len, embed_dim]</span></span><br><span class="line">        logits = logits.permute(<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> logits</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_initailze</span><span class="params">(self, layer)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(layer, (nn.Linear)):</span><br><span class="line">            nn.init.kaiming_uniform_(layer.weight)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，Chatbot 主体网络的实现非常简单：Embbedding -&gt; Transformer -&gt; Linear 就搭建完成了。最新版本的 Transformer 已经提供了 batch_first 的参数，轴变换的操作可以省去了。</p>
+<h2 id="开始训练"><a href="#开始训练" class="headerlink" title="开始训练"></a>开始训练</h2><p>训练的过程与前面的实战相似，我们会把迭代过程中训练效果到达一定精度的模型都保存下来，以供后续选择：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> optim</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(model_dir)</span>:</span></span><br><span class="line">    model_config = Config()</span><br><span class="line">    <span class="comment"># 定义模型</span></span><br><span class="line">    model = TransformerChatbot(config=model_config)</span><br><span class="line">    model.to(device)</span><br><span class="line">    <span class="comment"># 定义损失函数</span></span><br><span class="line">    loss_fn = nn.CrossEntropyLoss(ignore_index=<span class="number">0</span>)</span><br><span class="line">    <span class="comment"># 定义优化器</span></span><br><span class="line">    opt = optim.Adam(params=model.parameters(), lr=model_config.learning_rate)</span><br><span class="line"></span><br><span class="line">    best_train_acc = <span class="number">0.95</span></span><br><span class="line">    <span class="comment"># 迭代训练</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> tqdm(range(model_config.epochs), desc=<span class="string">'epoch'</span>, total=model_config.epochs):</span><br><span class="line">        print(<span class="string">"epoch : &#123;&#125;, lr: &#123;&#125;"</span>.format(epoch, opt.param_groups[<span class="number">0</span>][<span class="string">'lr'</span>]))</span><br><span class="line">        tr_loss = <span class="number">0</span></span><br><span class="line">        model.train()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> step, (question, reply) <span class="keyword">in</span> enumerate(train_loader):</span><br><span class="line">            opt.zero_grad()</span><br><span class="line">            enc_input, dec_input, dec_output = question, reply[:,:<span class="number">-1</span>], reply[:,<span class="number">1</span>:]</span><br><span class="line">            y_pred = model(enc_input, dec_input)</span><br><span class="line">            y_pred = y_pred.reshape(<span class="number">-1</span>, y_pred.size(<span class="number">-1</span>))</span><br><span class="line">            dec_output = dec_output.contiguous().view(<span class="number">-1</span>).long()</span><br><span class="line">            real_value_index = [dec_output != <span class="number">0</span>]</span><br><span class="line">            mb_loss = loss_fn(y_pred[real_value_index], dec_output[real_value_index])</span><br><span class="line">            mb_loss.backward()</span><br><span class="line">            opt.step()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">                mb_acc = acc(y_pred, dec_output)</span><br><span class="line"></span><br><span class="line">            tr_loss += mb_loss.item()</span><br><span class="line">            tr_acc = mb_acc.item()</span><br><span class="line">            tr_loss_avg = tr_loss / (step + <span class="number">1</span>)</span><br><span class="line">            tr_summary = &#123;<span class="string">'loss'</span>: tr_loss_avg, <span class="string">'acc'</span>: tr_acc&#125;</span><br><span class="line">            total_step = epoch * len(train_loader) + step</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 在验证集上做评价</span></span><br><span class="line">            <span class="keyword">if</span> total_step % model_config.summary_step == <span class="number">0</span> <span class="keyword">and</span> total_step != <span class="number">0</span>:</span><br><span class="line">                model.eval()</span><br><span class="line">                print(<span class="string">"eval: "</span>)</span><br><span class="line">                val_summary = evaluate(model, eval_loader, &#123;<span class="string">'loss'</span>: loss_fn, <span class="string">'acc'</span>: acc&#125;)</span><br><span class="line">                tqdm.write(<span class="string">'epoch : &#123;&#125;, step : &#123;&#125;, tr_loss: &#123;:.3f&#125;, val_loss: &#123;:.3f&#125;, '</span></span><br><span class="line">                           <span class="string">'tr_acc: &#123;:.2%&#125;, val_acc: &#123;:.2%&#125;'</span>.format(epoch + <span class="number">1</span>, total_step,</span><br><span class="line">                                                                    tr_summary[<span class="string">'loss'</span>],</span><br><span class="line">                                                                    val_summary[<span class="string">'loss'</span>],</span><br><span class="line">                                                                    tr_summary[<span class="string">'acc'</span>],</span><br><span class="line">                                                                    val_summary[<span class="string">'acc'</span>]))</span><br><span class="line">                val_loss = val_summary[<span class="string">'loss'</span>]</span><br><span class="line">                is_best = tr_acc &gt; best_train_acc</span><br><span class="line">                <span class="comment"># 保存模型</span></span><br><span class="line">                <span class="keyword">if</span> is_best:</span><br><span class="line">                    best_train_acc = tr_acc</span><br><span class="line">                    print(<span class="string">"[Best model Save] train_acc: &#123;&#125;, "</span></span><br><span class="line">                          <span class="string">"train_loss: &#123;&#125;, val_loss: &#123;&#125;"</span>.format(tr_summary[<span class="string">'acc'</span>],</span><br><span class="line">                                                                tr_summary[<span class="string">'loss'</span>],</span><br><span class="line">                                                                val_loss))</span><br><span class="line">                    state = &#123;<span class="string">'epoch'</span>: epoch + <span class="number">1</span>,</span><br><span class="line">                             <span class="string">'model_state_dict'</span>: model.to(torch.device(<span class="string">'cpu'</span>)).state_dict(),</span><br><span class="line">                             <span class="string">'opt_state_dict'</span>: opt.state_dict()&#125;</span><br><span class="line">                    summary = &#123;<span class="string">'train'</span>: tr_summary, <span class="string">'validation'</span>: val_summary&#125;</span><br><span class="line">                    <span class="keyword">with</span> open(model_dir+<span class="string">'/summary-'</span>+str(epoch)+<span class="string">'-'</span>+str(total_step)+<span class="string">'.json'</span>, mode=<span class="string">'w'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">                        json.dump(summary, fout, indent=<span class="number">4</span>)</span><br><span class="line">                    torch.save(state, model_dir+<span class="string">'/model-'</span>+str(epoch)+<span class="string">'-acc-'</span>+str(best_train_acc)+<span class="string">'.pth'</span>)</span><br><span class="line"></span><br><span class="line">                model.to(device)</span><br><span class="line">                model.train()</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> step % <span class="number">50</span> == <span class="number">0</span>:</span><br><span class="line">                    print(<span class="string">'epoch : &#123;&#125;, step : &#123;&#125;, '</span></span><br><span class="line">                          <span class="string">'tr_loss: &#123;:.3f&#125;, tr_acc: &#123;:.2%&#125;'</span>.format(epoch + <span class="number">1</span>, total_step,</span><br><span class="line">                                                                   tr_summary[<span class="string">'loss'</span>], tr_summary[<span class="string">'acc'</span>]))</span><br></pre></td></tr></table></figure></p>
+<p>其中用到的评估与准确率计算的实现如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">acc</span><span class="params">(yhat, y)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        yhat = yhat.max(dim=<span class="number">-1</span>)[<span class="number">1</span>]</span><br><span class="line">        acc = (yhat == y).float()[y != <span class="number">0</span>].mean()</span><br><span class="line">    <span class="keyword">return</span> acc</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">correct_sum</span><span class="params">(y_pred, dec_output)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        y_pred = y_pred.max(dim=<span class="number">-1</span>)[<span class="number">1</span>]</span><br><span class="line">        correct_elms = (y_pred == dec_output).float()[dec_output != <span class="number">0</span>]</span><br><span class="line">        correct_sum = correct_elms.sum().to(torch.device(<span class="string">'cpu'</span>)).numpy()</span><br><span class="line">        num_correct_elms = len(correct_elms)</span><br><span class="line">    <span class="keyword">return</span> correct_sum, num_correct_elms</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">evaluate</span><span class="params">(model, data_loader, metrics)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> model.training:</span><br><span class="line">        model.eval()</span><br><span class="line"></span><br><span class="line">    summary = &#123;metric: <span class="number">0</span> <span class="keyword">for</span> metric <span class="keyword">in</span> metrics&#125;</span><br><span class="line">    num_correct_elms = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> step, (question, reply) <span class="keyword">in</span> enumerate(data_loader):</span><br><span class="line">        enc_input, dec_input, dec_output = question, reply[:,:<span class="number">-1</span>], reply[:,<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            y_pred = model(enc_input, dec_input)</span><br><span class="line">            y_pred = y_pred.reshape(<span class="number">-1</span>, y_pred.size(<span class="number">-1</span>))</span><br><span class="line">            dec_output = dec_output.contiguous().view(<span class="number">-1</span>).long()</span><br><span class="line">            <span class="keyword">for</span> metric <span class="keyword">in</span> metrics:</span><br><span class="line">                <span class="keyword">if</span> metric <span class="keyword">is</span> <span class="string">'acc'</span>:</span><br><span class="line">                    _correct_sum, _num_correct_elms = correct_sum(y_pred, dec_output)</span><br><span class="line">                    summary[metric] += _correct_sum</span><br><span class="line">                    num_correct_elms += _num_correct_elms</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    summary[metric] += metrics[metric](y_pred, dec_output).item()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> metric <span class="keyword">in</span> metrics:</span><br><span class="line">        <span class="keyword">if</span> metric <span class="keyword">is</span> <span class="string">'acc'</span>:</span><br><span class="line">            summary[metric] /= num_correct_elms</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            summary[metric] /= len(data_loader.dataset)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> summary</span><br></pre></td></tr></table></figure></p>
+<h2 id="使用模型"><a href="#使用模型" class="headerlink" title="使用模型"></a>使用模型</h2><p>使用模型需要注意，尽管输入仅仅是单条语句，当仍需要按照 [batch_size, seq_len] 的形状进行组装，而且 decoder_input 需要初始化一个 “\<bos>” 作为第一个单词。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">decoding_from_token_id</span><span class="params">(y_pred, reverse_word_map)</span>:</span></span><br><span class="line">    list_of_pred_ids = y_pred.max(dim=<span class="number">-1</span>)[<span class="number">1</span>].tolist()[<span class="number">0</span>]</span><br><span class="line">    str_lst = [reverse_word_map[t] <span class="keyword">for</span> t <span class="keyword">in</span> list_of_pred_ids]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">' '</span>.join(str_lst)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">()</span>:</span></span><br><span class="line">    config = Config()</span><br><span class="line">    <span class="comment"># 加载词典</span></span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'./data/Chatbot/vocab.json'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        word_map = eval(fin.readline())</span><br><span class="line">    reverse_word_map = &#123;value:key <span class="keyword">for</span> key, value <span class="keyword">in</span> word_map.items()&#125;</span><br><span class="line"></span><br><span class="line">    input = <span class="string">'what can i do for you'</span></span><br><span class="line">    print(<span class="string">'[INPUT]: '</span>+input)</span><br><span class="line">    input_word_lst = input.split(<span class="string">' '</span>)</span><br><span class="line">    question = [word_map.get(word, word_map[<span class="string">'&lt;unk&gt;'</span>]) <span class="keyword">for</span> word <span class="keyword">in</span> input_word_lst] + [word_map[<span class="string">'&lt;pad&gt;'</span>]] * (</span><br><span class="line">            config.maxlen - len(input_word_lst))</span><br><span class="line">    input_batch_lst = []</span><br><span class="line">    input_batch_lst.append(question)</span><br><span class="line"></span><br><span class="line">    model = TransformerChatbot(config=config)</span><br><span class="line">    checkpoint = torch.load(<span class="string">'./model/Chatbot/model-196-acc-0.3378582298755646.pth'</span>, map_location=torch.device(<span class="string">'cpu'</span>))</span><br><span class="line">    model.load_state_dict(checkpoint[<span class="string">'model_state_dict'</span>])</span><br><span class="line"></span><br><span class="line">    device = torch.device(<span class="string">'cuda'</span>) <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> torch.device(<span class="string">'cpu'</span>)</span><br><span class="line">    model.to(device)</span><br><span class="line">    model.eval()</span><br><span class="line"></span><br><span class="line">    enc_input = torch.LongTensor(input_batch_lst).to(device)</span><br><span class="line">    dec_input = torch.LongTensor([[word_map[<span class="string">'&lt;bos&gt;'</span>]]]).to(device)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(config.maxlen):</span><br><span class="line">        y_pred = model(enc_input, dec_input)</span><br><span class="line">        y_pred_ids = y_pred.max(dim=<span class="number">-1</span>)[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> (y_pred_ids[<span class="number">0</span>, <span class="number">-1</span>] == word_map[<span class="string">'&lt;eos&gt;'</span>]).to(torch.device(<span class="string">'cpu'</span>)).numpy():</span><br><span class="line">            print(<span class="string">'[OUTPUT]: '</span>+decoding_from_token_id(y_pred, reverse_word_map))</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        dec_input = torch.cat(</span><br><span class="line">            [dec_input.to(torch.device(<span class="string">'cpu'</span>)), y_pred_ids[<span class="number">0</span>, <span class="number">-1</span>].unsqueeze(<span class="number">0</span>).unsqueeze(<span class="number">0</span>).to(torch.device(<span class="string">'cpu'</span>))],</span><br><span class="line">            dim=<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> i == config.maxlen - <span class="number">1</span>:</span><br><span class="line">            print(<span class="string">'[OUTPUT]: '</span>+decoding_from_token_id(y_pred, reverse_word_map))</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，我们输入 “what can i do for you”，Chatbot 的输出是 “i want to talk to you \<eos>“。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/12/17/pytorch-9/" rel="next" title="PyTorch实战：机器翻译">
+                <i class="fa fa-chevron-left"></i> PyTorch实战：机器翻译
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/02/26/pytorch-11/" rel="prev" title="PyTorch实战：基于BERT的NER">
+                PyTorch实战：基于BERT的NER <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据预处理"><span class="nav-number">1.</span> <span class="nav-text">数据预处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据加载"><span class="nav-number">2.</span> <span class="nav-text">数据加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定义网络"><span class="nav-number">3.</span> <span class="nav-text">定义网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始训练"><span class="nav-number">4.</span> <span class="nav-text">开始训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用模型"><span class="nav-number">5.</span> <span class="nav-text">使用模型</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

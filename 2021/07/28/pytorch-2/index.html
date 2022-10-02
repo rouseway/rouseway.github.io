@@ -1,0 +1,819 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="用深度学习来解决现实世界的问题，我们经常从预处理原始数据开始，而不是从那些准备好的张量格式数据开始。 读取数据集为了方便数据的读取，我们需要将使用的数据包装为Dataset类,自定义的Dataset需要继承它并且实现两个成员方法：  __getitem__() 该方法定义用索引(0 到 len(self))获取一条数据或一个样本 __len__() 该方法返回数据集的总长度123456789101">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch数据预处理">
+<meta property="og:url" content="http://yoursite.com/2021/07/28/pytorch-2/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="用深度学习来解决现实世界的问题，我们经常从预处理原始数据开始，而不是从那些准备好的张量格式数据开始。 读取数据集为了方便数据的读取，我们需要将使用的数据包装为Dataset类,自定义的Dataset需要继承它并且实现两个成员方法：  __getitem__() 该方法定义用索引(0 到 len(self))获取一条数据或一个样本 __len__() 该方法返回数据集的总长度123456789101">
+<meta property="article:published_time" content="2021-07-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:16.403Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/07/28/pytorch-2/"/>
+
+
+
+
+
+  <title> PyTorch数据预处理 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/07/28/pytorch-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch数据预处理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-28T00:00:00+08:00">
+                2021-07-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>用深度学习来解决现实世界的问题，我们经常从预处理原始数据开始，而不是从那些准备好的张量格式数据开始。</p>
+<h2 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h2><p>为了方便数据的读取，我们需要将使用的数据包装为Dataset类,自定义的Dataset需要继承它并且实现两个成员方法：</p>
+<ul>
+<li>__getitem__() 该方法定义用索引(0 到 len(self))获取一条数据或一个样本</li>
+<li>__len__() 该方法返回数据集的总长度<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyDataset</span><span class="params">(Dataset)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, input_file)</span>:</span></span><br><span class="line">        <span class="string">""" 实现初始化方法，可以从文件中读取到列表或DataFrame中 """</span></span><br><span class="line">        self.data = create_dataset() <span class="comment"># 后文有实现</span></span><br><span class="line">        self.labels = pd.read_csv()</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">""" 返回数据长度 """</span></span><br><span class="line">        <span class="keyword">return</span> len(self.data)</span><br><span class="line">        <span class="comment"># return len(self.df)</span></span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, idx)</span>:</span></span><br><span class="line">        <span class="string">""" 根据idx返回数据 """</span></span><br><span class="line">        <span class="keyword">return</span> self.data[idx], self.labels.iloc[idx]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>自定义的数据集创建好后，就可以使用官方提供的数据载入器来读取数据，数据载入器提供了设置batch_size、是否进行shuffle、加载数据的子进程树（num_workers）等参数：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">dataset = MyDataset(input_file)</span><br><span class="line">dl = torch.utils.data.DataLoader(dataset, batch_size=<span class="number">10</span>, shuffle=<span class="literal">True</span>, num_workers=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># dl是一个迭代器，可以对其循环遍历实现对数据的访问</span></span><br><span class="line">idata = iter(dl)</span><br><span class="line">print(next(idata))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i, data <span class="keyword">in</span> enumerate(dl):</span><br><span class="line">    print(i, data)</span><br></pre></td></tr></table></figure></p>
+<h2 id="处理缺失值"><a href="#处理缺失值" class="headerlink" title="处理缺失值"></a>处理缺失值</h2><p>在结构化的表格数据中，“NaN” 项代表缺失值。为了处理缺失的数据，典型的方法包括<strong>插值</strong>和<strong>删除</strong>，其中插值用替代值代替缺失值，而删除则忽略缺失值。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(input_file)</span><br><span class="line"></span><br><span class="line">df.fillna(<span class="number">0</span>) <span class="comment"># 用0值替换缺失值，也常用均值df.mean()</span></span><br><span class="line">df.fillna(axis=<span class="number">1</span>, method=<span class="string">'ffill'</span>) <span class="comment"># 横向用缺失值前面的值替换缺失值</span></span><br><span class="line">df.dropna(how=<span class="string">'all'</span>) <span class="comment"># 所有值全为缺失值才删除</span></span><br><span class="line">df.dropna(thresh=<span class="number">2</span>) <span class="comment"># 至少出现过两个缺失值才删除</span></span><br><span class="line">df.dropna(subset=[<span class="string">'name'</span>, <span class="string">'born'</span>]) <span class="comment"># 删除subset中的含有缺失值的行或列</span></span><br></pre></td></tr></table></figure><br>在文本数据中，通常会引入一个特殊的token“<unk\>”来表征未登录词。</p>
+<h2 id="文本序列化"><a href="#文本序列化" class="headerlink" title="文本序列化"></a>文本序列化</h2><p>处理文本数据的第一步是生成词典，即为每个词进行编号，从而可以将文本转换成词对应编号的序列：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tokenizer是对文本进行分词的分词器，通常会指定词典词的最大个数以及最小词频</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_vocab</span><span class="params">(file_path, tokenizer, max_size, min_freq)</span>:</span></span><br><span class="line">    vocab_dic = &#123;&#125;</span><br><span class="line">    <span class="keyword">with</span> open(file_path, <span class="string">'r'</span>, encoding=<span class="string">'UTF-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">            <span class="keyword">for</span> word <span class="keyword">in</span> tokenizer(sline.strip()):</span><br><span class="line">                vocab_dic[word] = vocab_dic.get(word, <span class="number">0</span>) + <span class="number">1</span></span><br><span class="line">        vocab_list = sorted([_ <span class="keyword">for</span> _ <span class="keyword">in</span> vocab_dic.items() <span class="keyword">if</span> _[<span class="number">1</span>] &gt;= min_freq], key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)[</span><br><span class="line">                     :max_size]</span><br><span class="line">        vocab_list.insert(<span class="number">0</span>, (<span class="string">'&lt;pad&gt;'</span>, min_freq)) <span class="comment"># 引入补全标识（通常编号为0）</span></span><br><span class="line">        vocab_list.append((<span class="string">'&lt;unk&gt;'</span>, min_freq)) <span class="comment"># 引入未登录词标识</span></span><br><span class="line">        word2idx = &#123;word_count[<span class="number">0</span>]: idx <span class="keyword">for</span> idx, word_count <span class="keyword">in</span> enumerate(vocab_list)&#125;</span><br><span class="line">        idx2word = &#123;idx : word_count[<span class="number">0</span>] <span class="keyword">for</span> idx, word_count <span class="keyword">in</span> enumerate(vocab_list)&#125;</span><br><span class="line">    <span class="keyword">return</span> word2idx, idx2word</span><br></pre></td></tr></table></figure></p>
+<p>有了词典以后还需要再次遍历文档，生成文档中文本对应的编号序列，我们可以在这一步就对数据进行补齐，使得批量文本具有相同个数的词（序列长度相等）：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_dataset</span><span class="params">(file_path, tokenizer, word2idx, pad_size=<span class="number">32</span>)</span>:</span></span><br><span class="line">    contents = []</span><br><span class="line">    <span class="keyword">with</span> open(file_path, <span class="string">'r'</span>, encoding=<span class="string">'UTF-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">            words_line = []</span><br><span class="line">            token = tokenizer(sline.strip())</span><br><span class="line">            seq_len = len(token)</span><br><span class="line">            <span class="keyword">if</span> pad_size:</span><br><span class="line">                <span class="keyword">if</span> len(token) &lt; pad_size:</span><br><span class="line">                    token.extend(<span class="string">'&lt;pad&gt;'</span> * (pad_size - len(token)))</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    token = token[:pad_size]</span><br><span class="line">                    seq_len = pad_size</span><br><span class="line">            <span class="keyword">for</span> word <span class="keyword">in</span> token:</span><br><span class="line">                words_line.append(word2idx.get(word, word2idx.get(<span class="string">'&lt;unk&gt;'</span>)))</span><br><span class="line">            contents.append((words_line, seq_len)) <span class="comment"># 带有文本实际长度</span></span><br><span class="line">    <span class="keyword">return</span> contents</span><br></pre></td></tr></table></figure></p>
+<h2 id="批量化补齐"><a href="#批量化补齐" class="headerlink" title="批量化补齐"></a>批量化补齐</h2><p>当然，PyTorch也提供在载入器中进行批量化补齐的接口，我们可以实现一个<strong>collate_fn</strong>函数，作为参数传入DataLoader中：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">collate_fn</span><span class="params">(batch_data, pad=<span class="number">0</span>)</span>:</span></span><br><span class="line">    data, labels = list(zip(*batch_data)) <span class="comment"># batch_data的结构是[([data_1],[label_1]),([data_2],[label_2])，...]，所以需要使用zip函数对它解压</span></span><br><span class="line">    max_len = max([len(seq) <span class="keyword">for</span> seq <span class="keyword">in</span> data]) <span class="comment"># 以批量数据中的最长序列为基准补齐</span></span><br><span class="line">   </span><br><span class="line">    data = [seq+[pad]*(max_len-len(seq)) <span class="keyword">for</span> seq <span class="keyword">in</span> data]</span><br><span class="line">    data = torch.LongTensor(data)</span><br><span class="line">    label = torch.FloatTensor(label)</span><br><span class="line">    <span class="keyword">return</span> (data, label)</span><br><span class="line"></span><br><span class="line">dl = torch.utils.data.DataLoader(dataset, batch_size=<span class="number">10</span>, shuffle=<span class="literal">True</span>, collate_fn=collate_fn)</span><br></pre></td></tr></table></figure><br>当然，如上一节的实例那样预先把数据补齐，然后使用数据载入器只进行打乱与批量读取。</p>
+<h2 id="TorchText工具"><a href="#TorchText工具" class="headerlink" title="TorchText工具"></a>TorchText工具</h2><p>对于处理 NLP 任务的数据，我们可以使用高级工具 TorchText，在 pip 安装时需要确保版本与你所使用的 torch 版本配套（本文使用的接口是 0.8 及其以下版本的，自 0.9 版本起接口变化较大）。</p>
+<p>TorchText 的核心是 <strong>Field、Dataset、Iterator</strong> 这三个类：</p>
+<ul>
+<li><p><strong>Field</strong>：定义对于数据预处理的配置信息，包括设置是否以序列表示、是否使用词典对象、起始字符（如 “\<bos>“）、结尾字符（如”\<eos>“）、每条数据的长度、分词前的预处理、分词后的后处理、转小写、分词器、是否以 batch_size 作为第一轴、padding 字符、unk 字符等信息：</p>
+<ul>
+<li>torchtext.data.Field(sequential=True, use_vocab=True, init_token=None, eos_token=None, fix_length=None, dtype=torch.int64, preprocessing=None, postprocessing=None, lower=False, tokenize=None, tokenizer_language=’en’, include_lengths=False, batch_first=False, pad_token=’\<pad>‘, unk_token=’\<unk>‘, pad_first=False, truncate_first=False, stop_words=None, is_target=False)</li>
+</ul>
+</li>
+<li><p><strong>Dataset</strong>：按照 Feild 声明的配置信息，从原始数据构造数据集，常用的 Dataset 类包括：TabularDataset 用来处理结构化的原始数据（tsv、csv、json）；TranslationDataset 用来处理机器翻译的原始数据（包含源语言与目标语言）；LanguageModelingDataset 用来处理语言模型的原始数据；SequenceTaggingDataset 用来处理序列标注的原始数据。</p>
+</li>
+<li><p><strong>Iterator</strong>：对 Dataset 进行迭代输出，支持对输出的张量进行 shuffle、batching 与 packaging。其中，BucketIterator 类可以将长度相似的输入序列存储在一起，提升运算效率。</p>
+<ul>
+<li>torchtext.data.BucketIterator(dataset, batch_size, sort_key=None, device=None, batch_size_fn=None, train=True, repeat=False, shuffle=None, sort=None, sort_within_batch=None)</li>
+</ul>
+</li>
+</ul>
+<p>使用上述三类组件进行 NLP 数据处理的步骤是：<strong>声明数据的 Field -&gt; 将 Field 映射到原始数据上并构建 Dataset 划分数据 -&gt; 使用某个数据集上的 Field 创建词汇表 vocab -&gt; 生成批量的迭代器</strong>，我们通过下面的实例来掌握 TorchText 工具的使用方法：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 声明 Field</span></span><br><span class="line"><span class="keyword">from</span> torchtext.data <span class="keyword">import</span> Field</span><br><span class="line"></span><br><span class="line">tokenize = <span class="keyword">lambda</span> x: x.split()</span><br><span class="line">TEXT = Field(sequential=<span class="literal">True</span>, tokenize=tokenize, lower=<span class="literal">True</span>)</span><br><span class="line">LABEL = Field(sequential=<span class="literal">False</span>, use_vocab=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建Dataset</span></span><br><span class="line"><span class="keyword">from</span> torchtext.data <span class="keyword">import</span> TabularDataset</span><br><span class="line"></span><br><span class="line">tv_datafields = [(<span class="string">"id"</span>, <span class="literal">None</span>),</span><br><span class="line">                 (<span class="string">"comment_text"</span>, TEXT), (<span class="string">"toxic"</span>, LABEL),</span><br><span class="line">                 (<span class="string">"severe_toxic"</span>, LABEL), (<span class="string">"threat"</span>, LABEL),</span><br><span class="line">                 (<span class="string">"obscene"</span>, LABEL), (<span class="string">"insult"</span>, LABEL),</span><br><span class="line">                 (<span class="string">"identity_hate"</span>, LABEL)]</span><br><span class="line">trn, vld = TabularDataset.splits(</span><br><span class="line">               path=<span class="string">"data"</span>,</span><br><span class="line">               train=<span class="string">'torchtext_train.csv'</span>, validation=<span class="string">"torchtext_valid.csv"</span>,</span><br><span class="line">               format=<span class="string">'csv'</span>,</span><br><span class="line">               skip_header=<span class="literal">True</span>,</span><br><span class="line">               fields=tv_datafields)</span><br><span class="line"></span><br><span class="line">tst_datafields = [(<span class="string">"id"</span>, <span class="literal">None</span>),</span><br><span class="line">                  (<span class="string">"comment_text"</span>, TEXT)]</span><br><span class="line">tst = TabularDataset(</span><br><span class="line">           path=<span class="string">"./data/torchtext_test.csv"</span>,</span><br><span class="line">           format=<span class="string">'csv'</span>,</span><br><span class="line">           skip_header=<span class="literal">True</span>,</span><br><span class="line">           fields=tst_datafields)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用训练数据的TEXT字段构建词表</span></span><br><span class="line">TEXT.build_vocab(trn)</span><br><span class="line"><span class="comment"># pickle.dump(TEXT.vocab, vocab_file_path) # 输出保存词表</span></span><br><span class="line"><span class="comment"># TEXT.vocab.stoi (基于词表词转id) / TEXT.vocab.itos (基于词表id转词)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建迭代器</span></span><br><span class="line"><span class="keyword">from</span> torchtext.data <span class="keyword">import</span> Iterator, BucketIterator</span><br><span class="line"></span><br><span class="line">train_iter, val_iter = BucketIterator.splits(</span><br><span class="line"> (trn, vld),</span><br><span class="line"> batch_sizes=(<span class="number">64</span>, <span class="number">64</span>),</span><br><span class="line"> device=<span class="number">-1</span>,</span><br><span class="line"> sort_key=<span class="keyword">lambda</span> x: len(x.comment_text),</span><br><span class="line"> sort_within_batch=<span class="literal">False</span>,</span><br><span class="line"> repeat=<span class="literal">False</span></span><br><span class="line">)</span><br><span class="line">test_iter = Iterator(tst, batch_size=<span class="number">64</span>, device=<span class="number">-1</span>, sort=<span class="literal">False</span>, sort_within_batch=<span class="literal">False</span>, repeat=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure></p>
+<p>我们读取的原始数据是如下所示的结构化表格数据：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>comment_text</th>
+<th>toxic</th>
+<th>severe_toxic</th>
+<th>obscene</th>
+<th>threat</th>
+<th>insult</th>
+<th>identity_hate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0…7bf</td>
+<td>“Explanation Why the edits ….”</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>首先将声明的 Field 指定到具体的列名上， “comment_text” 的评论文本需要分词并从训练数据的该字段中构建词表；除了 “id” 列不被使用，其余各列都是被声明为了标签。本例中的训练集与验证集是通过指定文件加载，调用的是对象方法 splits()，我们也可以调用 Dataset 对象的方法 split() 指定划分比例将一个整体数据划分为训练集与验证集。在划分数据的过程中就自动按照 Field 里声明的处理方法对数据进行了预处理。使用训练数据的 TEXT 字段构建词汇表，也可以通过设置 build_vector() 中的 vectors 参数，引入已经预训练好的词向量（word2vec等）。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/07/13/pytorch-1/" rel="next" title="PyTorch的数据操作">
+                <i class="fa fa-chevron-left"></i> PyTorch的数据操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/08/08/pytorch-3/" rel="prev" title="PyTorch构建神经网络">
+                PyTorch构建神经网络 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#读取数据集"><span class="nav-number">1.</span> <span class="nav-text">读取数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理缺失值"><span class="nav-number">2.</span> <span class="nav-text">处理缺失值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文本序列化"><span class="nav-number">3.</span> <span class="nav-text">文本序列化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量化补齐"><span class="nav-number">4.</span> <span class="nav-text">批量化补齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TorchText工具"><span class="nav-number">5.</span> <span class="nav-text">TorchText工具</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

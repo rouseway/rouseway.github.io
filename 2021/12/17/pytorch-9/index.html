@@ -1,0 +1,782 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="从WMT18下载机器翻译数据集 News Commentary v13，并从中取出中英部分的平行语料，该部分为两个以 .en 和 .zh 为后缀的文件，文件的每一行是一个中文或英文的句子，两者一一对应互为翻译。 数据预处理我们准备构建一个简单的“中到英”机器翻译系统，所以我们把中文语料作为源语言，英文语料作为目标语言；我们使用结巴分词对中文进行分词，NLTK对英文进行分词处理。我们预处理要做的事情">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch实战：机器翻译">
+<meta property="og:url" content="http://yoursite.com/2021/12/17/pytorch-9/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="从WMT18下载机器翻译数据集 News Commentary v13，并从中取出中英部分的平行语料，该部分为两个以 .en 和 .zh 为后缀的文件，文件的每一行是一个中文或英文的句子，两者一一对应互为翻译。 数据预处理我们准备构建一个简单的“中到英”机器翻译系统，所以我们把中文语料作为源语言，英文语料作为目标语言；我们使用结巴分词对中文进行分词，NLTK对英文进行分词处理。我们预处理要做的事情">
+<meta property="article:published_time" content="2021-12-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:47.624Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/12/17/pytorch-9/"/>
+
+
+
+
+
+  <title> PyTorch实战：机器翻译 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/12/17/pytorch-9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch实战：机器翻译
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-17T00:00:00+08:00">
+                2021-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从<a href="http://statmt.org/wmt18/translation-task.html#download" target="_blank" rel="noopener">WMT18</a>下载机器翻译数据集 News Commentary v13，并从中取出中英部分的平行语料，该部分为两个以 .en 和 .zh 为后缀的文件，文件的每一行是一个中文或英文的句子，两者一一对应互为翻译。</p>
+<h2 id="数据预处理"><a href="#数据预处理" class="headerlink" title="数据预处理"></a>数据预处理</h2><p>我们准备构建一个简单的“中到英”机器翻译系统，所以我们把中文语料作为源语言，英文语料作为目标语言；我们使用结巴分词对中文进行分词，NLTK对英文进行分词处理。我们预处理要做的事情包括：生成源语言和目标语言的分词序列，构建词典，划分训练、验证与测试集。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> nltk,jieba,pickle</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"></span><br><span class="line">PAD_TOKEN = <span class="number">0</span></span><br><span class="line">UNK_TOKEN = <span class="number">1</span></span><br><span class="line">SOS_TOKEN = <span class="number">2</span></span><br><span class="line">EOS_TOKEN = <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_word_index</span><span class="params">(vocab_dic, max_size, min_freq)</span>:</span></span><br><span class="line">    vocab_list = sorted([_ <span class="keyword">for</span> _ <span class="keyword">in</span> vocab_dic.items() <span class="keyword">if</span> _[<span class="number">1</span>] &gt;= min_freq],</span><br><span class="line">                           key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)[:max_size]</span><br><span class="line">    vocab_list.insert(PAD_TOKEN, (<span class="string">'&lt;pad&gt;'</span>, min_freq))</span><br><span class="line">    vocab_list.insert(UNK_TOKEN, (<span class="string">'&lt;unk&gt;'</span>, min_freq))</span><br><span class="line">    vocab_list.insert(SOS_TOKEN, (<span class="string">'&lt;sos&gt;'</span>, min_freq))</span><br><span class="line">    vocab_list.insert(EOS_TOKEN, (<span class="string">'&lt;eos&gt;'</span>, min_freq))</span><br><span class="line">    word2idx = &#123;word_count[<span class="number">0</span>]: idx <span class="keyword">for</span> idx, word_count <span class="keyword">in</span> enumerate(vocab_list)&#125;</span><br><span class="line">    idx2word = &#123;idx: word_count[<span class="number">0</span>] <span class="keyword">for</span> idx, word_count <span class="keyword">in</span> enumerate(vocab_list)&#125;</span><br><span class="line">    <span class="keyword">return</span> word2idx,idx2word</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">preprocessing</span><span class="params">(src_file, tgt_file, max_size=<span class="number">10000</span>, min_freq=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> open(src_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        chinese = fin.read().strip().split(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">with</span> open(tgt_file, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">        english = fin.read().strip().split(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">assert</span> (len(chinese) == len(english))</span><br><span class="line"></span><br><span class="line">    src_list = []</span><br><span class="line">    tgt_list = []</span><br><span class="line">    en_vocab = &#123;&#125;</span><br><span class="line">    ch_vocab = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(english)):</span><br><span class="line">        print(i)</span><br><span class="line">        ch_tokens = list(jieba.cut(chinese[i]))</span><br><span class="line">        en_tokens = nltk.word_tokenize(english[i])</span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> ch_tokens:</span><br><span class="line">            ch_vocab[word] = ch_vocab.get(word, <span class="number">0</span>) + <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> en_tokens:</span><br><span class="line">            word = word.lower()</span><br><span class="line">            en_vocab[word] = en_vocab.get(word, <span class="number">0</span>) + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        src_list.append(ch_tokens)</span><br><span class="line">        tgt_list.append(en_tokens)</span><br><span class="line">  </span><br><span class="line">    ch_word2idx, ch_idx2word = get_word_index(ch_vocab, max_size, min_freq)</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'./data/MT/ch_vocab.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump((ch_word2idx, ch_idx2word), fout)</span><br><span class="line">    print(<span class="string">'Source lang vocab size is: &#123;&#125;'</span>.format(len(ch_word2idx)))</span><br><span class="line">    en_word2idx,en_idx2word = get_word_index(en_vocab, max_size, min_freq)</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'./data/MT/en_vocab.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump((en_word2idx,en_idx2word), fout)</span><br><span class="line">    print(<span class="string">'Target lang vocab size is: &#123;&#125;'</span>.format(len(en_word2idx)))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 划分训练、验证、测试集</span></span><br><span class="line">    src_train, src_test, tgt_train, tgt_test = train_test_split(src_list, tgt_list, test_size=<span class="number">0.1</span>, shuffle=<span class="literal">True</span>)</span><br><span class="line">    src_train, src_eval, tgt_train, tgt_eval = train_test_split(src_train, tgt_train, test_size=<span class="number">0.1</span>, shuffle=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'./data/MT/train-eval-corpus.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump((src_train, tgt_train, src_eval, tgt_eval), fout)</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">'./data/MT/test-corpus.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> fout:</span><br><span class="line">        pickle.dump((src_test, tgt_test), fout)</span><br><span class="line">    print(<span class="string">"train-corpus size is: &#123;&#125;, eval-corpus size is: &#123;&#125;, test-corpus size is: &#123;&#125;"</span>.format(</span><br><span class="line">        len(src_train), len(src_eval), len(src_test)))</span><br></pre></td></tr></table></figure><br>不同于分类等其他的任务，翻译需要处理的数据是源语言-目标语言这样的平行语料，为了触发翻译任务的开始与结束需要额外增加两个标记句首与句尾的特殊标识（SOS_TOKEN 与 EOS_TOKEN）。</p>
+<h2 id="数据加载"><a href="#数据加载" class="headerlink" title="数据加载"></a>数据加载</h2><p>数据的读取与加载我们仍然使用 PyTorch 提供的 Dataset 与 DataLoader 来实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset,DataLoader</span><br><span class="line">device = torch.device(<span class="string">'cuda:0'</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">'cpu'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyDataset</span><span class="params">(Dataset)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, src_word2idx, src_corpus, tgt_word2idx, tgt_corpus)</span>:</span></span><br><span class="line">        self.src_data = []</span><br><span class="line">        self.tgt_data = []</span><br><span class="line">        <span class="keyword">for</span> src_sentence <span class="keyword">in</span> src_corpus:</span><br><span class="line">            self.src_data.append([src_word2idx.get(w, UNK_TOKEN) <span class="keyword">for</span> w <span class="keyword">in</span> src_sentence])</span><br><span class="line">        <span class="keyword">for</span> tgt_sentence <span class="keyword">in</span> tgt_corpus:</span><br><span class="line">            tgt_tokens = [tgt_word2idx.get(w, UNK_TOKEN) <span class="keyword">for</span> w <span class="keyword">in</span> tgt_sentence]</span><br><span class="line">            tgt_tokens.append(EOS_TOKEN)</span><br><span class="line">            self.tgt_data.append(tgt_tokens)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.src_data)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, idx)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.src_data[idx],self.tgt_data[idx]</span><br></pre></td></tr></table></figure></p>
+<p>我们继承 Dataset 实现自己的数据读取，分别对源语言和目标语言进行单词编号的转换，同时在目标语言的最后增加一个句尾标识（EOS_TOKEN）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_loader</span><span class="params">(src_word2idx, src_corpus, tgt_word2idx, tgt_corpus, batch_size)</span>:</span></span><br><span class="line">    dataset = MyDataset(src_word2idx, src_corpus, tgt_word2idx, tgt_corpus)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_batch_padded</span><span class="params">(batch_data, idx, pad)</span>:</span></span><br><span class="line">        <span class="comment"># 以批量数据中的最长序列为基准补齐</span></span><br><span class="line">        max_len = max([len(seq[idx]) <span class="keyword">for</span> seq <span class="keyword">in</span> batch_data])</span><br><span class="line">        data = []</span><br><span class="line">        seq_lengths = []</span><br><span class="line">        <span class="keyword">for</span> seq <span class="keyword">in</span> batch_data:</span><br><span class="line">            data.append(seq[idx] + [pad] * (max_len - len(seq[idx])))</span><br><span class="line">            seq_lengths.append(len(seq[idx]))</span><br><span class="line">        data = torch.LongTensor(data).to(device)</span><br><span class="line">        <span class="keyword">return</span> data, seq_lengths</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">collate_fn</span><span class="params">(batch_data)</span>:</span></span><br><span class="line">        src_data, src_seq_lengths = get_batch_padded(batch_data, <span class="number">0</span>, PAD_TOKEN)</span><br><span class="line">        tgt_data, tgt_seq_lengths = get_batch_padded(batch_data, <span class="number">1</span>, PAD_TOKEN)</span><br><span class="line">        <span class="keyword">return</span> src_data, src_seq_lengths, tgt_data, tgt_seq_lengths</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> DataLoader(dataset=dataset, batch_size=batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                      collate_fn=collate_fn, drop_last=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
+<p>通过 DataLoader 来实现批量数据的生成，我们还是采取批量数据中最长数据的长度进行补齐，同时，我们需要记录批量数据中真实文本序列的长度（仅源语言有这样的需求），为了后面使用 PyTorch 提供的压缩 pad 操作。</p>
+<h2 id="定义网络"><a href="#定义网络" class="headerlink" title="定义网络"></a>定义网络</h2><p>机器翻译是一个由源语言序列到目标语言序列的 Seq2Seq（Sequence to Sequence) 任务，对应的网络架构是<strong>编码器-解码器</strong>网络，该网络框架的核心思想是将编码器中的序列（源语言）转换成一个上下文向量 $C$，并将该向量带入到解码器的每一步解码过程中，即目标语言的生成。我们首先来定义编码器网络：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_packed_sequence, pack_padded_sequence</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EncoderRNN</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, input_size, hidden_size, n_layers=<span class="number">1</span>)</span>:</span></span><br><span class="line">        super(EncoderRNN, self).__init__()</span><br><span class="line">        self.n_layers = n_layers</span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=PAD_TOKEN)</span><br><span class="line">        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=<span class="literal">True</span>,</span><br><span class="line">                          num_layers=self.n_layers, bidirectional=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, input, input_lengths, hidden)</span>:</span></span><br><span class="line">        <span class="comment"># input: [b, sl]</span></span><br><span class="line">        <span class="comment"># hidden: [drection*n_layers, b, h]</span></span><br><span class="line">        output = self.embedding(input)</span><br><span class="line">        <span class="comment"># output: [b, sl, h]</span></span><br><span class="line">        output = pack_padded_sequence(output, input_lengths, batch_first=<span class="literal">True</span>, enforce_sorted=<span class="literal">False</span>)</span><br><span class="line">        <span class="comment"># output is a PackedSequence object</span></span><br><span class="line">        output, hidden = self.gru(output, hidden)</span><br><span class="line">        <span class="comment"># output: [b, sl, h*direction]</span></span><br><span class="line">        <span class="comment"># hidden: [drection*n_layers, b, h]</span></span><br><span class="line">        output, _ = pad_packed_sequence(output, batch_first=<span class="literal">True</span>, padding_value=PAD_TOKEN)</span><br><span class="line">        output = output[:, :, :self.hidden_size] + output[:, :, self.hidden_size:]</span><br><span class="line">        <span class="comment"># output: [b, sl, h]</span></span><br><span class="line">        <span class="keyword">return</span> output, hidden</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initHidden</span><span class="params">(self, batch_size)</span>:</span></span><br><span class="line">        result = torch.zeros(self.n_layers*<span class="number">2</span>, batch_size, self.hidden_size).to(device)</span><br><span class="line">        <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure><br>编码器网络包含一个 embedding 层，我们将 embedding 的维度也设置为 hidden_size 的大小，输入通过 embedding 层以后接入一个双向的 GRU 层，我们把 GRU 的 batch_first 设置为 True，方便数据的形状的前后兼容。我们约定一些符号，<strong>b</strong> 表示 batch_size，<strong>h</strong> 表示 hidden_size，<strong>sl</strong> 表示源语言序列的长度，<strong>tl</strong> 表示目标语言序列的长度，便于我们在代码中注释上每一层输入输出的张量形状变化。请重点关注这些形状的变化，加深对各种常用网络层的输入输出形状的认识。</p>
+<p>我们配合使用了 pack_padded_sequence( ) 和 pad_paked_sequence( ) 用来在循环神经网络中更好地处理 padding 以后的一个 batch 的源语言序列，避免神经网络学习到过多 pad 标签的无意义信息。</p>
+<p>如果只是把编码器的隐层作为一个上下文向量 $C$，带入到解码器的每一步解码，这种处理过于简单，相当于将编码器中的每个 token 无差别地对待。但我们可以想象在翻译任务中，当我们输出目标语言的某个 token 时，其实重点参考的是源语言中的某一个或某几个 token ，这种随着解码输出的不同重点参考不同编码的机制就是<strong>注意力机制</strong>。所谓 “重点参考”，其数学表现形式就是权重矩阵，生成权重矩阵的输入源则是来自 <strong>解码器的隐层输出 $h_t$</strong> 和 <strong>编码器的隐层输出 $\bar{h}_s$</strong>，它们按照<strong>注意力分布</strong>的计算公式来计算：</p>
+<script type="math/tex; mode=display">\alpha_{ts}=\text{softmax}(\text{score}(h_t, \bar{h}_s))=\frac{\text{exp}(\text{score}(h_t, \bar{h}_s))}{\sum_{s'=1}^S\text{exp}(\text{score}(h_t, \bar{h}_{s'}))}</script><p>注意力分配矩阵 $\text{A}$ 的元素 $\alpha_{ts}$ 表示 $h_t$ 收到 $\bar{h}_s$ 的注意力概率。常用的计算 attention 的 <strong>score</strong> 方法有三种：</p>
+<ul>
+<li>内积（dot）： $h_t^T\bar{h}_s$</li>
+<li>线性映射（general）： $h_t^TW_a\bar{h}_s$</li>
+<li>双线性映射（concat）： $v_a^T\text{tanh}(W_a[h_t;\bar{h}_s])$</li>
+</ul>
+<p>理解了注意力机制的原理后，我们来动手实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Attention</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, score_type, hidden_size)</span>:</span></span><br><span class="line">        super(Attention, self).__init__()</span><br><span class="line">        self.score_type = score_type</span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        <span class="keyword">if</span> score_type == <span class="string">'general'</span>:</span><br><span class="line">            self.attn = nn.Linear(hidden_size, hidden_size)</span><br><span class="line">        <span class="keyword">elif</span> score_type == <span class="string">'concat'</span>:</span><br><span class="line">            self.attn = nn.Linear(hidden_size * <span class="number">2</span>, hidden_size)</span><br><span class="line">            self.v = nn.Parameter(torch.FloatTensor(<span class="number">1</span>, hidden_size))</span><br><span class="line"></span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">score</span><span class="params">(self, decoder_rnn_output, encoder_output)</span>:</span></span><br><span class="line">        <span class="comment"># decoder_rnn_ouput: [1, h]</span></span><br><span class="line">        <span class="comment"># encoder_rnn_ouput: [1, h]</span></span><br><span class="line">        <span class="keyword">if</span> self.score_type == <span class="string">'dot'</span>:</span><br><span class="line">            energy = decoder_rnn_output.squeeze(<span class="number">0</span>).dot(encoder_output.squeeze(<span class="number">0</span>))</span><br><span class="line">        <span class="keyword">elif</span> self.score_type == <span class="string">'general'</span>:</span><br><span class="line">            energy = self.attn(encoder_output)</span><br><span class="line">            energy = decoder_rnn_output.squeeze(<span class="number">0</span>).dot(energy.squeeze(<span class="number">0</span>))</span><br><span class="line">        <span class="keyword">elif</span> self.score_type == <span class="string">'concat'</span>:</span><br><span class="line">            h_o = torch.cat((decoder_rnn_output, encoder_output), <span class="number">1</span>)</span><br><span class="line">            energy = self.attn(h_o)</span><br><span class="line">            energy = self.v.squeeze(<span class="number">0</span>).dot(energy.squeeze(<span class="number">0</span>))</span><br><span class="line">        <span class="keyword">return</span> energy</span><br><span class="line"></span><br><span class="line">    <span class="comment"># attn_weights: [b, tl, sl]</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, rnn_outputs, encoder_outputs)</span>:</span></span><br><span class="line">        <span class="comment"># rnn_outputs: [b, tl, h]</span></span><br><span class="line">        <span class="comment"># encoder_outputs: [b, sl, h]</span></span><br><span class="line">        tgt_seq_len = rnn_outputs.size()[<span class="number">1</span>]</span><br><span class="line">        src_seq_len = encoder_outputs.size()[<span class="number">1</span>]</span><br><span class="line">        batch_size = encoder_outputs.size()[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.score_type == <span class="string">'general'</span>:</span><br><span class="line">            encoder_outputs = self.attn(encoder_outputs).transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">            <span class="comment"># encoder_outputs: [b, h, sl]</span></span><br><span class="line">            attn_energies = rnn_outputs.bmm(encoder_outputs)</span><br><span class="line">            <span class="comment"># attn_energies: # [b, tl, sl] &lt;- [b, tl, h]*[b, h, sl]</span></span><br><span class="line">            attn_weights = F.softmax(attn_energies, dim=<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> attn_weights</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            attn_energies = torch.zeros(batch_size, tgt_seq_len, src_seq_len)</span><br><span class="line">            <span class="comment"># attn_energies: [b, tl, sl]</span></span><br><span class="line">            <span class="keyword">for</span> b <span class="keyword">in</span> range(batch_size):</span><br><span class="line">                decoder_rnn_output = rnn_outputs[b]</span><br><span class="line">                <span class="comment"># decoder_rnn_ouput: [tl, h]</span></span><br><span class="line">                <span class="keyword">for</span> i <span class="keyword">in</span> range(src_seq_len):</span><br><span class="line">                    encoder_output = encoder_outputs[b, i, :].unsqueeze(<span class="number">0</span>)</span><br><span class="line">                    attn_energies[b, :, i] = self.score(decoder_rnn_output, encoder_output)</span><br><span class="line"></span><br><span class="line">            attn_weights = torch.zeros(batch_size, src_seq_len).to(device)</span><br><span class="line">            <span class="keyword">for</span> b <span class="keyword">in</span> range(batch_size):</span><br><span class="line">                attn_weights[b] = F.softmax(attn_energies[b], dim=<span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> attn_weights.unsqueeze(<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<p>以上的代码其实就是对上述的注意力原理与公式的翻译，请大家关注注释中各张量的形状变化，其实如果我们读到后文训练部分时再回头来看上面的代码，你会发现其实 tl 就等于 1。实现完了注意力层以后，就可以开始实现解码层了：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AttnDecoderRNN</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, hidden_size, output_size, score_method=<span class="string">'concat'</span>, n_layers=<span class="number">1</span>, dropout_p=<span class="number">0.1</span>)</span>:</span></span><br><span class="line">        super(AttnDecoderRNN, self).__init__()</span><br><span class="line">        self.score_method = score_method</span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        self.output_size = output_size</span><br><span class="line">        self.n_layers = n_layers</span><br><span class="line">        self.dropout_p = dropout_p</span><br><span class="line"></span><br><span class="line">        self.embedding = nn.Embedding(output_size, hidden_size, padding_idx=PAD_TOKEN)</span><br><span class="line">        self.embedding_dropout = nn.Dropout(dropout_p)</span><br><span class="line">        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=<span class="literal">True</span>, n_layers=n_layers)</span><br><span class="line">        self.attn = Attention(score_method, hidden_size)</span><br><span class="line">        self.concat = nn.Linear(hidden_size * <span class="number">2</span>, hidden_size)</span><br><span class="line">        self.out = nn.Linear(hidden_size, output_size)</span><br><span class="line">        self.softmax = nn.LogSoftmax(dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, input_seqs, last_hidden, encoder_outputs)</span>:</span></span><br><span class="line">        <span class="comment"># input_seqs: [b, tl]</span></span><br><span class="line">        <span class="comment"># last_hidden: [direction*n_layers, b, h]</span></span><br><span class="line">        <span class="comment"># encoder_outputs: [b, sl, h]</span></span><br><span class="line"></span><br><span class="line">        embedded = self.embedding(input_seqs)</span><br><span class="line">        <span class="comment"># embedded: [b, tl, h]</span></span><br><span class="line">        rnn_output, hidden = self.gru(embedded, last_hidden)</span><br><span class="line">        <span class="comment"># rnn_outupt: [b, tl, h]</span></span><br><span class="line">        <span class="comment"># hidden: [direction*n_layers, b, h]</span></span><br><span class="line">        attn_weights = self.attn(rnn_output, encoder_outputs)</span><br><span class="line">        <span class="comment"># attn_weights: [b, tl, sl]</span></span><br><span class="line">        context = attn_weights.bmm(encoder_outputs)</span><br><span class="line">        <span class="comment"># context: [b, tl, h] &lt;- [b, tl, sl] * [b, sl, h]</span></span><br><span class="line">        output_context = torch.cat((rnn_output, context), <span class="number">2</span>)</span><br><span class="line">        <span class="comment"># output_context: [b, tl, 2h] &lt;- [b, tl, h], [b, tl, h]</span></span><br><span class="line">        output_context = self.concat(output_context)</span><br><span class="line">        <span class="comment"># output_context: [b, tl, h]</span></span><br><span class="line">        concat_output = torch.tanh(output_context)</span><br><span class="line">        </span><br><span class="line">        output = self.out(concat_output)</span><br><span class="line">        output = F.softmax(output, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> output, hidden</span><br></pre></td></tr></table></figure></p>
+<p>解码层与编码层的逻辑是差不多的，embedding 层过后接入 GRU 层，不同的是这里的 GRU 是一个单向的；随后进行注意力计算，将 GRU 的输出与注意力值进行融合（线性变化加非线性激活），最后进行 softmax 层映射到目标语言的词汇。</p>
+<h2 id="开始训练"><a href="#开始训练" class="headerlink" title="开始训练"></a>开始训练</h2><p>训练过程我们引入了一种叫做 “教师强制（teacher forcing）” 的机制，即解码器在生成下一个词的时候，输入的不是自己预测的词，而是真实数据。通过设置 teacher_forcing_ratio=0.5 即代表着将有 50% 的概率选用这种直接使用正确答案的监督学习方式，余下的 50% 直接用预测的结果作为输入。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_simple_model</span><span class="params">(train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, config)</span>:</span></span><br><span class="line"></span><br><span class="line">    total_loss = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> src_input,src_lengths,tgt_input,tgt_lengths <span class="keyword">in</span> train_loader:</span><br><span class="line">        <span class="comment"># 循环神经网络每一个 batch 都要重新初始化隐层</span></span><br><span class="line">        encoder_hidden = encoder.initHidden(config.batch_size)</span><br><span class="line">        encoder_optimizer.zero_grad()</span><br><span class="line">        decoder_optimizer.zero_grad()</span><br><span class="line"></span><br><span class="line">        loss = torch.tensor([<span class="number">0.0</span>]).to(device)</span><br><span class="line">        encoder_outputs, encoder_hidden = encoder(src_input, src_lengths, encoder_hidden)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 输入给解码器的第一个字符是句首标识 SOS_TOKEN</span></span><br><span class="line">        tgt_seq_len = tgt_input.size()[<span class="number">1</span>]</span><br><span class="line">        decoder_input = torch.LongTensor([[SOS_TOKEN]] * config.batch_size).to(device)</span><br><span class="line">        <span class="comment"># 使用掩码变量mask来忽略掉标签为填充项PAD的损失</span></span><br><span class="line">        mask, num_not_pad_tokens = torch.ones(config.batch_size, ).to(device), <span class="number">0</span></span><br><span class="line">        <span class="comment"># 编码器是双向GRU，而解码器是单向的</span></span><br><span class="line">        decoder_hidden = encoder_hidden[:decoder.n_layers]</span><br><span class="line">        </span><br><span class="line">        use_teacher_forcing = <span class="literal">True</span> <span class="keyword">if</span> random.random() &lt; config.teacher_forcing_ratio <span class="keyword">else</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">for</span> t_step <span class="keyword">in</span> range(tgt_seq_len):</span><br><span class="line">            <span class="comment"># 开始一步一步地解码</span></span><br><span class="line">            decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden, encoder_outputs)</span><br><span class="line">            loss = loss + (mask * criterion(decoder_output, tgt_input[:, t_step])).sum()</span><br><span class="line">            num_not_pad_tokens += mask.sum().item()</span><br><span class="line">            <span class="comment"># EOS 后面全是 PAD，保证一旦遇到EOS接下来的循环中 mask 就一直是 0</span></span><br><span class="line">            mask = mask * (decoder_input != EOS_TOKEN).float()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> use_teacher_forcing:</span><br><span class="line">                <span class="comment"># 将真实数据当做下一时间步的输入</span></span><br><span class="line">                decoder_input = tgt_input[:,t_step].unsqueeze(<span class="number">1</span>)  <span class="comment"># Teacher forcing</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># 从输出结果（概率的对数值）中选择出一个数值最大的单词作为输出放到了topi中</span></span><br><span class="line">                topv, topi = decoder_output.data.topk(<span class="number">1</span>, dim=<span class="number">1</span>)</span><br><span class="line">                ni = topi[:, <span class="number">0</span>]</span><br><span class="line">                decoder_input = ni.unsqueeze(<span class="number">1</span>).to(device)</span><br><span class="line">                <span class="comment"># decoder_input: [b, 1]</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 开始反向传播</span></span><br><span class="line">        loss.backward()</span><br><span class="line">        <span class="comment"># 开始梯度下降</span></span><br><span class="line">        encoder_optimizer.step()</span><br><span class="line">        decoder_optimizer.step()</span><br><span class="line">        <span class="comment"># 累加总误差</span></span><br><span class="line">        total_loss += (loss / num_not_pad_tokens).item()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 返回训练时候的平均误差</span></span><br><span class="line">    <span class="keyword">return</span> total_loss / len(train_loader)</span><br></pre></td></tr></table></figure></p>
+<p>从上面的代码可以看到，编码器在训练过程中不需要关心其内部的时间步展开与循环，由编码器网络直接返回 encoder_outputs 和 encoder_hidden；解码器的训练则需要按时间步一步一步地喂数据，而且在开始解码时输入的第一个字符应该是句首 SOS_TOKEN。另外，我们在计算损失的时候，使用了掩码变量将句尾标识 EOS_TOKEN 往后的 pad 值都忽略掉。</p>
+<p>启动训练，我们把相关的超参数封装到 Config 对象中，并且完成数据的读取与加载；然后初始化网络、初始化优化器、定义损失函数；随后进行多轮迭代，并在每轮迭代中进行验证集上的验证，记录并输出损失的变化；最后，保存模型。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> optim</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Config</span><span class="params">(object)</span>:</span></span><br><span class="line">    batch_size = <span class="number">16</span></span><br><span class="line">    num_epochs = <span class="number">200</span></span><br><span class="line">    hidden_size = <span class="number">64</span></span><br><span class="line">    n_layers = <span class="number">1</span></span><br><span class="line">    learning_rate = <span class="number">0.0001</span></span><br><span class="line">    src_vocab_size = <span class="number">10004</span></span><br><span class="line">    tgt_vocab_size = <span class="number">10004</span></span><br><span class="line">    teacher_forcing_ratio = <span class="number">0.5</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">()</span>:</span></span><br><span class="line">    plot_losses = []</span><br><span class="line"></span><br><span class="line">    src_word2idx, _ = pickle.load(open(<span class="string">'./data/MT/ch_vocab.pkl'</span>, <span class="string">'rb'</span>))</span><br><span class="line">    tgt_word2idx, _ = pickle.load(open(<span class="string">'./data/MT/en_vocab.pkl'</span>, <span class="string">'rb'</span>))</span><br><span class="line">    (src_train, tgt_train, src_eval, tgt_eval) = pickle.load(open(<span class="string">'./data/MT/train-eval-corpus.pkl'</span>, <span class="string">'rb'</span>))</span><br><span class="line"></span><br><span class="line">    config = Config()</span><br><span class="line"></span><br><span class="line">    encoder = EncoderRNN(config.src_vocab_size, config.hidden_size, n_layers=config.n_layers).to(device)</span><br><span class="line">    decoder = AttnDecoderRNN(config.hidden_size, config.tgt_vocab_size, score_method=<span class="string">'general'</span>,</span><br><span class="line">                             n_layers=config.n_layers, dropout_p=<span class="number">0.1</span>).to(device)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 为两个网络分别定义优化器</span></span><br><span class="line">    encoder_optimizer = optim.Adam(encoder.parameters(), lr=config.learning_rate)</span><br><span class="line">    decoder_optimizer = optim.Adam(decoder.parameters(), lr=config.learning_rate)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定义损失函数</span></span><br><span class="line">    criterion = nn.NLLLoss()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 开始多轮迭代训练</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(config.num_epochs):</span><br><span class="line">        train_loader = create_loader(src_word2idx, src_train, tgt_word2idx, tgt_train, config.batch_size)</span><br><span class="line">        train_loss = train_simple_model(train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, config)</span><br><span class="line"></span><br><span class="line">        valid_loader = create_loader(src_word2idx, src_eval, tgt_word2idx, tgt_eval, config.batch_size)</span><br><span class="line">        valid_loss = evaluation_simple_model(valid_loader, encoder, decoder, criterion, config, rights)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 打印并记录每一个Epoch的输出结果</span></span><br><span class="line">        print(<span class="string">'Epoch: %d%% Train-Loss: %.4f Eval-Loss: %.4f'</span> % </span><br><span class="line">        (epoch * <span class="number">1.0</span> / config.num_epochs * <span class="number">100</span>, train_loss, valid_loss))</span><br><span class="line">        plot_losses.append([train_loss, valid_loss])</span><br><span class="line">    </span><br><span class="line">    torch.save(encoder, <span class="string">'./model/NMT_encoder.pth'</span>)</span><br><span class="line">    torch.save(decoder, <span class="string">'./model/NMT_decoder.pth'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>由于篇幅有限，我们不再给出 evaluation_simple_model( ) 的实现，其处理流程与训练函数基本一致（不需要引入教师强制策略）。</p>
+<h2 id="使用模型"><a href="#使用模型" class="headerlink" title="使用模型"></a>使用模型</h2><p>使用我们训练好的模型，我们来进行一次中到英的翻译，值得注意的是我们的模型是针对 mini-batch 数据格式的，而一般翻译任务的输入是单条数据，我们需要进行 batch 的封装：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">translate</span><span class="params">(encoder_model, decoder_mdoel, max_seq_len)</span>:</span></span><br><span class="line">    encoder = torch.load(encoder_model, map_location=device)</span><br><span class="line">    decoder = torch.load(decoder_mdoel, map_location=device)</span><br><span class="line">    ch_word2idx, _ = pickle.load(open(<span class="string">'./data/MT/ch_vocab.pkl'</span>, <span class="string">'rb'</span>))</span><br><span class="line">    _, en_idx2word = pickle.load(open(<span class="string">'./data/MT/en_vocab.pkl'</span>, <span class="string">'rb'</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    ch_text = <span class="string">"美国的立场也起不到帮助。"</span></span><br><span class="line">    ch_tokens = list(jieba.cut(ch_text))</span><br><span class="line">    ch_tokens.append(<span class="string">'&lt;eos&gt;'</span>)</span><br><span class="line">    enc_input = torch.tensor([[ch_word2idx.get(w, UNK_TOKEN) <span class="keyword">for</span> w <span class="keyword">in</span> ch_tokens]]).to(device)</span><br><span class="line">    encoder_hidden = encoder.initHidden(<span class="number">1</span>)</span><br><span class="line">    encoder_outputs, encoder_hidden  = encoder(enc_input, [len(ch_tokens)], encoder_hidden)</span><br><span class="line">    decoder_input = torch.LongTensor([[SOS_TOKEN]]).to(device)</span><br><span class="line">    decoder_hidden = encoder_hidden[:<span class="number">1</span>]</span><br><span class="line">    output_tokens = []</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(max_seq_len):</span><br><span class="line">        decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden, encoder_outputs)</span><br><span class="line">        pred = decoder_output.argmax(dim=<span class="number">1</span>)</span><br><span class="line">        pred_token = en_idx2word.get(int(pred[<span class="number">0</span>].item()), <span class="string">'&lt;unk&gt;'</span>)</span><br><span class="line">        <span class="keyword">if</span> pred_token == EOS_TOKEN:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            output_tokens.append(pred_token)</span><br><span class="line">            decoder_input = pred.unsqueeze(<span class="number">0</span>)</span><br><span class="line">    print(output_tokens)</span><br></pre></td></tr></table></figure><br>我们需要加载保存好的编码器与解码器模型和词典数据，另外，我们需要指定翻译输出的最大长度。实践中，评价机器翻译结果通常使用 BLEU（Bilingual Evaluation Understudy），对于模型预测序列中任意的子序列，BLEU 考察这个子序列是否出现在标签序列中，在这里我们不做详细介绍，感兴趣的读者可以查阅相关资料。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/11/02/pytorch-8/" rel="next" title="PyTorch实战：文本分类">
+                <i class="fa fa-chevron-left"></i> PyTorch实战：文本分类
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/01/22/pytorch-10/" rel="prev" title="PyTorch实战：聊天机器人">
+                PyTorch实战：聊天机器人 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据预处理"><span class="nav-number">1.</span> <span class="nav-text">数据预处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据加载"><span class="nav-number">2.</span> <span class="nav-text">数据加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定义网络"><span class="nav-number">3.</span> <span class="nav-text">定义网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始训练"><span class="nav-number">4.</span> <span class="nav-text">开始训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用模型"><span class="nav-number">5.</span> <span class="nav-text">使用模型</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

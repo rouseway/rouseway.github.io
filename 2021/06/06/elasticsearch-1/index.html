@@ -1,0 +1,793 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="搜索引擎,数据科学,ElasticSearch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="安装配置下载最新的 ES7.X Linux版本，其内置了JDK，所以不再需要本地 JDK 环境，解压后包括以下目录：  bin ：脚本文件，包括 ES 启动 &amp; 安装插件等等 config ： elasticsearch.yml（ES 配置文件）、jvm.options（JVM 配置文件）、日志配置文件等 JDK ： 内置的 JDK，JAVA_VERSION&#x3D;”12.0.1” lib ：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch：基础知识">
+<meta property="og:url" content="http://yoursite.com/2021/06/06/elasticsearch-1/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="安装配置下载最新的 ES7.X Linux版本，其内置了JDK，所以不再需要本地 JDK 环境，解压后包括以下目录：  bin ：脚本文件，包括 ES 启动 &amp; 安装插件等等 config ： elasticsearch.yml（ES 配置文件）、jvm.options（JVM 配置文件）、日志配置文件等 JDK ： 内置的 JDK，JAVA_VERSION&#x3D;”12.0.1” lib ：">
+<meta property="article:published_time" content="2021-06-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:39:43.390Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="搜索引擎">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="ElasticSearch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/06/06/elasticsearch-1/"/>
+
+
+
+
+
+  <title> ElasticSearch：基础知识 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/06/06/elasticsearch-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ElasticSearch：基础知识
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-06T00:00:00+08:00">
+                2021-06-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2/" itemprop="url" rel="index">
+                    <span itemprop="name">信息检索</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2/ElasticSearch/" itemprop="url" rel="index">
+                    <span itemprop="name">ElasticSearch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="安装配置"><a href="#安装配置" class="headerlink" title="安装配置"></a>安装配置</h2><p>下载最新的 <a href="https://www.elastic.co/cn/downloads/elasticsearch" target="_blank" rel="noopener">ES7.X</a> Linux版本，其内置了JDK，所以不再需要本地 JDK 环境，解压后包括以下目录：</p>
+<ul>
+<li>bin ：脚本文件，包括 ES 启动 &amp; 安装插件等等</li>
+<li>config ： elasticsearch.yml（ES 配置文件）、jvm.options（JVM 配置文件）、日志配置文件等</li>
+<li>JDK ： 内置的 JDK，JAVA_VERSION=”12.0.1”</li>
+<li>lib ： 类库</li>
+<li>logs ： 日志文件</li>
+<li>modules ： ES 所有模块，包括 X-pack 等</li>
+<li>plugins ： ES 已经安装的插件。默认没有插件</li>
+<li>data ： ES 启动的时候，会有该目录，用来存储文档数据。该目录可以设置</li>
+</ul>
+<p>对 config 下的各种默认配置进行一定的修改，包括 jvm.options 中 ES 使用的堆内存：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms4g</span><br><span class="line">-Xmx4g</span><br></pre></td></tr></table></figure><br>默认使用4G的大小，请根据业务需要进行扩充，但最好不要超过32G。另外修改 elasticsearch.yml 中的 Network 与 Discovery 信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">network.host: 0.0.0.0</span><br><span class="line">http.port: 9200</span><br><span class="line"></span><br><span class="line">cluster.initial_master_nodes: [&quot;node-1&quot;]</span><br></pre></td></tr></table></figure><br>由于在Linux服务器上部署，为了让其他机器也能访问到，所以将 host 配置成 0.0.0.0，注意“node-1”要换成你的服务器的名称（执行 hostname 命令可以看到）。</p>
+<p>输入命令 ./bin/elasticsearch 就可以启动 ES，启动成功后在浏览器中输入 “ <a href="http://localhost:9200/”，" target="_blank" rel="noopener">http://localhost:9200/”，</a> 当然如果是在自己的PC上访问服务器上部署的ES，则需要将localhost换成服务器的ip地址。如果正常启动了，则会显示 cluster_name, version 等信息。</p>
+<p>保证 ES 可以正常启动后，“Ctrl+C”终止当前任务，重新使用命令 <strong>./bin/elasticsearch -d</strong> 将 ES 在后台运行起来，后面如果想要关闭 ES 则可以通过查询 9200 端口占用的进程，以杀掉进程的方式终止。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>从逻辑设计的角度来看，用于索引和搜索的基本单位是<strong>文档</strong>，一个或多个文档存储于<strong>索引</strong>中：</p>
+<ul>
+<li><strong>Document（文档）</strong>：可以被搜索数据的最小单位，文档会被序列化成 JSON 格式，每个文档都有一个独一无二的 _id</li>
+<li><strong>Index（索引）</strong>：是 Document 的容器，即一类文档的集合，复数是 Indices</li>
+</ul>
+<p>ES 从 7.x 版本开始彻底废除了 Type（类型）这一概念，一个 Index 中只有一个默认的 Type，即 _doc。Type 被废弃后，类比关系型数据库 MySQL 可以这样理解：<u> ES 实例对应 MySQL 实例中的一个 Database；Index 对应 MySQL 中的 Table；Document 对应 MySQL 中表的记录。</u></p>
+<ul>
+<li><strong>Mapping（映射）</strong>：类似于关系型数据库中的表结构信息，用于定义索引中字段（Field）的索引类型、分析方式、是否存储等信息。ES 中的 Mapping 是可以动态识别的，也就是说 ES 会自动根据数据格式识别它的类型，但是当需要对某些字段添加特殊属性（比如：定义分词器、是否分词、是否存储等）时，就需要手动设置 Mapping 了。一个索引的 Mapping 一旦创建，若已经存储了数据，就不可修改了</li>
+<li><strong>Analyzer（分析器）</strong>：定义索引中字段的分析与处理方式。一个 Analyzer 通常由一个 Tokenizer（分词器）、零到多个 Filter（过滤器） 组成</li>
+</ul>
+<p>从物理设计的角度来看，一个 ES <strong>集群（Cluster）</strong> 由一个或多个 <strong>节点（Node）</strong> 组成，一个 ES 实例就是一个节点，一个机器可以有多个实例；ES 是分布式搜索引擎，每个索引有一个或多个 <strong>分片（Shard）</strong>，索引的数据被分配到各个分片上，分片可以是主分片（Primary Shard）或者是副本分片（Replica Shard），主分片和副本分片不会出现在同一个节点上（防止单点故障）。对集群中的索引定义其物理属性（如分片数、副本数等），需要在 <strong>Settings（设置）</strong> 中进行配置。</p>
+<h2 id="使用Kibana"><a href="#使用Kibana" class="headerlink" title="使用Kibana"></a>使用Kibana</h2><p>我们推荐从官网下载与 ES 版本对应的 <a href="https://www.elastic.co/cn/downloads/kibana" target="_blank" rel="noopener">Kibana</a>，如果 ES 都是默认配置，则 Kibana 不需要做额外配置，当然，如果为了支持在服务器以外的机器上访问，我们需要将 host 改成“0.0.0.0”。使用命令 <code>nohup bin/kibana &amp;</code> 将其在后台启动起来。可以通过 “<a href="http://localhost:5601”">http://localhost:5601”</a> 在浏览器中进行访问，我们后面的操作将在 Kibana 的 Dev Tools 中完成。</p>
+<h2 id="简单的REST-API示例"><a href="#简单的REST-API示例" class="headerlink" title="简单的REST API示例"></a>简单的REST API示例</h2><p>ES 通过 REST API 显露出了很多功能，让用户可以构建 JSON 格式的创建、查询等各类操作，我们下面将在 Kibana 平台上，通过实际的数据，演示最简单的 REST API 操作，包括创建索引、查看索引、删除索引、创建文档等，以加深对 ES 的基本概念的认识：</p>
+<h3 id="创建索引"><a href="#创建索引" class="headerlink" title="创建索引"></a>创建索引</h3><p>在 Kibana 中输入 <code>PUT /shopping</code> 点击执行按钮，就可以看到右侧 ES 返回的响应：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"acknowledged"</span> : <span class="literal">true</span>,  <span class="comment">//响应结果</span></span><br><span class="line">  <span class="attr">"shards_acknowledged"</span> : <span class="literal">true</span>, <span class="comment">//分片结果</span></span><br><span class="line">  <span class="attr">"index"</span> : <span class="string">"shopping"</span> <span class="comment">//索引名称</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>此时，如果再次执行 <code>PUT /shopping</code> 创建一个同名的索引，则会返回错误信息：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"error"</span> : &#123;</span><br><span class="line">    <span class="attr">"root_cause"</span> : [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"type"</span> : <span class="string">"resource_already_exists_exception"</span>,</span><br><span class="line">        <span class="attr">"reason"</span> : <span class="string">"index [shopping/bu5v-UQDQGChrcvunLV5iA] already exists"</span>,</span><br><span class="line">        <span class="attr">"index_uuid"</span> : <span class="string">"bu5v-UQDQGChrcvunLV5iA"</span>,</span><br><span class="line">        <span class="attr">"index"</span> : <span class="string">"shopping"</span></span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"type"</span> : <span class="string">"resource_already_exists_exception"</span>,</span><br><span class="line">    <span class="attr">"reason"</span> : <span class="string">"index [shopping/bu5v-UQDQGChrcvunLV5iA] already exists"</span>,</span><br><span class="line">    <span class="attr">"index_uuid"</span> : <span class="string">"bu5v-UQDQGChrcvunLV5iA"</span>,</span><br><span class="line">    <span class="attr">"index"</span> : <span class="string">"shopping"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"status"</span> : <span class="number">400</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="查看索引"><a href="#查看索引" class="headerlink" title="查看索引"></a>查看索引</h3><p>在 Kibana 中输入 <code>GET /shopping</code> 点击执行按钮，在右侧就会看到当前索引的相关信息：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"shopping"</span> : &#123; <span class="comment">//索引名</span></span><br><span class="line">    <span class="attr">"aliases"</span> : &#123; &#125;, <span class="comment">//别名</span></span><br><span class="line">    <span class="attr">"mappings"</span> : &#123; &#125;, <span class="comment">//映射</span></span><br><span class="line">    <span class="attr">"settings"</span> : &#123; <span class="comment">//设置</span></span><br><span class="line">      <span class="attr">"index"</span> : &#123;</span><br><span class="line">        <span class="attr">"routing"</span> : &#123;</span><br><span class="line">          <span class="attr">"allocation"</span> : &#123;</span><br><span class="line">            <span class="attr">"include"</span> : &#123;</span><br><span class="line">              <span class="attr">"_tier_preference"</span> : <span class="string">"data_content"</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"number_of_shards"</span> : <span class="string">"1"</span>, <span class="comment">//主分片数量</span></span><br><span class="line">        <span class="attr">"provided_name"</span> : <span class="string">"shopping"</span>,</span><br><span class="line">        <span class="attr">"creation_date"</span> : <span class="string">"1631953527202"</span>,</span><br><span class="line">        <span class="attr">"number_of_replicas"</span> : <span class="string">"1"</span>, <span class="comment">//副本分片数量</span></span><br><span class="line">        <span class="attr">"uuid"</span> : <span class="string">"bu5v-UQDQGChrcvunLV5iA"</span>,</span><br><span class="line">        <span class="attr">"version"</span> : &#123;</span><br><span class="line">          <span class="attr">"created"</span> : <span class="string">"7140199"</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果想要查看当前ES实例中都有哪些索引，则需要执行请求 <code>GET /_cat/indices?v</code>，请求路径中的<br>_cat 表示查看的意思：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">health status index                           uuid                   pri rep docs.count docs.deleted store.size pri.store.size</span><br><span class="line">yellow open   shopping                        bu5v-UQDQGChrcvunLV5iA   1   1          0            0       208b           208b</span><br></pre></td></tr></table></figure><br>返回字段的含义是： health=当前服务器健康状态 green（集群完整）yellow（单点正常、集群不完整） red（单点不正常）； status=索引打开、关闭状态； index=索引名；uuid=索引统一编号； pri=主分片数量； rep=副本数量； docs.count=可用文档数量； docs.deleted=文档删除状态（逻辑删除）； store.size=主分片和副分片整体占空间大小； pri.store.size=主分片占空间大小。</p>
+<h3 id="删除索引"><a href="#删除索引" class="headerlink" title="删除索引"></a>删除索引</h3><p>在 Kibana 中输入 <code>DELETE /shopping</code> 点击执行按钮，在右侧会返回：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"acknowledged"</span> : <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>此时，再用上面的查看命令查看就会出现报错，或在所有的索引列表中没有了该索引，删除索引会立即释放相应的磁盘空间。</p>
+<h3 id="创建文档"><a href="#创建文档" class="headerlink" title="创建文档"></a>创建文档</h3><p>默认我们已经创建好了索引 shopping，在 Kibana 中输入 <code>POST /shoppint/_doc</code> 并附上文档的 JSON 内容：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"小米手机"</span>,</span><br><span class="line">    <span class="attr">"category"</span>: <span class="string">"小米"</span>,</span><br><span class="line">    <span class="attr">"images"</span>: <span class="string">"http://www.pictures.com/xm.jpg"</span>,</span><br><span class="line">    <span class="attr">"price"</span>: <span class="number">3999.00</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>此时，右侧返回的响应结果为：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_index"</span> : <span class="string">"shopping"</span>, <span class="comment">// 索引</span></span><br><span class="line">  <span class="attr">"_type"</span> : <span class="string">"_doc"</span>, <span class="comment">// 默认唯一的“类型”</span></span><br><span class="line">  <span class="attr">"_id"</span> : <span class="string">"W7R-C3wBLUpZGbU12mrM"</span>, <span class="comment">// 文档的唯一标识，未指定则随机生成</span></span><br><span class="line">  <span class="attr">"_version"</span> : <span class="number">1</span>, <span class="comment">// 版本</span></span><br><span class="line">  <span class="attr">"result"</span> : <span class="string">"created"</span>, <span class="comment">// 表示创建成功</span></span><br><span class="line">  <span class="attr">"_shards"</span> : &#123;</span><br><span class="line">    <span class="attr">"total"</span> : <span class="number">2</span>, <span class="comment">// 分片总数</span></span><br><span class="line">    <span class="attr">"successful"</span> : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"failed"</span> : <span class="number">0</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"_seq_no"</span> : <span class="number">0</span>,</span><br><span class="line">  <span class="attr">"_primary_term"</span> : <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>自定义唯一性标识则需要在创建文档时指定：<code>POST /shopping/_doc/1</code>，这里的 1 就是指定的 _id。需要注意的是，第一条命令由于没有指定_id，所以只能用 POST 命令，第二条指定了数据主键，则 POST 和 PUT 都是可行的请求。</p>
+<h3 id="查看文档"><a href="#查看文档" class="headerlink" title="查看文档"></a>查看文档</h3><p>查看文档时，需要指明文档的唯一性标识，在 Kibana 中输入 <code>GET /shopping/_doc/1</code>，执行后就能返回对应的文档内容。另一个常用的查看文档命令是查看索引下的所有数据，<code>GET /shopping/_search</code>，返回的结果如下：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"took"</span> : <span class="number">7</span>,</span><br><span class="line">  <span class="attr">"timed_out"</span> : <span class="literal">false</span>,</span><br><span class="line">  <span class="attr">"_shards"</span> : &#123;</span><br><span class="line">    <span class="attr">"total"</span> : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"successful"</span> : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"skipped"</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">"failed"</span> : <span class="number">0</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"hits"</span> : &#123;</span><br><span class="line">    <span class="attr">"total"</span> : &#123;</span><br><span class="line">      <span class="attr">"value"</span> : <span class="number">1</span>,</span><br><span class="line">      <span class="attr">"relation"</span> : <span class="string">"eq"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"max_score"</span> : <span class="number">1.0</span>,</span><br><span class="line">    <span class="attr">"hits"</span> : [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"_index"</span> : <span class="string">"shopping"</span>,</span><br><span class="line">        <span class="attr">"_type"</span> : <span class="string">"_doc"</span>,</span><br><span class="line">        <span class="attr">"_id"</span> : <span class="string">"1"</span>,</span><br><span class="line">        <span class="attr">"_score"</span> : <span class="number">1.0</span>,</span><br><span class="line">        <span class="attr">"_source"</span> : &#123;</span><br><span class="line">          <span class="attr">"title"</span> : <span class="string">"小米手机"</span>,</span><br><span class="line">          <span class="attr">"category"</span> : <span class="string">"小米"</span>,</span><br><span class="line">          <span class="attr">"images"</span> : <span class="string">"http://www.pictures.com/xm.jpg"</span>,</span><br><span class="line">          <span class="attr">"price"</span> : <span class="number">3999.0</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="删改文档"><a href="#删改文档" class="headerlink" title="删改文档"></a>删改文档</h3><p>和新增文档一样，使用 POST 命令输入相同的 URL 地址请求，如果请求体变化，会将原有的数据内容覆盖；当然还可以只修改某一文档的局部字段，那么此时需要在 URL 中增加 _update 关键字，并指定文档 _id 使用 <code>PSOT /shopping/_update/1</code> 命令带上修改字段的 JSON 内容：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"doc"</span>: &#123;</span><br><span class="line">    <span class="attr">"title"</span>: <span class="string">"华为手机"</span>,</span><br><span class="line">    <span class="attr">"category"</span>: <span class="string">"华为"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>修改成功后会回复如下内容：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_index"</span> : <span class="string">"shopping"</span>,</span><br><span class="line">  <span class="attr">"_type"</span> : <span class="string">"_doc"</span>,</span><br><span class="line">  <span class="attr">"_id"</span> : <span class="string">"1"</span>,</span><br><span class="line">  <span class="attr">"_version"</span> : <span class="number">2</span>,</span><br><span class="line">  <span class="attr">"result"</span> : <span class="string">"updated"</span>, <span class="comment">// 表示数据已被更新</span></span><br><span class="line">  <span class="attr">"_shards"</span> : &#123;</span><br><span class="line">    <span class="attr">"total"</span> : <span class="number">2</span>,</span><br><span class="line">    <span class="attr">"successful"</span> : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"failed"</span> : <span class="number">0</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"_seq_no"</span> : <span class="number">1</span>,</span><br><span class="line">  <span class="attr">"_primary_term"</span> : <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>再次查看对应的文档，则发现相应的字段被修改了：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_index"</span> : <span class="string">"shopping"</span>,</span><br><span class="line">  <span class="attr">"_type"</span> : <span class="string">"_doc"</span>,</span><br><span class="line">  <span class="attr">"_id"</span> : <span class="string">"1"</span>,</span><br><span class="line">  <span class="attr">"_version"</span> : <span class="number">2</span>,</span><br><span class="line">  <span class="attr">"_seq_no"</span> : <span class="number">1</span>,</span><br><span class="line">  <span class="attr">"_primary_term"</span> : <span class="number">1</span>,</span><br><span class="line">  <span class="attr">"found"</span> : <span class="literal">true</span>,</span><br><span class="line">  <span class="attr">"_source"</span> : &#123;</span><br><span class="line">    <span class="attr">"title"</span> : <span class="string">"华为手机"</span>,</span><br><span class="line">    <span class="attr">"category"</span> : <span class="string">"华为"</span>,</span><br><span class="line">    <span class="attr">"images"</span> : <span class="string">"http://www.pictures.com/xm.jpg"</span>,</span><br><span class="line">    <span class="attr">"price"</span> : <span class="number">3999.0</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>最后，我们说说文档的删除机制，删除一个文档需要向 ES 发送 <code>DELETE /shopping/_doc/1</code> 命令，但 ES 不会立即从磁盘上移除该文档，而只是将其标记成已删除（逻辑删除），即仍然可以被检索到，但最终会被过滤而不返回。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/" rel="tag"># 搜索引擎</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/05/numpy-1/" rel="next" title="面向机器学习的NumPy知识点汇总">
+                <i class="fa fa-chevron-left"></i> 面向机器学习的NumPy知识点汇总
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/25/elasticsearch-2/" rel="prev" title="ElasticSearch：存储数据">
+                ElasticSearch：存储数据 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置"><span class="nav-number">1.</span> <span class="nav-text">安装配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Kibana"><span class="nav-number">3.</span> <span class="nav-text">使用Kibana</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单的REST-API示例"><span class="nav-number">4.</span> <span class="nav-text">简单的REST API示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建索引"><span class="nav-number">4.1.</span> <span class="nav-text">创建索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看索引"><span class="nav-number">4.2.</span> <span class="nav-text">查看索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除索引"><span class="nav-number">4.3.</span> <span class="nav-text">删除索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建文档"><span class="nav-number">4.4.</span> <span class="nav-text">创建文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看文档"><span class="nav-number">4.5.</span> <span class="nav-text">查看文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删改文档"><span class="nav-number">4.6.</span> <span class="nav-text">删改文档</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

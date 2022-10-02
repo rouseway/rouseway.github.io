@@ -1,0 +1,801 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="PyTorch中的激活函数与损失函数都存在两种调用模式，nn.xx对象和torch.xx类函数（或者定义在torch.nn.functional.xx中），前者是包装好的类，后者是可以直接调用的函数；nn.xx 类的 forward( ) 函数中调用了 torch.xx 函数。 激活函数我们在构建深度神经网络时，如果没有激励函数，无论你神经网络有多少层，输出都是输入的线性组合，引入非线性函数作为激">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch激活与损失函数">
+<meta property="og:url" content="http://yoursite.com/2021/09/15/pytorch-5/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="PyTorch中的激活函数与损失函数都存在两种调用模式，nn.xx对象和torch.xx类函数（或者定义在torch.nn.functional.xx中），前者是包装好的类，后者是可以直接调用的函数；nn.xx 类的 forward( ) 函数中调用了 torch.xx 函数。 激活函数我们在构建深度神经网络时，如果没有激励函数，无论你神经网络有多少层，输出都是输入的线性组合，引入非线性函数作为激">
+<meta property="article:published_time" content="2021-09-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:47.611Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/09/15/pytorch-5/"/>
+
+
+
+
+
+  <title> PyTorch激活与损失函数 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/09/15/pytorch-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch激活与损失函数
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-15T00:00:00+08:00">
+                2021-09-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>PyTorch中的<strong>激活函数</strong>与<strong>损失函数</strong>都存在两种调用模式，<strong>nn.xx对象</strong>和<strong>torch.xx类函数</strong>（或者定义在torch.nn.functional.xx中），前者是包装好的类，后者是可以直接调用的函数；nn.xx 类的 forward( ) 函数中调用了 torch.xx 函数。</p>
+<h2 id="激活函数"><a href="#激活函数" class="headerlink" title="激活函数"></a>激活函数</h2><p>我们在构建深度神经网络时，如果没有激励函数，无论你神经网络有多少层，输出都是输入的线性组合，引入非线性函数作为激励函数，这样深层神经网络表达能力就更加强大（几乎可以逼近任意函数）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="comment"># 准备好数据</span></span><br><span class="line">x = torch.linspace(<span class="number">-5</span>, <span class="number">5</span>, <span class="number">200</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="sigmoid函数"><a href="#sigmoid函数" class="headerlink" title="sigmoid函数"></a>sigmoid函数</h3><p>该函数是将取值为 (−∞,+∞) 的数映射到 (0,1) 之间，其数学形式与图形为：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">y_sigmoid = torch.sigmoid(x)</span><br><span class="line"><span class="comment"># sigmoid = torch.nn.Sigmoid() # 使用类-对象模式</span></span><br><span class="line"><span class="comment"># y_sigmoid = sigmoid(x)</span></span><br><span class="line"></span><br><span class="line">plt.plot(x.numpy(), y_sigmoid.numpy(), c=<span class="string">'red'</span>, label=<span class="string">'sigmoid'</span>)</span><br><span class="line">plt.ylim((<span class="number">-0.2</span>, <span class="number">1.2</span>))</span><br><span class="line">plt.legend(loc=<span class="string">'best'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<p>sigmoid 函数满足当输入很小时，输出接近于0；当输入很大时，输出值接近1。从它的图形中可以看出其具有以下几个缺点：</p>
+<ul>
+<li>当 x 值非常大或者非常小时，sigmoid函数的导数 g′(z) 将接近 0，这会导致权重参数 W 的梯度将接近 0 ，使得梯度更新十分缓慢，即梯度消失。</li>
+<li>非零中心化，也就是当输入为0时，输出不为0，因为每一层的输出都要作为下一层的输入，而未0中心化会直接影响梯度下降 。</li>
+<li>从其函数定义可以看出计算量比较大。</li>
+</ul>
+<p>sigmoid 函数可用在网络最后一层，作为输出层进行二分类，但尽量不要使用在隐藏层。　</p>
+<h3 id="tanh函数"><a href="#tanh函数" class="headerlink" title="tanh函数"></a>tanh函数</h3><p>该函数是将取值为 (−∞,+∞) 的数映射到 (−1,1) 之间，其数学形式与图形为：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">y_tanh = torch.tanh(x)</span><br><span class="line"><span class="comment"># tanh = torch.nn.Tanh() # 使用类-对象模式</span></span><br><span class="line"><span class="comment"># y_tanh = tanh(x)</span></span><br><span class="line"></span><br><span class="line">plt.plot(x.numpy(), y_tanh.numpy(), c=<span class="string">'red'</span>, label=<span class="string">'tanh'</span>)</span><br><span class="line">plt.ylim((<span class="number">-1.2</span>, <span class="number">1.2</span>))</span><br><span class="line">plt.legend(loc=<span class="string">'best'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<p>对比 tanh 函数与 sigmoid 函数的图形和定义可以看出，它是零中心化的，但仍然存在梯度消失和计算量大的缺点。</p>
+<h3 id="ReLU函数"><a href="#ReLU函数" class="headerlink" title="ReLU函数"></a>ReLU函数</h3><p>是一种分段线性函数，$Relu(x)=max(0, x)$，该函数的图形为：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">y_relu = torch.relu(x)</span><br><span class="line"><span class="comment">#relu = torch.nn.ReLU() # 使用类-对象模式</span></span><br><span class="line"><span class="comment">#y_relu = relu(x)</span></span><br><span class="line"></span><br><span class="line">plt.plot(x.numpy(), y_relu.numpy(), c=<span class="string">'red'</span>, label=<span class="string">'relu'</span>)</span><br><span class="line">plt.ylim((<span class="number">-1</span>, <span class="number">5</span>))</span><br><span class="line">plt.legend(loc=<span class="string">'best'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br>ReLU 极大程度地弥补了 sigmoid 函数以及 tanh 函数的梯度消失问题（当输入为负数时也会导致梯度为零），计算速度也提升了许多。ReLU 目前仍是最常用的激活函数，在搭建人工神经网络的时候推荐优先尝试。当使用 ReLU 时要小心设置 learning rate，而且要注意不要让网络出现很多 “dead” 神经元，如果这个问题不好解决，那么可以试试 Leaky ReLU、PReLU 或者 Maxout。</p>
+<h3 id="softmax函数"><a href="#softmax函数" class="headerlink" title="softmax函数"></a>softmax函数</h3><p>与 sigmoid 函数类似，softmax 函数将每个单元的输出压缩为 (0, 1) 之间。然而，softmax操作还将每个输出除以所有输出的和，从而得到一个离散概率分布，除以 k 个可能的类，结果分布中的概率总和为 1。这对于解释分类任务的输出非常有用。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x = torch.rand(<span class="number">3</span>)</span><br><span class="line">print(x)</span><br><span class="line"><span class="comment"># 类函数模式在：torch.nn.functional.softmax()</span></span><br><span class="line">softmax = torch.nn.Softmax(dim=<span class="number">0</span>) <span class="comment"># 参数指定在哪一个轴上进行归一化</span></span><br><span class="line">y_softmax = softmax(x)</span><br><span class="line">print(y_softmax)</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">tensor([0.7768, 0.0511, 0.6187])</span></span><br><span class="line"><span class="string">tensor([0.4278, 0.2070, 0.3652])</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>结合 softmax 函数的公式与输出结果可以看出，由于使用了指数，可以让大的值更大，让小的更小，增加了区分对比度，提高学习效率。</p>
+<h2 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h2><p>在深度学习中要用到各种各样的损失函数，这些损失函数可看作是一种特殊的 layer， PyTorch 中的损失函数一般在训练模型时候指定，调用时传入 y_pred 在前，y_true 在后。值得注意的是，大部分损失函数在定义时都有 size_average 和 reduce 两个布尔类型的参数，需要解释一下。因为一般损失函数都是直接计算 batch 的数据，因此返回的 loss 结果都是维度为 (batch_size, ) 的张量。</p>
+<ul>
+<li>如果 reduce = False，那么 size_average 参数失效，直接返回张量形式的 loss；</li>
+<li>如果 reduce = True，那么 loss 返回的是标量;<ul>
+<li>如果 size_average = True，返回 loss.mean(); </li>
+<li>如果 size_average = False，返回 loss.sum();</li>
+</ul>
+</li>
+</ul>
+<p>另外一个参数 reduction 有三个取值，分别为 ‘none’、’mean’、’sum’，也可以来指导规约计算的方式，所以如果想要返回的 loss 是规约后的标量，一般我们推荐：size_average 和 reduce 都取 None，通过更改 reduction 的值以达到不同的规约目标。尽管 PyTorch 提供如此多灵活的计算方式，但最终用于优化的损失必须是一个标量。</p>
+<h3 id="均方损失函数"><a href="#均方损失函数" class="headerlink" title="均方损失函数"></a>均方损失函数</h3><p>对于回归模型，通常使用的是均方损失函数nn.MSELoss：</p>
+<p><strong>torch.nn.MSELoss(size_average=None, reduce=None, reduction=’mean’)</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">y_pred = torch.ones(<span class="number">2</span>, <span class="number">2</span>, requires_grad=<span class="literal">True</span>) * <span class="number">0.5</span></span><br><span class="line">y_true = torch.ones(<span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">loss_func = torch.nn.MSELoss()</span><br><span class="line">loss = loss_func(y_pred, y_true)</span><br></pre></td></tr></table></figure>
+<p>用于回归的损失函数还有，nn.L1Loss （L1 损失，也叫做绝对值误差损失）或者 nn.SmoothL1Loss (平滑 L1 损失，当输入在 -1 到 1 之间时，平滑为 L2 损失)。</p>
+<h3 id="二元交叉熵损失函数"><a href="#二元交叉熵损失函数" class="headerlink" title="二元交叉熵损失函数"></a>二元交叉熵损失函数</h3><p>对于二分类模型，通常使用的是二元交叉熵损失函数 nn.BCELoss (输入已经是 sigmoid 激活函数之后的结果) 或者 nn.BCEWithLogitsLoss (输入尚未经过 nn.Sigmoid 激活函数) ：</p>
+<p><strong>torch.nn.BCELoss(weight=None, size_average=None, reduce=None, reduction=’mean’)</strong><br><strong>torch.nn.BCEWithLogitsLoss(weight=None, size_average=None, reduce=None, reduction=’mean’, pos_weight=None)</strong></p>
+<p>这里需要注意的是，y_pred 的形状与 y_true 是相同的，都是 (batch, *)，其中 * 对应维度上的取值应该在 (0, 1) 之间（经过 sigmoid 激活），表示当前维度判断为 yes（二分类yes/no） 的概率。通常最简单的二分类数据格式，* 轴上对应的维度仅仅1维。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">y_pred = torch.randn((<span class="number">3</span>, <span class="number">2</span>)) <span class="comment"># batch_size=3</span></span><br><span class="line">y_true = torch.FloatTensor(<span class="number">3</span>, <span class="number">2</span>).random_(<span class="number">2</span>) <span class="comment"># 各元素取值为0或1，但必须是浮点型</span></span><br><span class="line"></span><br><span class="line">loss_func = torch.nn.BCELoss(reduce=<span class="literal">False</span>)</span><br><span class="line">loss = loss_func(torch.sigmoid(y_pred), y_true)</span><br></pre></td></tr></table></figure></p>
+<h3 id="交叉熵损失函数"><a href="#交叉熵损失函数" class="headerlink" title="交叉熵损失函数"></a>交叉熵损失函数</h3><p>对于多分类模型（同样适用于二分类），一般推荐使用交叉熵损失函数 nn.CrossEntropyLoss （y_true 需要是一阶的稀疏标签值，非 one-hot 形式；y_pred 是维度与类别数相等的张量，未经过 torch.nn.Softmax 激活，CrossEntropyLoss 会自动对其进行一个 Softmax() 操作）</p>
+<p><strong>torch.nn.CrossEntropyLoss(weight=None, size_average=None, ignore_index=-100, reduce=None, reduction=’mean’)</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="comment"># 假设一个3分类任务，batch_size=2，假设每个神经元输出都为0.5</span></span><br><span class="line">y_pred = torch.ones(<span class="number">2</span>, <span class="number">3</span>, requires_grad=<span class="literal">True</span>) * <span class="number">0.5</span> <span class="comment"># 形状是 (batch, category)</span></span><br><span class="line">y_true = torch.from_numpy(np.array([<span class="number">0</span>, <span class="number">1</span>])).type(torch.LongTensor)</span><br><span class="line"></span><br><span class="line">loss_func = torch.nn.CrossEntropyLoss(reduce=<span class="literal">False</span>)</span><br><span class="line"><span class="comment"># 使用 weight 对第一个类别加权</span></span><br><span class="line"><span class="comment"># weight = torch.from_numpy(np.array([0.6, 0.2, 0.2])).float()</span></span><br><span class="line"><span class="comment"># loss_func = torch.nn.CrossEntropyLoss(weight=weight, reduce=False)</span></span><br><span class="line">loss = loss_func(y_pred, y_true)</span><br></pre></td></tr></table></figure>
+<p>可选参数 weight 必须是一个 1 阶张量, 权重将被分配给各个类别. 对于不平衡的训练集非常有效。</p>
+<p>此外，如果多分类的 y_pred 已经通过 nn.LogSoftmax 激活，则可以使用 nn.NLLLoss 损失函数(the Negative Log Likelihood Loss)， 这种方法和直接使用 nn.CrossEntropyLoss 等价:</p>
+<p><strong>torch.nn.NLLLoss(weight=None, size_average=None, ignore_index=-100, reduce=None, reduction=’mean’)</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">logsoftmax = torch.nn.LogSoftmax(dim=<span class="number">1</span>)</span><br><span class="line">y_pred = logsoftmax(y_pred) <span class="comment"># y_pred被LogSoftmax激活过</span></span><br><span class="line"></span><br><span class="line">loss_func = torch.nn.NLLLoss(reduce=<span class="literal">False</span>)</span><br><span class="line">loss = loss_func(y_pred, y_true) <span class="comment"># 可以看到和上面的loss是一样的</span></span><br></pre></td></tr></table></figure>
+<h3 id="自定义损失函数"><a href="#自定义损失函数" class="headerlink" title="自定义损失函数"></a>自定义损失函数</h3><p>如果有需要，也可以自定义损失函数，自定义损失函数需要接收两个张量 y_pred，y_true 作为输入参数，并输出一个标量作为损失函数值。也可以对 nn.Module 进行子类化，重写 forward() 方法实现损失的计算逻辑，从而得到损失函数的类的实现。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FocalLoss</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,gamma=<span class="number">2.0</span>,alpha=<span class="number">0.75</span>)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.alpha = alpha</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self,y_pred,y_true)</span>:</span></span><br><span class="line">        bce = torch.nn.BCELoss(reduction = <span class="string">"none"</span>)(y_pred,y_true)</span><br><span class="line">        p_t = (y_true * y_pred) + ((<span class="number">1</span> - y_true) * (<span class="number">1</span> - y_pred))</span><br><span class="line">        alpha_factor = y_true * self.alpha + (<span class="number">1</span> - y_true) * (<span class="number">1</span> - self.alpha)</span><br><span class="line">        modulating_factor = torch.pow(<span class="number">1.0</span> - p_t, self.gamma)</span><br><span class="line">        loss = torch.mean(alpha_factor * modulating_factor * bce)</span><br><span class="line">        <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure><br>上面的代码是一个 Focal Loss 的自定义实现示范。Focal Loss是一种对binary_crossentropy的改进损失函数形式。它有两个可调参数，$\alpha$ 参数和 $\gamma$ 参数。其中 $\alpha$ 参数主要用于衰减负样本的权重，$\gamma$ 参数主要用于衰减容易训练样本的权重：</p>
+<script type="math/tex; mode=display">focal\_loss(y,p) = \begin{cases} -\alpha (1-p)^{\gamma}\log(p) & \text{if y = 1}\\ -(1-\alpha) p^{\gamma}\log(1-p) & \text{if y = 0} \end{cases}</script><p>从而让模型更加聚焦在正样本和困难样本上，这就是为什么这个损失函数叫做 Focal Loss。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/08/19/pytorch-4/" rel="next" title="PyTorch常用网络层">
+                <i class="fa fa-chevron-left"></i> PyTorch常用网络层
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/10/02/pytorch-6/" rel="prev" title="PyTorch优化器与正则化">
+                PyTorch优化器与正则化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#激活函数"><span class="nav-number">1.</span> <span class="nav-text">激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sigmoid函数"><span class="nav-number">1.1.</span> <span class="nav-text">sigmoid函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tanh函数"><span class="nav-number">1.2.</span> <span class="nav-text">tanh函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReLU函数"><span class="nav-number">1.3.</span> <span class="nav-text">ReLU函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#softmax函数"><span class="nav-number">1.4.</span> <span class="nav-text">softmax函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数"><span class="nav-number">2.</span> <span class="nav-text">损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#均方损失函数"><span class="nav-number">2.1.</span> <span class="nav-text">均方损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二元交叉熵损失函数"><span class="nav-number">2.2.</span> <span class="nav-text">二元交叉熵损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交叉熵损失函数"><span class="nav-number">2.3.</span> <span class="nav-text">交叉熵损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义损失函数"><span class="nav-number">2.4.</span> <span class="nav-text">自定义损失函数</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

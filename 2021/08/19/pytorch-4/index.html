@@ -1,0 +1,816 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,Deep Learning,PyTorch," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="上一节我们使用了PyTorch的线性层（也叫全连接层）torch.nn.Linear( )，体验到了使用PyTorch封装好的函数构建神经网络的便捷。所以，这一节我们将处理一下常用的网络函数12import torchfrom torch import nn Embedding层实现自然语言处理任务的第一个操作就是讲离散类型的单词表示为密集向量，这个过程称为“representation lear">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch常用网络层">
+<meta property="og:url" content="http://yoursite.com/2021/08/19/pytorch-4/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="上一节我们使用了PyTorch的线性层（也叫全连接层）torch.nn.Linear( )，体验到了使用PyTorch封装好的函数构建神经网络的便捷。所以，这一节我们将处理一下常用的网络函数12import torchfrom torch import nn Embedding层实现自然语言处理任务的第一个操作就是讲离散类型的单词表示为密集向量，这个过程称为“representation lear">
+<meta property="article:published_time" content="2021-08-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T09:16:47.608Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="Deep Learning">
+<meta property="article:tag" content="PyTorch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/08/19/pytorch-4/"/>
+
+
+
+
+
+  <title> PyTorch常用网络层 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/08/19/pytorch-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PyTorch常用网络层
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-19T00:00:00+08:00">
+                2021-08-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/PyTorch/" itemprop="url" rel="index">
+                    <span itemprop="name">PyTorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一节我们使用了PyTorch的线性层（也叫全连接层）torch.nn.Linear( )，体验到了使用PyTorch封装好的函数构建神经网络的便捷。所以，这一节我们将处理一下常用的网络函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br></pre></td></tr></table></figure></p>
+<h2 id="Embedding层"><a href="#Embedding层" class="headerlink" title="Embedding层"></a>Embedding层</h2><p>实现自然语言处理任务的第一个操作就是讲离散类型的单词表示为密集向量，这个过程称为“representation learning”或“embedding”：</p>
+<p><strong>torch.nn.Embedding(num_embeddings, embedding_dim, padding_idx=None, max_norm=None, norm_type=2, scale_grad_by_freq=False, sparse=False)</strong></p>
+<p>该层对应的参数其实就是一个保存了固定字典大小的简单查找表，模块的输入是一个单词id组成的列表，输出是对应的词嵌入。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch.autograd <span class="keyword">import</span> Variable</span><br><span class="line"></span><br><span class="line">embedding = nn.Embedding(<span class="number">10</span>, <span class="number">3</span>) <span class="comment"># 定义一个包含10个词，每个词3维的embedding层</span></span><br><span class="line"><span class="comment"># 输入shape=(N, w)：N表示样本（句子）数，w表示一个样本（句子）中的单词数</span></span><br><span class="line">input = Variable(torch.LongTensor([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">5</span>], [<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">9</span>]])) <span class="comment"># 2个句子，每个句子4个单词（用单词id表示）</span></span><br><span class="line"><span class="comment"># 输出shape=(N, w, embedding_dim)</span></span><br><span class="line">out1 = embedding(input)</span><br></pre></td></tr></table></figure></p>
+<h2 id="全连接层"><a href="#全连接层" class="headerlink" title="全连接层"></a>全连接层</h2><p>全连接层是一种最简单的网络层，它的的输入与输出形状为 [batch_size, *, size] ，即第0轴对应batch的维度，最后一个轴上的维度值对应in_features/out_features：</p>
+<p><strong>torch.nn.Linear(in_features, out_features, bias=True)</strong></p>
+<p>在初始化全连接层时，我们只需要关注输入输出的张量的最后一个轴上的维度（不用去考虑参数的形状），相当于该网络层可以自动将[batch_size, *, size=in_features]的张量变换成了[batch_size, size=out_features]的输出张量。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">input = torch.from_numpy(np.array([[<span class="number">3.3</span>], [<span class="number">4.4</span>], [<span class="number">5.5</span>], [<span class="number">6.71</span>], [<span class="number">6.93</span>]], dtype=np.float32))</span><br><span class="line"></span><br><span class="line">hidden_layer = nn.Linear(<span class="number">1</span>, <span class="number">10</span>) <span class="comment"># input中数据的特征都是1维的</span></span><br><span class="line">predict_layer = nn.Linear(<span class="number">10</span>, <span class="number">1</span>) <span class="comment"># 堆叠多个全连接层时输入输出特征维度注意对应上</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Dropout层"><a href="#Dropout层" class="headerlink" title="Dropout层"></a>Dropout层</h2><p>Dropout 是在训练过程中以一定的概率的使神经元失活，即输出为0，以提高模型的泛化能力，减少过拟合。PyTorch中常用的Dropout层有如下两个：前者用于一维数据，比如 linear 的输出结果；后者主要用于二维数据，一般在卷积层后。</p>
+<p><strong>torch.nn.Dropout(p=0.5, inplace=False)</strong><br><strong>torch.nn.Dropout2d(p=0.5, inplace=False)</strong></p>
+<p>其中的两个参数，p 表示将多少数据置为 0 的概率，inplace=True 则表示进行原地操作，对输入的数据本身内存进行操作。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dropout = nn.Dropout(<span class="number">0.3</span>)</span><br><span class="line"></span><br><span class="line">x = hidden_layer(input)</span><br><span class="line">x = dropout(torch.relu(x)) <span class="comment"># 全连接层之后添加Dropout层</span></span><br><span class="line">x = predict_layer(x)</span><br></pre></td></tr></table></figure><br>在测试模型时，我们为了拿到更加确定性的结果，一般不使用Dropout层。</p>
+<h2 id="卷积层"><a href="#卷积层" class="headerlink" title="卷积层"></a>卷积层</h2><p>常用的卷积层分为一维卷积 nn.Conv1d 和二维卷积 nn.Conv2d：</p>
+<p><strong>torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)</strong></p>
+<p>一维卷积多用于文本数据，只对宽度进行卷积。通常，输入大小为 word_embedding_dim * max_length，其中，word_embedding_dim 为词向量的维度，max_length 为句子的最大长度。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># in_channels就是词向量的维度，out_channels是卷积产生的通道数（也就是卷积核的数量），kernel_size是卷积核的尺寸（第0轴上的维度，第1轴的维度由in_channels决定）</span></span><br><span class="line">conv1 = nn.Conv1d(in_channels=<span class="number">256</span>, out_channels=<span class="number">100</span>, kernel_size=<span class="number">2</span>)</span><br><span class="line">input = torch.randn(<span class="number">32</span>, <span class="number">35</span>, <span class="number">256</span>) <span class="comment"># batch_size=32, max_legth=35, word_embedding_dim=256</span></span><br><span class="line">input = input.permute(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>) <span class="comment"># 需要进行轴变换（因为卷积操作是在最后一个轴上进行的）</span></span><br><span class="line">output = conv1(input)</span><br></pre></td></tr></table></figure></p>
+<p><strong>torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)</strong></p>
+<p>二维卷积nn.Conv2d用于图像数据，对宽度和高度都进行卷积。输入的尺寸为$(N, C_i, H_i, W_i)$，输出的尺寸为$(N, C_o, H_o, W_o)$：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># padding表示每一个轴方向上补零的个数，dilation控制kernel点之间的空间距离</span></span><br><span class="line">conv2 = nn.Conv2d(<span class="number">16</span>, <span class="number">33</span>, (<span class="number">3</span>, <span class="number">5</span>), stride=(<span class="number">2</span>, <span class="number">1</span>), padding=(<span class="number">4</span>, <span class="number">2</span>), dilation=(<span class="number">3</span>, <span class="number">1</span>))</span><br><span class="line">input = torch.randn((<span class="number">20</span>, <span class="number">16</span>, <span class="number">50</span>, <span class="number">100</span>)) <span class="comment"># 输入的形状：[ batch_size, channels, height_1, width_1 ]</span></span><br><span class="line">output = conv2(input)</span><br></pre></td></tr></table></figure></p>
+<h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>池化层本质就是进行下采样操作的，即将 feature map 变小，常用的池化操作有<strong>最大池化</strong>与<strong>平均池化</strong>：</p>
+<p><strong>torch.nn.MaxPool1d(kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False)</strong><br><strong>torch.nn.AvgPool1d(kernel_size, stride=None, padding=0, ceil_mode=False, count_include_pad=True)</strong></p>
+<p>其中的参数和卷积层中的定义是一致的，这里不再赘述。其中 return_indices 如果等于True，会返回输出最大值的序号，对于上采样操作会有帮助；ceil_mode 如果等于True，计算输出信号大小的时候，会使用向上取整，代替默认的向下取的操作；count_include_pad 表示在计算平均值时，是否把填充值考虑在内计算。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">avgpool_layer = nn.AvgPool2d((<span class="number">2</span>, <span class="number">2</span>), stride=(<span class="number">2</span>, <span class="number">2</span>))</span><br><span class="line">img_pool = avgpool_layer(input)</span><br></pre></td></tr></table></figure></p>
+<p>池化层只是一个进行简单操作的层，没有需要学习的参数。</p>
+<h2 id="循环网络层"><a href="#循环网络层" class="headerlink" title="循环网络层"></a>循环网络层</h2><p>循环网络层，我们重点介绍 LSTM 和 GRU（说明部分以 LSTM 举例，GRU也是一样的）：</p>
+<p><strong>torch.nn.LSTM(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0, bidirectional=False, proj_size=0)</strong><br><strong>torch.nn.GRU(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0, bidirectional=False)</strong></p>
+<p>通过设置 num_layers&gt;1 就可以支持多层，设置 bidirectional=True 可以得到双向 LSTM。需要注意的时，默认的输入和输出形状是 (seq, batch, feature), 如果需要将 batch 维度放在第0轴，则要设置 batch_first 参数设置为 True 。我们使用一个表格来总结 LSTM 中几个变量的维度：<br>|模型/变量|第0轴|第1轴|第2轴|<br>|—-|—-|—-|—-|<br>|torch.nn.LSTM()|input_size|hidden_size|num_layers|<br>|<strong>$x$</strong>|seq_len|batch|input_size|<br>|<strong>$h_0$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$c_0$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$output$</strong>|seq_len|batch|num_directions×hidden_size|<br>|<strong>$h_n$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$c_n$</strong>|num_layers×num_directions|batch|hidden_size|</p>
+<p>对句子进行 LSTM 操作，假设训练集有若干句子，每个句子里有7个词，batch_size=64，embedding_size=300，此时，各个参数为：input_size=embedding_size=300；batch=batch_size=64；seq_len=7，另外设置hidden_size=100, num_layers=1<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">lstm = nn.LSTM(<span class="number">300</span>, <span class="number">100</span>, <span class="number">1</span>)</span><br><span class="line">gru = nn.GRU(<span class="number">300</span>, <span class="number">128</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">x = torch.randn(<span class="number">7</span>, <span class="number">64</span>, <span class="number">300</span>) <span class="comment"># 具体维度参考上面的表格说明</span></span><br><span class="line">h0 = torch.randn(<span class="number">1</span>, <span class="number">64</span>, <span class="number">100</span>)</span><br><span class="line">c0 = torch.randn(<span class="number">1</span>, <span class="number">64</span>, <span class="number">100</span>)</span><br><span class="line"></span><br><span class="line">output, (hn, cn)=lstm(x, (h0, c0)) <span class="comment"># 如果不指定h0、c0，则使用默认全0的隐藏状态</span></span><br><span class="line">output, h = gru(x, h0)</span><br></pre></td></tr></table></figure></p>
+<p>output 就是最后一个 layer 上，序列中每个时刻（横向）状态h的集合（若为双向则按位置拼接，输出维度 2*hidden_size ），而 $h_n$ 实际上是每个 layer 最后一个状态（纵向）输出的拼接。对于单向 LSTM 来说，$h_n[-1,:,:]$ 就是 $output[-1,:,:]$，相当于序列最后一个时间步的输出（可以用它作为整个序列的 embedding或 representation）。但双向 LSTM 推广后，每个时间步的隐层输出都可以作为当前词的一个融合了上下文的 embedding，因此 BiLSTM 可以视为一种词级别的 encoder 方法，得到的 output 既可以用于词级别的输出拼接，也可以进行融合（比如 attention 加权求和、pooling ）得到序列级的输出。</p>
+<p>通常，输入到 LSTM 或 GRU 的序列并不是等长的，需要进行 pad 补齐后才能进行批量运算，但是长短不一的文本数据单纯 pad 往往会导致最短的那句话里大量都是无用的 \<pad> 符号，PyTorch提供了一种 <strong>压缩 pad</strong> 的机制：</p>
+<p><strong>torch.nn.utils.rnn.pack_padded_sequence(input, lengths, batch_first=False)</strong></p>
+<p>input 是我们要压缩的数据，当 batch_first 为 True，shape 的输入格式是 [ batch, seq_len, embed_dim ] ，如果 batch_first 为 False，相应的的数据格式必须是 [seq_len, batch, embed_dim ] 。lengths 是输入数据的每个序列的长度。需要注意的是，input 必须按序列长度的长短排序，长的排在前面，短的在后面。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">input_seq = [[<span class="number">3</span>, <span class="number">5</span>, <span class="number">12</span>, <span class="number">7</span>, <span class="number">2</span>], [<span class="number">4</span>, <span class="number">11</span>, <span class="number">14</span>], [<span class="number">18</span>, <span class="number">7</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">5</span>, <span class="number">4</span>]]</span><br><span class="line">lengths = [<span class="number">5</span>, <span class="number">3</span>, <span class="number">6</span>]   <span class="comment"># batch中每个seq的有效长度。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 由大到小排序</span></span><br><span class="line">input_seq = sorted(input_seq, key = <span class="keyword">lambda</span> tp: len(tp), reverse=<span class="literal">True</span>)</span><br><span class="line">lengths = sorted(lengths, key = <span class="keyword">lambda</span> tp: tp, reverse=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">pack = nn.utils.rnn.pack_padded_sequence(embeded, lengths, batch_first=<span class="literal">True</span>) <span class="comment"># 返回一个PackedSequence对象</span></span><br></pre></td></tr></table></figure></p>
+<p>因为有了 lengths 指示了有效长度，这样 LSTM 和 GRU 只会作用到句子的实际长度处就停止了，不会去处理无用的 \<pad> 符号。</p>
+<p>处理长序列时还要避免梯度消失的问题，可以调用 <strong>梯度裁剪</strong> 函数在反向传播过程中，对梯度进行裁剪，使其限制在区间 [-clip<em>value, clip_value] 内（对应的函数是clip_grad_value</em>）。或者，更柔和一些，不直接用梯度去更新参数，而是比较梯度的范数与梯度阈值，如果范数较大，则使用梯度阈值除以范数作为缩放因子乘到真实的梯度上进行更新（对应的函数是clip<em>grad_norm</em>）：</p>
+<p><strong>torch.nn.utils.clip<em>grad_value</em>(parameters, clip_value)</strong><br><strong>torch.nn.utils.clip<em>grad_norm</em>(parameters, max_norm, norm_type=2.0)</strong></p>
+<p>其中，max_norm 是梯度的最大范数；norm_type 规定范数的类型，默认为 L2 范数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">outputs = net(data)</span><br><span class="line">loss= loss_fn(outputs, target)</span><br><span class="line"></span><br><span class="line">optimizer.zero_grad()</span><br><span class="line">loss.backward()</span><br><span class="line">nn.utils.clip_grad_norm_(net.parameters(), max_norm=<span class="number">20</span>, norm_type=<span class="number">2</span>)</span><br><span class="line">optimizer.step()</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，PyTorch 的梯度计算是在 loss.backward() 后进行的，所以需要在 optimizer 更新参数之前，完成梯度的裁剪，最后还要记得使用 optimizer 对 net 的参数进行更新。</p>
+<h2 id="归一化层"><a href="#归一化层" class="headerlink" title="归一化层"></a>归一化层</h2><p>归一化层最早是在图像领域引入的，常见的归一化操作包括：</p>
+<ul>
+<li>BatchNorm：batch 方向做归一化，算 NHW 的均值，对小 batch_size 效果不好；BN 主要缺点是对 batch_size 的大小比较敏感，由于每次计算均值和方差是在一个 batch 上，所以如果 batch_size 太小，则计算的均值、方差不足以代表整个数据分布</li>
+<li>LayerNorm：channel 方向做归一化，算 CHW 的均值，主要对 RNN 作用明显</li>
+<li>InstanceNorm：一个channel内做归一化，算 H*W 的均值，用在风格化迁移；因为在图像风格化中，生成结果主要依赖于某个图像实例，所以对整个 batch 归一化不适合图像风格化中，因而对 HW 做归一化。可以加速模型收敛，并且保持每个图像实例之间的独立</li>
+<li>GroupNorm：将 channel 方向分 group，然后每个 group 内做归一化，算 (C//G)HW 的均值；这样与 batch_size 无关，不受其约束</li>
+<li>SwitchableNorm：将 BN、LN、IN 结合，赋予权重，让网络自己去学习归一化层应该使用什么方法</li>
+</ul>
+<p><strong>torch.nn.BatchNorm1d(num_features, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)</strong></p>
+<p>其中，num_features 来自期望输入的特征数，该期望输入的大小为 batch_size × num_features [* width]；eps 是一个极小值，为保证数值稳定性（分母不能趋近或取0）给分母加上的；momentum 为动态均值和动态方差所使用的动量；affine 当设为True，给该层添加可学习的仿射变换参数；track_running_stats 当设为true，记录训练过程中的均值和方差；</p>
+<p><strong>torch.nn.LayerNorm(normalized_shape, eps=1e-05, elementwise_affine=True)</strong></p>
+<p>normalized_shape 输入尺寸为[∗ ×normalized_shape[0]×normalized_shape[1]× … ×normalized_shape[−1]]；elementwise_affine 当设为true，给该层添加可学习的仿射变换参数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = torch.rand(<span class="number">100</span>, <span class="number">16</span>, <span class="number">784</span>) <span class="comment"># 随机生成一个Batch的模拟，100张16通道784像素点的数据</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Batch Normalization层，因为输入是将高度H和宽度W合成了一个维度,所以这里用1d</span></span><br><span class="line">layer = nn.BatchNorm1d(<span class="number">16</span>)  <span class="comment"># 传入通道数</span></span><br><span class="line">out = layer(x)</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，BN 层的统计数据更新是在每一次训练阶段的 forward( ) 方法中自动实现的，而不是在梯度计算与反向传播中更新 optim.step( ) 中完成。</p>
+<h2 id="Transformer层"><a href="#Transformer层" class="headerlink" title="Transformer层"></a>Transformer层</h2><p>Transformer 是一个完全基于注意力机制的模型，一个完整的 Transformer 模型是经典的 encoder-decoder 架构，采用多头自注意力实现</p>
+<p><strong>torch.nn.Transformer(d_model=512, nhead=8, num_encoder_layers=6, num_decoder_layers=6, dim_feedforward=2048, dropout=0.1, activation=’relu’, custom_encoder=None, custom_decoder=None)</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">transformer_model = nn.Transformer(nhead=<span class="number">16</span>, num_encoder_layers=<span class="number">12</span>)</span><br><span class="line">src = torch.rand((<span class="number">10</span>, <span class="number">32</span>, <span class="number">512</span>))</span><br><span class="line">tgt = torch.rand((<span class="number">20</span>, <span class="number">32</span>, <span class="number">512</span>))</span><br><span class="line">out = transformer_model(src, tgt)</span><br><span class="line"><span class="comment"># forward(src, tgt, src_mask=None, tgt_mask=None, memory_mask=None, \</span></span><br><span class="line"><span class="comment">#         src_key_padding_mask=None, tgt_key_padding_mask=None, \</span></span><br><span class="line"><span class="comment">#         memory_key_padding_mask=None)</span></span><br></pre></td></tr></table></figure>
+<p>用作语言模型用时，对于输入的 src，还应该传入它的 mask 序列（因为从左到右做语言模型时，模型是看不到其右侧的文本的）。</p>
+<p><strong>torch.nn.TransformerEncoder(encoder_layer, num_layers, norm=None)</strong><br><strong>torch.nn.TransformerDecoder(decoder_layer, num_layers, norm=None)</strong><br><strong>torch.nn.TransformerEncoderLayer(d_model, nhead, dim_feedforward=2048, dropout=0.1, activation=’relu’)</strong><br><strong>torch.nn.TransformerDecoderLayer(d_model, nhead, dim_feedforward=2048, dropout=0.1, activation=’relu’)</strong></p>
+<p>除了完整的 Transformer 模型，PyTorch 还提供了其中的编码、解码层，方便我们灵活实现自己的网络：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">encoder_layer = nn.TransformerEncoderLayer(d_model=<span class="number">512</span>, nhead=<span class="number">8</span>)</span><br><span class="line">transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=<span class="number">6</span>)</span><br><span class="line">src = torch.rand(<span class="number">10</span>, <span class="number">32</span>, <span class="number">512</span>)</span><br><span class="line">out = transformer_encoder(src)</span><br><span class="line"><span class="comment"># forward(src, src_mask=None, src_key_padding_mask=None)</span></span><br><span class="line"></span><br><span class="line">decoder_layer = nn.TransformerDecoderLayer(d_model=<span class="number">512</span>, nhead=<span class="number">8</span>)</span><br><span class="line">transformer_decoder = nn.TransformerDecoder(decoder_layer, num_layers=<span class="number">6</span>)</span><br><span class="line">memory = torch.rand(<span class="number">10</span>, <span class="number">32</span>, <span class="number">512</span>)</span><br><span class="line">tgt = torch.rand(<span class="number">20</span>, <span class="number">32</span>, <span class="number">512</span>)</span><br><span class="line">out = transformer_decoder(tgt, memory)</span><br><span class="line"><span class="comment"># forward(tgt, memory, tgt_mask=None, memory_mask=None, \</span></span><br><span class="line"><span class="comment">#         tgt_key_padding_mask=None, memory_key_padding_mask=None)</span></span><br></pre></td></tr></table></figure><br>这里需要重点解释一下各接口中的参数 *mask 和 *_key_padding_mask：模块出现在 encoder，* 就是 src；出现在 decoder，* 就是 tgt，decoder 每个 block 的第二层和 encoder 做 cross attention 的时候，就是 memory。*mask 对应的 API 是 attn_mask，*_key_padding_mask 对应的 API 是 key_padding_mask：</p>
+<ul>
+<li>key_padding_mask：用来屏蔽 pad token 的 embedding 输入。形状要求：(N, S)</li>
+<li>attn_mask：2维或者3维的矩阵。用来屏蔽指定位置的 embedding 输入。2维矩阵形状要求：(L, S)；也支持3维矩阵输入，形状要求：(N*num_heads, L, S)</li>
+</ul>
+<p>需要注意的是，使用 Transformer 模型，需要自己单独实现一个 PositionalEncoding 的操作，把位置信息加入到 token 的 embedding 中。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/08/08/pytorch-3/" rel="next" title="PyTorch构建神经网络">
+                <i class="fa fa-chevron-left"></i> PyTorch构建神经网络
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/09/15/pytorch-5/" rel="prev" title="PyTorch激活与损失函数">
+                PyTorch激活与损失函数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Embedding层"><span class="nav-number">1.</span> <span class="nav-text">Embedding层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全连接层"><span class="nav-number">2.</span> <span class="nav-text">全连接层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dropout层"><span class="nav-number">3.</span> <span class="nav-text">Dropout层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积层"><span class="nav-number">4.</span> <span class="nav-text">卷积层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#池化层"><span class="nav-number">5.</span> <span class="nav-text">池化层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#循环网络层"><span class="nav-number">6.</span> <span class="nav-text">循环网络层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#归一化层"><span class="nav-number">7.</span> <span class="nav-text">归一化层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer层"><span class="nav-number">8.</span> <span class="nav-text">Transformer层</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

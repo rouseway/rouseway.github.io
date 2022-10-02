@@ -1,0 +1,815 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="人工智能,自然语言处理,Python," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="数据分析中往往会遇到很多文本数据，我们需要借助一些开源的工具，快速地对这些文本数据进行简单的处理与分析。本文整理了一些基于 sklearn、nltk 等工具包进行快速 NLP 处理的常用实例，不涉及 NLP 理论知识，模型与方法的选型也不是最优的，只求快速。 字符编码Python3 开始字符在 python 解释器内部的默认编码为 unicode，unicode 编码有许多特殊的属性：123456">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python快速自然语言处理">
+<meta property="og:url" content="http://yoursite.com/2020/10/07/nlp-1/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="数据分析中往往会遇到很多文本数据，我们需要借助一些开源的工具，快速地对这些文本数据进行简单的处理与分析。本文整理了一些基于 sklearn、nltk 等工具包进行快速 NLP 处理的常用实例，不涉及 NLP 理论知识，模型与方法的选型也不是最优的，只求快速。 字符编码Python3 开始字符在 python 解释器内部的默认编码为 unicode，unicode 编码有许多特殊的属性：123456">
+<meta property="article:published_time" content="2020-10-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:10.438Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="人工智能">
+<meta property="article:tag" content="自然语言处理">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/10/07/nlp-1/"/>
+
+
+
+
+
+  <title> Python快速自然语言处理 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/07/nlp-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python快速自然语言处理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-07T00:00:00+08:00">
+                2020-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" itemprop="url" rel="index">
+                    <span itemprop="name">数据处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>数据分析中往往会遇到很多文本数据，我们需要借助一些开源的工具，快速地对这些文本数据进行简单的处理与分析。本文整理了一些基于 sklearn、nltk 等工具包进行快速 NLP 处理的常用实例，不涉及 NLP 理论知识，模型与方法的选型也不是最优的，只求快速。</p>
+<h2 id="字符编码"><a href="#字符编码" class="headerlink" title="字符编码"></a>字符编码</h2><p>Python3 开始字符在 python 解释器内部的默认编码为 unicode，unicode 编码有许多特殊的属性：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> unicodedata</span><br><span class="line"></span><br><span class="line">a = <span class="string">"中"</span></span><br><span class="line">b = <span class="string">"❤"</span></span><br><span class="line">print(a.encode(<span class="string">"raw_unicode_escape"</span>)) <span class="comment"># b'\\u4e2d'</span></span><br><span class="line">print(unicodedata.name(a))   <span class="comment"># CJK UNIFIED IDEOGRAPH-4E2D</span></span><br><span class="line">print(unicodedata.name(b)) <span class="comment"># HEAVY BLACK HEART</span></span><br></pre></td></tr></table></figure></p>
+<p>unicode 常用的属性包括：Name（名字）、Block（所属的连续编码范围）、Plane（所属平面）、Script（书写体系） 和 Category（类别）等。如上面的代码所示，通过 unicodedata 库可以获得 unicode 字符的上述属性，一个中文字符的 Name 都是以 CJK 开头的名称，通过名字属性我们可以判断一个字符的语种甚至语义，比如某种表情符号，其 Name 就是该表情符号的英文语义。Category 的属性跟语种是无关的，大体分为 <strong>L</strong>etter, <strong>M</strong>ark, <strong>N</strong>umber, <strong>P</strong>unctuation, <strong>S</strong>ymbol, <strong>S</strong>eperator, <strong>O</strong>ther 七大类，而每个类别下面还有进一步的二级分类，比如 <strong>Sm</strong> 就表示 <strong>S</strong>ymbol + <strong>m</strong>ath（数学符号）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">rst = []</span><br><span class="line"><span class="keyword">for</span> char <span class="keyword">in</span> <span class="string">"1a天。 ❤️"</span>:</span><br><span class="line">    rst.append(<span class="string">"&#123;&#125;:&#123;&#125;"</span>.format(char, unicodedata.category(char)))</span><br><span class="line"></span><br><span class="line">print(<span class="string">", "</span>.join(rst))</span><br><span class="line"><span class="comment"># 1:Nd, a:Ll, 天:Lo, 。:Po,  :Zs, ❤:So, ️:Mn</span></span><br></pre></td></tr></table></figure></p>
+<p>常用的类别标记有：Nd（十进制数字），P*（标点），Cc、Cf（控制字符），Zs（空格分隔符），Mn（不占空间标记，如声调）等。</p>
+<p>有的时候，从字面上看两个字符串是一模一样的，但是其编码却不同。这是由于 unicode 对一些字符的编码存在多种形式，主要集中在带声调的文字中，比如字符 “Ç” 就有两种编码形式： U+00C7 (LATIN CAPITAL LETTER C WITH CEDILLA) 单个编码、U+0043 (LATIN CAPITAL LETTER C) 与 U+0327 (COMBINING CEDILLA) 的两个编码 。前者称为 Compose（组合）模式，后者称为 Decompose（分离）模式。为了在处理文本时能得到统一的编码，我们需要利用 unicodedata.normalize(method, text) 函数对字符进行标准化处理，标准化分为两个方式：method=”<strong>NFKC</strong>“ 将所有的文本标准化为 Compose 形式；method=”<strong>NFKD</strong>“ 将所有的文本标准化为 Decompose 形式。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> unicodedata</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">strip_accents</span><span class="params">(s)</span>:</span></span><br><span class="line">   <span class="keyword">return</span> <span class="string">''</span>.join(c <span class="keyword">for</span> c <span class="keyword">in</span> unicodedata.normalize(<span class="string">'NFD'</span>, s)</span><br><span class="line">                  <span class="keyword">if</span> unicodedata.category(c) != <span class="string">'Mn'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>比如，我们要去掉声调字符，那么就按照 Decompose 形式标准化后，去除掉类别标记是 Mn 的字符即可。</p>
+<h2 id="文字判断"><a href="#文字判断" class="headerlink" title="文字判断"></a>文字判断</h2><p>如上文所属，一个语种的字符拥有若干连续的编码范围，中文字符的编码范围分为 8 段 ，如下面的代码所示，判断一个字符是否为中文（CJK中日韩文字）：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_is_chinese_char</span><span class="params">(char)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> ((char &gt;= <span class="number">0x4E00</span> <span class="keyword">and</span> char &lt;= <span class="number">0x9FFF</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x3400</span> <span class="keyword">and</span> char &lt;= <span class="number">0x4DBF</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x20000</span> <span class="keyword">and</span> char &lt;= <span class="number">0x2A6DF</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x2A700</span> <span class="keyword">and</span> char &lt;= <span class="number">0x2B73F</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x2B740</span> <span class="keyword">and</span> char &lt;= <span class="number">0x2B81F</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x2B820</span> <span class="keyword">and</span> char &lt;= <span class="number">0x2CEAF</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0xF900</span> <span class="keyword">and</span> char &lt;= <span class="number">0xFAFF</span>) <span class="keyword">or</span> </span><br><span class="line">            (char &gt;= <span class="number">0x2F800</span> <span class="keyword">and</span> char &lt;= <span class="number">0x2FA1F</span>)):</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br></pre></td></tr></table></figure></p>
+<p>当然，如前文所述，也可以采用 <code>unicodedata.name(char).startswith(&quot;CJK&quot;)</code> 来判断。另外，判断一个字符为标点符号则可以用 <code>unicodedata.category(char).startswith(&quot;P&quot;)</code> 来判断。</p>
+<h2 id="词法分析"><a href="#词法分析" class="headerlink" title="词法分析"></a>词法分析</h2><p>对于文本数据进行处理的第一步就是将文本序列转换为词的序列，即分词。中文推荐使用结巴分词：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"></span><br><span class="line">jieba.load_userdict(file_path) <span class="comment"># 用户自定义词典格式为“word freq POS”，其中word是必需</span></span><br><span class="line">text = <span class="string">"我来到北京清华大学"</span></span><br><span class="line">seg_list = jieba.cut(text)</span><br><span class="line">print(<span class="string">"Default Mode: "</span> + <span class="string">"/ "</span>.join(seg_list))  <span class="comment"># 精确模式</span></span><br><span class="line"><span class="comment"># 我/ 来到/ 北京/ 清华大学</span></span><br><span class="line"></span><br><span class="line">seg_list = jieba.cut(text, cut_all=<span class="literal">True</span>)</span><br><span class="line">print(<span class="string">"Full Mode: "</span> + <span class="string">"/ "</span>.join(seg_list))  <span class="comment"># 全词模式</span></span><br><span class="line"><span class="comment"># 我/ 来到/ 北京/ 清华/ 清华大学/ 华大/ 大学</span></span><br></pre></td></tr></table></figure><br>有的时候可以进一步得到词性的信息：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba.posseg <span class="keyword">as</span> psg</span><br><span class="line"></span><br><span class="line">seg_pos = psg.cut(text)</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> seg_pos:</span><br><span class="line">    print(<span class="string">"&#123;&#125;/&#123;&#125; "</span>.format(x.word, x.flag), end=<span class="string">""</span>)</span><br><span class="line"><span class="comment"># 我/r 来到/v 北京/ns 清华大学/nt</span></span><br></pre></td></tr></table></figure></p>
+<p>英文可以使用 NLTK 工具包，除了分词与词性标注以外，英文有的时候还可能需要进行词根还原：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> nltk</span><br><span class="line"></span><br><span class="line">text = nltk.word_tokenize(<span class="string">"And now for something completely different."</span>)</span><br><span class="line">print(text)</span><br><span class="line"><span class="comment"># ['And', 'now', 'for', 'something', 'completely', 'different', '.']</span></span><br></pre></td></tr></table></figure></p>
+<p>上述的词法分析工具包因为其内部集成了词典，所以可以直接或是简单配置资源后调用即可。然而，新兴的基于 BERT 的 NLP 方法提出了全新的分词模式—— wordpiece 分词，这种分词方法将中文切分为单个字，英文按照公共前缀的方式进行切分，这样可以解决一定程度的 OOV 问题。如果我们使用已发布的 BERT 模型，则需要配合使用该模型对应的词典进行文本预处理：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> BertTokenizer</span><br><span class="line"></span><br><span class="line">tokenizer = BertTokenizer.from_pretrained(BERT_MODEL_PATH)</span><br><span class="line">tokenizer.tokenize(text)</span><br></pre></td></tr></table></figure></p>
+<p>当然，如果我们要完全基于自己的语料构建 BERT 分词词典也是可以的：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pip install tonkenizers -q</span></span><br><span class="line"><span class="keyword">from</span> tokenizers <span class="keyword">import</span> BertWordPieceTokenizer</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置 handle_chinese_chars = False 中文也会按子串分词</span></span><br><span class="line">tokenizer = BertWordPieceTokenizer(</span><br><span class="line">    clean_text=<span class="literal">False</span>,</span><br><span class="line">    handle_chinese_chars=<span class="literal">True</span>,</span><br><span class="line">    strip_accents=<span class="literal">False</span>,</span><br><span class="line">    lowercase=<span class="literal">True</span>,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># train BERT tokenizer</span></span><br><span class="line">tokenizer.train(</span><br><span class="line">    file_path_lst, <span class="comment"># 所有的语料文件路径组成的列表</span></span><br><span class="line">    vocab_size=VOCAB_MAX_SIZE,</span><br><span class="line">    min_frequency=VOCAB_MIN_FREQ,</span><br><span class="line">    show_progress=<span class="literal">True</span>,</span><br><span class="line">    special_tokens=[<span class="string">'[PAD]'</span>, <span class="string">'[UNK]'</span>, <span class="string">'[CLS]'</span>, <span class="string">'[SEP]'</span>, <span class="string">'[MASK]'</span>],</span><br><span class="line">    limit_alphabet=<span class="number">1000</span>,</span><br><span class="line">    wordpieces_prefix=<span class="string">"##"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">vocab_dict = tokenizer.get_vocab()</span><br><span class="line">sorted_lst = sorted(vocab_dict.items(), key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>])</span><br><span class="line">fout = open(VOCAB_FILE, <span class="string">'w'</span>, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line"><span class="keyword">for</span> word, _ <span class="keyword">in</span> sorted_lst:</span><br><span class="line">    fout.write(<span class="string">"%s\n"</span> % word)</span><br><span class="line">fout.close()</span><br></pre></td></tr></table></figure></p>
+<p>构建好的 BERT 分词词典后，就可以使用 BERT 特殊的分词方式进行文本预处理了：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> tokenizers <span class="keyword">import</span> BertWordPieceTokenizer</span><br><span class="line"></span><br><span class="line">tokenizer = BertWordPieceTokenizer(VOCAB_FILE)</span><br><span class="line">word_lst = tokenizer.tokenize(<span class="string">"Hello word!"</span>)</span><br></pre></td></tr></table></figure></p>
+<h2 id="特征选择"><a href="#特征选择" class="headerlink" title="特征选择"></a>特征选择</h2><p>在传统的 NLP 方法中，词就是最基础的特征，基于分好词的语料统计出一个固定大小的词表，包括分词结果中的单个词与 n-grams 词组，就完成了大多数 NLP 任务的特征选择。sklearn 工具包中提供了一个记性文本特征提取的类 CountVectorize：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">sklearn</span>.<span class="title">feature_extraction</span>.<span class="title">text</span>.<span class="title">CountVectorizer</span><span class="params">(input=<span class="string">'content'</span>,</span></span></span><br><span class="line"><span class="class"><span class="params">encoding=<span class="string">'utf-8'</span>, decode_error=<span class="string">'strict'</span>,strip_accents=None, lowercase=True, </span></span></span><br><span class="line"><span class="class"><span class="params">preprocessor=None, tokenizer=None, stop_words=None,token_pattern=<span class="string">'(?u)\b\w\w+\b'</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">ngram_range=<span class="params">(<span class="number">1</span>, <span class="number">1</span>)</span>, analyzer=<span class="string">u'word'</span>, max_df=<span class="number">1.0</span>, min_df=<span class="number">1</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">max_features=None, vocabulary=None, binary=False, dtype=&lt;type <span class="string">'numpy.int64'</span>&gt;)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>input 参数一般使用默认的 content，即表示我们传入的是处理好的 token 化的文本，其数据类型是一个列表且元素是若干篇文档，每篇文档是用空格间隔的 token 序列。ngram_range 用来指定 n-grams 统计的长度范围。max_df 与 min_df 用来限定 DF 的最值，使用 DF 值“掐头去尾”是一种最简单有效的特征选择方法。max_features 用来限定特征的数量，通过按照词频的降序排列截取前 max_features 个作为特征。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"></span><br><span class="line"><span class="comment"># 四篇文章</span></span><br><span class="line">texts = [<span class="string">"dog cat fish"</span>, <span class="string">"dog cat cat"</span>, <span class="string">"fish bird"</span>, <span class="string">'bird'</span>] </span><br><span class="line"></span><br><span class="line"><span class="comment">#创建词袋数据结构</span></span><br><span class="line">cv = CountVectorizer()</span><br><span class="line">cv_fit = cv.fit_transform(texts)</span><br><span class="line"></span><br><span class="line">print(cv.get_feature_names()) <span class="comment"># ['bird', 'cat', 'dog', 'fish']</span></span><br><span class="line">print(cv.vocabulary_) <span class="comment"># &#123;'dog': 2, 'cat': 1, 'fish': 3, 'bird': 0&#125;</span></span><br><span class="line"></span><br><span class="line">print(cv_fit)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">(0, 3)    1</span></span><br><span class="line"><span class="string">(0, 1)    1</span></span><br><span class="line"><span class="string">(0, 2)    1</span></span><br><span class="line"><span class="string">(1, 1)    2</span></span><br><span class="line"><span class="string">(1, 2)    1</span></span><br><span class="line"><span class="string">(2, 0)    1</span></span><br><span class="line"><span class="string">(2, 3)    1</span></span><br><span class="line"><span class="string">(3, 0)    1</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>定义完 CountVectorizer 类的对象，使用 fit_transform 方法进行“拟合”，就可以得到词频矩阵，矩阵元素 a[i][j] 表示 ID 为 j 的词在第 i 个文本下的词频。比起统计词频、DF 值等简单的特征选择算法，在带有标签的语料中还可以使用卡方、互信息等特征选择算法选择一定数量的词构建词汇表。可以通过 TextFeatureSelection 包来实现上述特征选择：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> TextFeatureSelection <span class="keyword">import</span> TextFeatureSelection</span><br><span class="line"></span><br><span class="line">input_doc_list=[<span class="string">'i am very happy'</span>,<span class="string">'i just had an awesome weekend'</span>,<span class="string">'this is a very difficult terrain to trek. i wish i stayed back at home.'</span>,<span class="string">'i just had lunch'</span>,<span class="string">'Do you want chips?'</span>]</span><br><span class="line">target=[<span class="string">'Positive'</span>,<span class="string">'Positive'</span>,<span class="string">'Negative'</span>,<span class="string">'Neutral'</span>,<span class="string">'Neutral'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认采用四种特征选择算法综合计算分数</span></span><br><span class="line">fsOBJ=TextFeatureSelection(target=target,input_doc_list=input_doc_list, metric_list=[<span class="string">'MI'</span>,<span class="string">'CHI'</span>,<span class="string">'PD'</span>,<span class="string">'IG'</span>])</span><br><span class="line">result_df=fsOBJ.getScore()</span><br><span class="line">print(result_df)</span><br></pre></td></tr></table></figure></p>
+<p>选择出来的特征通常需要用两个词典进行维护，一个是 word2id，一个是 id2word，以方便将文本数据 ID 化以及还原显示。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">word2id = collections.OrderedDict()</span><br><span class="line">index = <span class="number">0</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'vocab.txt'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">    <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">        token = sline.strip()</span><br><span class="line">        word2id[token] = index</span><br><span class="line">        index += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">id2word = &#123;v: k <span class="keyword">for</span> k, v <span class="keyword">in</span> word2id.items()&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="向量空间"><a href="#向量空间" class="headerlink" title="向量空间"></a>向量空间</h2><p>前文选择的一定数量的特征词构成了一个“词袋”，每个词对应一个编号；如果构建一个词袋大小维度的向量，将一篇文档中出现的词对应到其编号所指的维度上，那么就可以将一篇文档转换为一个向量。至于向量每个维度上的取值，我们一般使用 TF-IDF 值作为特征权重：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfTransformer </span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">transformer = TfidfTransformer()</span><br><span class="line">tf_idf = transformer.fit_transform(cv_fit)</span><br><span class="line">print(tf_idf.toarray())</span><br></pre></td></tr></table></figure></p>
+<p>通常我们的做法是，接着上文 CountVectorizer 生成的特征矩阵，使用 TfidfTransformer 对其进行处理，计算生成权重为 tf-idf 的矩阵。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">sklearn</span>.<span class="title">feature_extraction</span>.<span class="title">text</span>.<span class="title">TfidfTransformer</span><span class="params">(*, norm=<span class="string">'l2'</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">use_idf=True, smooth_idf=True, sublinear_tf=False)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>TfidfTransformer 也提供了一些可配置的参数，但使用默认配置就可以了。norm 参数指定归一化向量的方法可以配置为 ‘l1’ 或 ‘l2’；use_idf 表示是否使用 idf，如果是 False 则相当于固定 idf=1；smooth_idf 表示是否做平滑（即我们计算 idf 时常用的加 1 平滑）；sublinear_tf 表示是否对 tf 进行次线性缩放，如果为 False 则 tf = 1 + log(tf)。</p>
+<p>当然，上面所述的两步走的方法，也可以由 TfidfVectorizer 类一步搞定：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfVectorizer</span><br><span class="line"></span><br><span class="line">tv = TfidfVectorizer()</span><br><span class="line"><span class="comment"># tv = TfidfVectorizer(vocabulary=feature_dict)</span></span><br><span class="line">tv_fit = tv.fit_transform(texts)</span><br><span class="line">print(tv_fit.toarray())</span><br></pre></td></tr></table></figure></p>
+<p>TfidfVectorizer 的初始化参数与 CountVectorizer 是一致的，如果我们通过其他算法事先选好了特征，我们也可以在初始化时指定 vocabulary 参数（dict 类型），从而按照指定的特征词袋计算tf-idf权重来生成向量空间。</p>
+<h2 id="相似度量"><a href="#相似度量" class="headerlink" title="相似度量"></a>相似度量</h2><p>将文本转换成向量空间中的向量就可以计算彼此间的相似度，如使用欧式距离、余弦相似度作为度量，我们使用 numpy 的向量数据结构来快速计算：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">x1_np = np.array(x1)</span><br><span class="line">x2_np = np.array(x2)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 欧式距离</span></span><br><span class="line">dist1 = np.sqrt(np.sum((x1_np - x2_np)**<span class="number">2</span>)) <span class="comment"># 或者：np.linalg.norm(x1_np, x2_np)</span></span><br><span class="line"><span class="comment"># 曼哈顿距离</span></span><br><span class="line">dist2 = np.sum(np.abs(x1_np - x2_np))</span><br><span class="line"><span class="comment"># 余弦值</span></span><br><span class="line">dist3 = np.dot(x1_np, x2_np)/(np.sqrt(x1_np, x1_np)*np.dot(x2_np, x2_np))</span><br><span class="line"><span class="comment"># 或者：np.dot(x1_np, x2_np)/(np.linalg.norm(x1_np)*np.linalg.norm(x2_np))</span></span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，欧式距离、曼哈顿距离都是大于 0 的值，值越小表示越相似；而余弦值是 [-1, 1] 的取值，其越接近 0 表示越相似。</p>
+<h2 id="文本聚类"><a href="#文本聚类" class="headerlink" title="文本聚类"></a>文本聚类</h2><p>文本数据中存在大量相似文本，我们希望通过文本聚类后从每个簇中适当地采样来减少待分析的样本数量，同时保持其多样性。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfTransformer</span><br><span class="line"><span class="keyword">from</span> nltk.cluster.kmeans <span class="keyword">import</span> KMeansClusterer</span><br><span class="line"><span class="keyword">from</span> nltk.cluster.util <span class="keyword">import</span> cosine_distance</span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建标准输入，一行一个文档，文档为空格间隔的token序列</span></span><br><span class="line">seg_lines = []</span><br><span class="line"><span class="keyword">for</span> token_lst <span class="keyword">in</span> corpus:</span><br><span class="line">    seg_lines.append(<span class="string">' '</span>.join(token_lst))</span><br><span class="line"><span class="comment"># 将文本中的词语转换为词频矩阵 矩阵元素a[i][j] 表示j词在i类文本下的词频</span></span><br><span class="line">vectorizer = CountVectorizer()</span><br><span class="line">transformer = TfidfTransformer()</span><br><span class="line">tfidf = transformer.fit_transform(vectorizer.fit_transform(seg_lines))</span><br><span class="line">tfidf_arr = tfidf.toarray()</span><br><span class="line">kmeans = KMeansClusterer(num_means=cluster_num, distance=cosine_distance)</span><br><span class="line">kmeans.cluster(tfidf_arr)</span><br><span class="line"><span class="comment"># 获取分类：文档编号 -&gt; 聚类的簇</span></span><br><span class="line">clusters = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(tfidf_arr)):</span><br><span class="line">    clus = kmeans.classify(tfidf_arr[i])</span><br><span class="line">    <span class="keyword">if</span> clus <span class="keyword">not</span> <span class="keyword">in</span> clusters:</span><br><span class="line">        clusters[clus] = []</span><br><span class="line">    clusters[clus].append(i)</span><br></pre></td></tr></table></figure></p>
+<p>我们使用前文提到到方法将文本转换为向量，并使用常用的 KMeans 聚类算法进行聚类分析。这里我们使用的是 NLTK 包中的 KMeans算法，sklearn 工具包中也有相应的聚类算法：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.cluster <span class="keyword">import</span> KMeans</span><br><span class="line"></span><br><span class="line">km_cluster = KMeans(n_clusters=cluster_num, max_iter=<span class="number">300</span>, n_init=<span class="number">40</span>, init=<span class="string">'k-means++'</span>)</span><br><span class="line">result = km_cluster.fit_predict(tfidf_matrix)</span><br><span class="line">print(result) <span class="comment"># [0 1 2 1] 返回各自文本的所被分配到的类索引</span></span><br></pre></td></tr></table></figure></p>
+<p>其中，max_iter 是对于单次初始值计算的最大迭代次数；n_init 为重新选择初始值的次数；init 指定初始值选择的算法；n_jobs 为进程个数，为-1的时候是指默认跑满 CPU。</p>
+<h2 id="主题分析"><a href="#主题分析" class="headerlink" title="主题分析"></a>主题分析</h2><p>不同的文档描述的是不同的主题，主题分析类似于文本聚类，它将相同主题的文档与词汇聚到一起，gensim 包里实现了主题模型 LDA，我们使用该模型来进行主题分析：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">gensim</span>.<span class="title">models</span>.<span class="title">ldamodel</span>.<span class="title">LdaModel</span><span class="params">(corpus=None, num_topics=<span class="number">100</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">id2word=None, distributed=False, chunksize=<span class="number">2000</span>, passes=<span class="number">1</span>, update_every=<span class="number">1</span>,</span></span></span><br><span class="line"><span class="class"><span class="params">alpha=<span class="string">'symmetric'</span>, eta=None, decay=<span class="number">0.5</span>, offset=<span class="number">1.0</span>, eval_every=<span class="number">10</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">iterations=<span class="number">50</span>, gamma_threshold=<span class="number">0.001</span>, minimum_probability=<span class="number">0.01</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">random_state=None, ns_conf=None, minimum_phi_value=<span class="number">0.01</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">per_word_topics=False, callbacks=None, dtype=&lt;class <span class="string">'numpy.float32'</span>&gt;)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>这里面 alpha 和 eta 是 LDA 模型中的两个超参数，可以完全使用默认值；chunksize 设置同时训练的文档数。值得注意的是，passes 参数才是遍历所有文档的次数（类似 epochs），而 iteration 是内部计算时的迭代次数，这两个参数的设置容易搞混。我们需要重点关注的是构建 LDA 模型时传入的数据格式，好在 gensim 包也提供了处理语料的接口：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> gensim</span><br><span class="line"><span class="keyword">import</span> gensim.corpora <span class="keyword">as</span> corpora</span><br><span class="line"></span><br><span class="line"><span class="comment"># 预处理后的文档是一个二维列表</span></span><br><span class="line">texts = [[<span class="string">'food'</span>, <span class="string">'good'</span>], [<span class="string">'environment'</span>, <span class="string">'very'</span>, <span class="string">'quiet'</span>], [<span class="string">'food'</span>, <span class="string">'very'</span>, <span class="string">'delicious'</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建词典</span></span><br><span class="line">id2word = corpora.Dictionary(texts)</span><br><span class="line"><span class="comment"># 文本 ID 化</span></span><br><span class="line">corpus = [id2word.doc2bow(text) <span class="keyword">for</span> text <span class="keyword">in</span> texts]</span><br><span class="line"><span class="comment"># 元组（单词ID，在文档中的词频）组成的列表对应一篇文档</span></span><br><span class="line">print(corpus) <span class="comment"># [[(0, 1), (1, 1)], [(2, 1), (3, 1), (4, 1)], [(0, 1), (4, 1), (5, 1)]]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建 LDA 模型</span></span><br><span class="line">lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=id2word, num_topics=<span class="number">5</span>,</span><br><span class="line">                                           chunksize=<span class="number">100</span>, passes=<span class="number">10</span>)</span><br><span class="line">print(lda_model.print_topics(num_words=<span class="number">3</span>))</span><br><span class="line">print(lda_model.get_document_topics(corpus[<span class="number">0</span>]))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">[(0, '0.306*"very" + 0.167*"environment" + 0.167*"quiet"'), (1, '0.167*"food" + 0.167*"very" + 0.167*"delicious"'), (2, '0.167*"food" + 0.167*"very" + 0.167*"delicious"'), (3, '0.167*"food" + 0.167*"delicious" + 0.167*"quiet"'), (4, '0.376*"food" + 0.374*"good" + 0.062*"delicious"')]</span></span><br><span class="line"><span class="string">[(0, 0.06708595), (1, 0.06671472), (2, 0.066714704), (3, 0.06671471), (4, 0.73276997)]</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>我们事先完成对文档的预处理，包括分词、过滤停用词等，形成一个二维列表，里面一维是单个文档的词的序列，外面一维是所有的文档。训练好的 LDA 模型可以通过输出主题与关键词（每个关键词属于当前主题的权重）来确定每个主题具体的语义，另外也可以输出具体的某篇文档的主题分布。</p>
+<h2 id="表征学习"><a href="#表征学习" class="headerlink" title="表征学习"></a>表征学习</h2><p>未标注的语料是广泛可获取的，通过在未标注的语料上预训练一个表征模型，可以更好地得到每个单词的语义表征，一种快速且有效的方法就是使用本领域的语料训练一个 word2vec 模型，gensim 包提供了所有操作的封装：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">gensim</span>.<span class="title">models</span>.<span class="title">word2vec</span>.<span class="title">Word2Vec</span><span class="params">(sentences=None, corpus_file=None, </span></span></span><br><span class="line"><span class="class"><span class="params">vector_size=<span class="number">100</span>, alpha=<span class="number">0.025</span>, window=<span class="number">5</span>, min_count=<span class="number">5</span>, max_vocab_size=None, </span></span></span><br><span class="line"><span class="class"><span class="params">sample=<span class="number">0.001</span>, seed=<span class="number">1</span>, workers=<span class="number">3</span>, min_alpha=<span class="number">0.0001</span>, sg=<span class="number">0</span>, hs=<span class="number">0</span>, negative=<span class="number">5</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">ns_exponent=<span class="number">0.75</span>, cbow_mean=<span class="number">1</span>, hashfxn=&lt;built-in function hash&gt;, epochs=<span class="number">5</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">null_word=<span class="number">0</span>, trim_rule=None, sorted_vocab=<span class="number">1</span>, batch_words=<span class="number">10000</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">compute_loss=False, callbacks=<span class="params">()</span>, comment=None, max_final_vocab=None, </span></span></span><br><span class="line"><span class="class"><span class="params">shrink_windows=True)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>这里通常需要设置的参数有：size 是词向量的维度；window 是词向量训练时上下文扫描窗口的大小，即前后各 window 个词；min-count 是最低频次，即语料中频次小于该值的词会被丢弃；wokers 是训练的进程数；sg 是 word2vec 训练的算法模式，设置为 1 表示 skip-gram 算法，0 表示 CBOW 算法。相应的 hs 参数如果为 0 则表示层次 softmax 训练算法，1 表示 negative-sampling 算法；ecpochs 设置迭代次数。sentences 是训练语料，它本身可以传入一个二维列表（文档 -&gt; 词序列），但是一般用来预训练的语料通常规模较大，我们建议使用 gensim 封装好的以迭代器模式读取文件的接口：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> gensim</span><br><span class="line"></span><br><span class="line">sentences = gensim.models.word2vec.LineSentence(input_file)</span><br><span class="line">model = gensim.models.Word2Vec(sentences, size=<span class="number">60</span>, min_count=<span class="number">1</span>, sg=<span class="number">0</span>, workers=<span class="number">16</span>)</span><br><span class="line">model.save(output_file)</span><br><span class="line">model.wv.save_word2vec_format(output_file + <span class="string">'.vector'</span>, binary=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure></p>
+<p>按照上面的代码，输入的文件需要是提前处理好的，一行一篇文章，每句是以空格分隔的 token 序列。保存模型时，如果考虑保存明文格式以便提供给其他编程语言调用，可以使用 save_word2vec_format 函数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model = gensim.models.Word2Vec.load(<span class="string">"word2vec.model"</span>)</span><br><span class="line">print(model[<span class="string">'中国'</span>])</span><br></pre></td></tr></table></figure></p>
+<p>使用模型时，直接以词作为 key 取出对应的向量，就可用以计算了，进一步地把多个词的向量进行组合（按维度求平均）就能得到句子的表征。</p>
+<p>相较于 word2vec 这种静态的词向量，通过 BERT 等更复杂的预训练语言模型可以获得更好的语义表征，尽管我们自己训练一个 BERT 模型的代价很大，但是用公开的通用模型也还是可以有很大优化的，<a href="https://huggingface.co/" target="_blank" rel="noopener">HuggingFace</a> 提供了一整套的 transformers 生态，除了各类 BERT 的 API 还发布了大量已训练好的模型：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> BertTokenizer</span><br><span class="line">tokenizer = BertTokenizer.from_pretrained(<span class="string">'bert-base'</span>)</span><br><span class="line"></span><br><span class="line">batch_sentences = [<span class="string">"我是一句话"</span>, <span class="string">"我是另一句话"</span>, <span class="string">"我是最后一句话"</span>]</span><br><span class="line">batch = tokenizer(batch_sentences, padding=<span class="literal">True</span>, return_tensors=<span class="string">"pt"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> BertModel</span><br><span class="line"></span><br><span class="line">model = BertModel.from_pretrained(<span class="string">"bert-base"</span>)</span><br><span class="line">bert_output = model(input_ids=batch[<span class="string">'input_ids'</span>], token_type_ids=batch[<span class="string">'token_type_ids'</span>], attention_mask=batch[<span class="string">'attention_mask'</span>]</span><br></pre></td></tr></table></figure></p>
+<p>我们最好预先从 HuggingFace 官网下载好所需的模型与配置（包括 vocab.txt），首先初始化分词器，把词典所在目录作为参数传入；分词处理后返回包含“input_ids”、“token_type_ids”与“attention_mask”三组特征的批量数据，它们都是 BERT 网络需要的输入，待初始化模型后传入。模型的预测结果是两个元素的 tuple，其第一个元素是 last_hidden_state，即输出序列每个 token 的语义向量，其形状为 (batch_size, seq_length, hidden_size)；第二个元素是 pooler_output，即 [CLS] 符号对应的语义向量，经过了全连接层和 tanh 激活，该向量可以认为是句子的表征，可直接用于下游的分类等任务。</p>
+<h2 id="关键词句"><a href="#关键词句" class="headerlink" title="关键词句"></a>关键词句</h2><p>提取每一篇文档各自的关键词，这里介绍两种常用的算法，一个是前面提到的 TF-IDF 算法，另一个是 TextRank 算法。显然，用前面特征选择是介绍的方法可以得到文档的关键词：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tf_idf = transformer.fit_transform(cv_fit)</span></span><br><span class="line">word = cv_fit.get_feature_names()</span><br><span class="line">weight = tf_idf.toarray()</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(weight))</span><br><span class="line">    print(list(zip(word, weight[i]))) <span class="comment"># 每篇文章中各个词的tf-idf权重</span></span><br></pre></td></tr></table></figure></p>
+<p>上述的方法显然是离线计算语料集合中每篇文档的关键词，有时我们需要在线计算单篇文档的关键词，则需要知道全局的 IDF 信息，可以事先统计全局语料的 IDF 值，用全局的 IDF 值排序得到的结果可以看做是全局关键词。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br><span class="line"></span><br><span class="line">doc_num = <span class="number">0</span></span><br><span class="line">doc_freq = defaultdict(int)</span><br><span class="line"><span class="comment"># 语料一行为一篇文档，且用空格分隔单词</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'./corpus.txt'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> fin:</span><br><span class="line">    <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">        doc_num += <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> set(sline.split(<span class="string">' '</span>)):</span><br><span class="line">            doc_freq[word] += <span class="number">1</span></span><br><span class="line">idf = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> word <span class="keyword">in</span> doc_freq:</span><br><span class="line">    idf[word] = math.log(doc_num/(doc_freq[word]+<span class="number">1.0</span>))</span><br></pre></td></tr></table></figure></p>
+<p>结巴分词工具包里也提供了 TF-IDF 算法的接口：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> jieba <span class="keyword">import</span> analyse</span><br><span class="line"></span><br><span class="line">text = <span class="string">"关键词抽取就是从文本里面把跟这篇文档意义最相关的一些词抽取出来"</span></span><br><span class="line">tfidf_keywords = analyse.extract_tags(text, topK=<span class="number">3</span>, withWeight=<span class="literal">True</span>)</span><br><span class="line">print(tfidf_keywords) <span class="comment"># [('抽取', 1.5259575872683333), ('文档', 0.8323878872125), ('文本', 0.7454042161975)]</span></span><br></pre></td></tr></table></figure></p>
+<p>该接口只需要输入原始的文本，会自动分词并统计，这里默认使用结巴内置的 IDF 数据进行计算，我们也可以事先指定领域自己的 IDF 全局统计值 <code>analyse.set_idf_path(&#39;./idf.txt&#39;)</code></p>
+<p>TextRank 算法的接口也是类似的：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">textrank_keywords = analyse.textrank(text, topK=<span class="number">3</span>, withWeight=<span class="literal">True</span>)</span><br><span class="line">print(textrank_keywords) <span class="comment"># [('抽取', 1.0), ('相关', 0.6634924194712594), ('是从', 0.5870858571685045)]</span></span><br></pre></td></tr></table></figure></p>
+<p>进一步地延伸 TextRank 算法，如果我们提取出了一篇文档的关键句子，其实就可以做一个简单的文本摘要了：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> networkx <span class="keyword">as</span> nx</span><br><span class="line"><span class="comment"># 首先构建两两句子相似度的矩阵</span></span><br><span class="line">sentence_similarity_martix = build_similarity_matrix(sentences)</span><br><span class="line"></span><br><span class="line">sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_martix)</span><br><span class="line">scores = nx.pagerank(sentence_similarity_graph)</span><br><span class="line">ranked_sentence = sorted(((scores[i],s) <span class="keyword">for</span> i,s <span class="keyword">in</span> enumerate(sentences)), reverse=<span class="literal">True</span>)    </span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(topN):</span><br><span class="line">    summarize_text.append(<span class="string">" "</span>.join(ranked_sentence[i][<span class="number">1</span>]))</span><br></pre></td></tr></table></figure></p>
+<p>首先，按照前文的方法学习句子的向量表征，构建两两句子的相似度矩阵，进而使用 networkx 工具包的 pagerank 接口计算关键句，使用权重最高的 topN 个句子组成摘要。</p>
+<h2 id="文本分类"><a href="#文本分类" class="headerlink" title="文本分类"></a>文本分类</h2><p>行文至此，我们已经介绍了多种文本向量化的方法，包括统计词袋 TF-IDF、主题模型 LDA 的输出、基于 word2vec 或者 BERT。所有这些方法得到的文本表征输入到一个分类模型（除朴素贝叶斯之外的向量模型）中就可以实现文本分类任务：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> svm</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_clf</span><span class="params">(train_data, train_labels)</span>:</span></span><br><span class="line">    clf = svm.SVC(C=<span class="number">10.0</span>, cache_size=<span class="number">200</span>, class_weight=<span class="literal">None</span>, coef0=<span class="number">0.0</span>, decision_function_shape=<span class="literal">None</span>, degree=<span class="number">3</span>,</span><br><span class="line">                  gamma=<span class="string">'auto'</span>, kernel=<span class="string">'rbf'</span>, max_iter=<span class="number">-1</span>, probability=<span class="literal">False</span>, random_state=<span class="literal">None</span>, shrinking=<span class="literal">True</span>,</span><br><span class="line">                  tol=<span class="number">0.001</span>, verbose=<span class="literal">False</span>)</span><br><span class="line">    clf.fit(train_data, train_labels)</span><br><span class="line">    <span class="keyword">return</span> clf</span><br></pre></td></tr></table></figure></p>
+<p>这里我们介绍 SVM 分类器的使用方法，参数 C 是惩罚系数，用来控制对损失函数的惩罚；class_weight 用来处理不平衡样本时的加权因子；kernel 是核函数，默认是 “rbf”核，还有线性核、多项式核等选项；degree 当核函数是多项式核函数的时候，用来控制函数的最高次数；max_iter:最大迭代次数，默认值是 -1，即没有限制；probability 是否使用概率估计，当需要输出分类概率时应设置为 True。分类器接收的数据是 numpy 数组定义的特征（二维）与标签（一维）。</p>
+<p>有监督的学习会把样本划分为训练集与测试集，sklearn 为我们提供了现成的接口，test_size 指定用作测试集的样本比例：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"></span><br><span class="line">train_X,test_X,train_Y,test_Y = train_test_split(corpus, labels, test_size=<span class="number">0.33</span>, random_state=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfVectorizer</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">vectorize</span><span class="params">(train_X, test_X)</span>:</span></span><br><span class="line">    v = TfidfVectorizer()</span><br><span class="line">    train_data = v.fit_transform(train_X)</span><br><span class="line">    test_data = v.transform(test_X)</span><br><span class="line">    <span class="keyword">return</span> train_data, test_data</span><br></pre></td></tr></table></figure></p>
+<p>在对训练集与测试集进行 TF-IDF 向量化的时候需要注意，我们是使用训练集来学习（或叫做提取）特征的，所以要用 .fit_trainsform() 函数；在测试集上使用已经学习到的特征去转换，则要用 .transform() 函数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> metrics</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">evaluate</span><span class="params">(actual, pred)</span>:</span></span><br><span class="line">    m_precision = metrics.precision_score(actual, pred, average=<span class="string">'macro'</span>)</span><br><span class="line">    m_recall = metrics.recall_score(actual, pred, average=<span class="string">'macro'</span>)</span><br><span class="line">    print(<span class="string">'precision:&#123;0:.3f&#125;'</span>.format(m_precision))</span><br><span class="line">    print(<span class="string">'recall:&#123;0:0.3f&#125;'</span>.format(m_recall))</span><br></pre></td></tr></table></figure></p>
+<p>训练好的模型在测试集上进行 .predict(test_data) 预测，将预测结果与真实标签进行比对计算我们关系的指标，这些指标的计算 sklearn 也为我们封装好了。</p>
+<h2 id="序列标注"><a href="#序列标注" class="headerlink" title="序列标注"></a>序列标注</h2><p>序列标注任务可以看做是对序列中的每个 token 都进行分类标签的预测，我们介绍使用 CRF 工具（ pip install python-crfsuite）对这类任务进行建模的方法。序列数据中每个 token 的标签显然就是样本数据的 Y，而预测 Y 的特征一般采用的是当前 token 的前后 token 即上下文来构造。处理中文我们可以用字作为 token，遗憾的是该工具不支持 unicode 字符，不能直接用中文汉字组合特征，我们可以保存一份汉字对应 ID，用 ID 的组合作为特征来解决兼容性的问题：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pycrfsuite</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_feature_words_id</span><span class="params">(token)</span>:</span></span><br><span class="line">    <span class="comment"># 增加句首、句尾两个特殊token，英文符号可以直接返回</span></span><br><span class="line">    <span class="keyword">if</span> token == <span class="string">'&lt;BOS&gt;'</span> <span class="keyword">or</span> token == <span class="string">'&lt;EOS&gt;'</span>:</span><br><span class="line">        <span class="keyword">return</span> token</span><br><span class="line">    <span class="comment"># 中文汉字则使用 ID 组合出特征</span></span><br><span class="line">    <span class="keyword">if</span> token <span class="keyword">not</span> <span class="keyword">in</span> feature_words:</span><br><span class="line">        words_id = len(feature_words) + <span class="number">1</span></span><br><span class="line">        feature_words[token] = <span class="string">'W&#123;&#125;'</span>.format(words_id)</span><br><span class="line">     <span class="keyword">return</span> feature_words[token]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_char_feature</span><span class="params">(token_lst, i)</span>:</span></span><br><span class="line">    <span class="comment"># 特征设置为当前词与前后各一个词组</span></span><br><span class="line">    features = &#123;        </span><br><span class="line">        <span class="string">"-1:char"</span>: get_feature_words_id(token_lst[i<span class="number">-1</span>])，</span><br><span class="line">        <span class="string">"0:char"</span>: get_feature_words_id(token_lst[i]),</span><br><span class="line">        <span class="string">"+1:char"</span>: get_feature_words_id(token_lst[i+<span class="number">1</span>])</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> features</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_char_labels</span><span class="params">(token_lst, entity_lst)</span>:</span></span><br><span class="line">    <span class="comment"># <span class="doctag">TODO:</span> 逐个生成text中每个字符的词位标识</span></span><br><span class="line">    labels = [<span class="string">'B_'</span>, <span class="string">'I_'</span>, <span class="string">'O'</span>]</span><br><span class="line">    <span class="keyword">return</span> labels</span><br></pre></td></tr></table></figure></p>
+<p>一般地，以命名实体实例为例，对于 token 的标签，常使用 <code>B_+标签名</code> 的标识来表示一个由多字组成的实体的“首个字”, 以 <code>I_+标签名</code> 来表示实体“非首字”部分, 以 <code>O</code> 来表示非实体的部分序列。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_features_and_labels</span><span class="params">(corpus_path)</span>:</span></span><br><span class="line">    X = []</span><br><span class="line">    Y = []</span><br><span class="line">    fin = open(corpus_path, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">    <span class="keyword">for</span> sline <span class="keyword">in</span> fin:</span><br><span class="line">        <span class="comment"># 前后各补一个&lt;BOS&gt;和&lt;EOS&gt;</span></span><br><span class="line">        token_lst = [<span class="string">'&lt;BOS&gt;'</span>]</span><br><span class="line">        <span class="keyword">for</span> char <span class="keyword">in</span> sline.strip():</span><br><span class="line">            token_lst.append(char)</span><br><span class="line">        token_lst.append(<span class="string">'&lt;EOS&gt;'</span>)</span><br><span class="line"></span><br><span class="line">        features = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(token_lst)<span class="number">-1</span>):</span><br><span class="line">            features.append(gen_char_feature(token_lst, i))</span><br><span class="line">        X.append(features)</span><br><span class="line">        Y.append(gen_char_labels(token_lst, entity_lst))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> X, Y</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_crf</span><span class="params">(X, Y, model_path)</span>:</span></span><br><span class="line">    trainer = pycrfsuite.Trainer(verbose=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">for</span> x,y <span class="keyword">in</span> zip(X,Y):</span><br><span class="line">        trainer.append(x, y)</span><br><span class="line">    trainer.set_params(&#123;</span><br><span class="line">        <span class="string">'c1'</span>: <span class="number">1.0</span>, </span><br><span class="line">        <span class="string">'c2'</span>: <span class="number">1e-3</span>, </span><br><span class="line">        <span class="string">'max_iterations'</span>: <span class="number">10000</span>,</span><br><span class="line">        <span class="string">'feature.possible_transitions'</span>: <span class="literal">True</span></span><br><span class="line">        &#125;)</span><br><span class="line">    trainer.train(model_path)</span><br></pre></td></tr></table></figure>
+<p>训练时需要确保每个 x 和 y 的样本能够正确对应上：y 是当前 token 的标签，x 则是当前 token 上下文的组合特征，这是最容易出错的地方。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test_crf</span><span class="params">(model_file, text)</span>:</span></span><br><span class="line">    tagger = pycrfsuite.Tagger()</span><br><span class="line">    tagger.open(model_file)</span><br><span class="line">    <span class="comment"># 将预测的文本按字符生成特征，使用模型进行逐个字符的词位预测</span></span><br><span class="line">    feature_lst = [gen_char_feature(token_lst, i) <span class="keyword">for</span> i <span class="keyword">in</span> range(len(text))]</span><br><span class="line">    tag_lst = tagger.tag(feature_lst)</span><br></pre></td></tr></table></figure></p>
+<p>使用模型时，也要按照训练时构造的特征模板组合 token 构建特征，模型会输出序列中每个 token 的标签，根据 B/I/O 的前缀组合单个字符，就能实现诸如命名实体识别等任务。</p>
+<h2 id="信息抽取"><a href="#信息抽取" class="headerlink" title="信息抽取"></a>信息抽取</h2><p>信息抽取简单来说就是识别文本中的部分字符串并给出它们的标签，上文的序列标注显然可以用来实现该任务，只要我们有足够的标注数据训练一个 CRF 模型。但是，在一般的工程实践中我们都是没有标注数据的，那么此时的信息抽取可以使用封闭词典匹配、正则表达式匹配等方法来实现。这里我们着重介绍一种词典的最大匹配方法：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.children = &#123;&#125;</span><br><span class="line">        self.is_word = <span class="literal">False</span></span><br><span class="line">        self.tag = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TriedTree</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.root = Node(<span class="string">"root"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">insert</span><span class="params">(self, word, tag)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> word == <span class="string">""</span>:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        word = list(word)</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">do_insert</span><span class="params">(i, node)</span>:</span></span><br><span class="line">            <span class="keyword">if</span> i == len(word):</span><br><span class="line">                node.is_word = <span class="literal">True</span></span><br><span class="line">                node.tag = tag</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            sub_node = node.children.get(word[i])</span><br><span class="line">            <span class="keyword">if</span> sub_node <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                sub_node = Node(word[i])</span><br><span class="line">                node.children[word[i]] = sub_node</span><br><span class="line">            do_insert(i + <span class="number">1</span>, sub_node)</span><br><span class="line"></span><br><span class="line">        index = <span class="number">0</span></span><br><span class="line">        first_node = self.root.children.get(word[index])</span><br><span class="line">        <span class="keyword">if</span> first_node <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            first_node = Node(word[index])</span><br><span class="line">            self.root.children[word[index]] = first_node</span><br><span class="line">        do_insert(index + <span class="number">1</span>, first_node)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">segment_word</span><span class="params">(self, sentence)</span>:</span></span><br><span class="line">        index = <span class="number">0</span></span><br><span class="line">        result = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> sentence == <span class="string">""</span>:</span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line">        sentence = list(sentence)</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">deep_first_search</span><span class="params">(i, node)</span>:</span></span><br><span class="line">            <span class="keyword">if</span> i == len(sentence) <span class="keyword">and</span> node.is_word:</span><br><span class="line">                <span class="keyword">return</span> i, <span class="literal">True</span>, node.tag</span><br><span class="line">            <span class="keyword">if</span> i == len(sentence) <span class="keyword">and</span> <span class="keyword">not</span> node.is_word:</span><br><span class="line">                <span class="keyword">return</span> i, <span class="literal">False</span>, <span class="string">""</span></span><br><span class="line">            sub_node = node.children.get(sentence[i])</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> sub_node <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">and</span> node.is_word:</span><br><span class="line">                <span class="keyword">return</span> i, <span class="literal">True</span>, node.tag</span><br><span class="line">            <span class="keyword">if</span> sub_node <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="keyword">not</span> node.is_word:</span><br><span class="line">                <span class="keyword">return</span> i, <span class="literal">False</span>, <span class="string">""</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> deep_first_search(i + <span class="number">1</span>, sub_node)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> index &lt; len(sentence):</span><br><span class="line"></span><br><span class="line">            first_node = self.root.children.get(sentence[index])</span><br><span class="line">            begin = index</span><br><span class="line">            index += <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> first_node <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            end, success, tag = deep_first_search(index, first_node)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> success:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            index = end</span><br><span class="line">            result.append(&#123;<span class="string">"word"</span>: <span class="string">""</span>.join(sentence[begin:end]), <span class="string">"tag"</span>: tag, <span class="string">"begin"</span>: begin, <span class="string">"end"</span>: end&#125;)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure></p>
+<p>匹配算法的实现需要借助一种名叫 Trie树 的数据结构，上面的代码通过 insert() 方法实现对 Trie树的构建，我们的封闭词典一般包含用作匹配的词或词组，以及它们所对应的标签；segment_word() 方法实现了基于封闭词典的最大匹配，返回的对象中包含匹配结果的字符串、始末位置与标签。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          
+            <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" rel="tag"># 自然语言处理</a>
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/03/python-package-2/" rel="next" title="BeautifulSoup详解">
+                <i class="fa fa-chevron-left"></i> BeautifulSoup详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/11/17/pandas-1/" rel="prev" title="Pandas基础知识">
+                Pandas基础知识 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#字符编码"><span class="nav-number">1.</span> <span class="nav-text">字符编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文字判断"><span class="nav-number">2.</span> <span class="nav-text">文字判断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#词法分析"><span class="nav-number">3.</span> <span class="nav-text">词法分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#特征选择"><span class="nav-number">4.</span> <span class="nav-text">特征选择</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#向量空间"><span class="nav-number">5.</span> <span class="nav-text">向量空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相似度量"><span class="nav-number">6.</span> <span class="nav-text">相似度量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文本聚类"><span class="nav-number">7.</span> <span class="nav-text">文本聚类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主题分析"><span class="nav-number">8.</span> <span class="nav-text">主题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#表征学习"><span class="nav-number">9.</span> <span class="nav-text">表征学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关键词句"><span class="nav-number">10.</span> <span class="nav-text">关键词句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文本分类"><span class="nav-number">11.</span> <span class="nav-text">文本分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#序列标注"><span class="nav-number">12.</span> <span class="nav-text">序列标注</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信息抽取"><span class="nav-number">13.</span> <span class="nav-text">信息抽取</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

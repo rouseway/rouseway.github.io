@@ -1,0 +1,766 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="实际分析的数据常常存在缺失，要使用统计方法或机器学习的算法，必须先处理好缺失的数据。1import pandas as pd 查看缺失缺失数据可以使用 isna 或 isnull （两个函数没有区别）来查看每个单元格是否缺失，如果想要查看某一列缺失或者非缺失的行，可以利用 Series 上的 isna 或者 notna 进行布尔索引。如果想要同时对几个列，检索出全部为缺失或者至少有一个缺失或者没有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas缺失处理">
+<meta property="og:url" content="http://yoursite.com/2021/01/02/pandas-3/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="实际分析的数据常常存在缺失，要使用统计方法或机器学习的算法，必须先处理好缺失的数据。1import pandas as pd 查看缺失缺失数据可以使用 isna 或 isnull （两个函数没有区别）来查看每个单元格是否缺失，如果想要查看某一列缺失或者非缺失的行，可以利用 Series 上的 isna 或者 notna 进行布尔索引。如果想要同时对几个列，检索出全部为缺失或者至少有一个缺失或者没有">
+<meta property="article:published_time" content="2021-01-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:36.983Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/01/02/pandas-3/"/>
+
+
+
+
+
+  <title> Pandas缺失处理 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/01/02/pandas-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas缺失处理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-02T00:00:00+08:00">
+                2021-01-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>实际分析的数据常常存在缺失，要使用统计方法或机器学习的算法，必须先处理好缺失的数据。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br></pre></td></tr></table></figure></p>
+<h2 id="查看缺失"><a href="#查看缺失" class="headerlink" title="查看缺失"></a>查看缺失</h2><p>缺失数据可以使用 isna 或 isnull （两个函数没有区别）来查看每个单元格是否缺失，如果想要查看某一列缺失或者非缺失的行，可以利用 Series 上的 isna 或者 notna 进行布尔索引。如果想要同时对几个列，检索出全部为缺失或者至少有一个缺失或者没有缺失的行，可以使用 isna, notna 和 any, all 的组合。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(<span class="string">'./data/learn_pandas.csv'</span>,</span><br><span class="line">                 usecols = [<span class="string">'Grade'</span>, <span class="string">'Name'</span>, <span class="string">'Gender'</span>, <span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Transfer'</span>])</span><br><span class="line">print(df.isna().head())</span><br><span class="line">print(df.isna().sum()/df.shape[<span class="number">0</span>]) <span class="comment"># 查看缺失的比例</span></span><br><span class="line"></span><br><span class="line">sub_set = df[[<span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Transfer'</span>]] <span class="comment"># 关注的三个列</span></span><br><span class="line">print(df[sub_set.isna().all(<span class="number">1</span>)]) <span class="comment"># 三个特征全部缺失</span></span><br><span class="line">print(df[sub_set.isna().any(<span class="number">1</span>)].head()) <span class="comment"># 三个特征至少有一个缺失</span></span><br><span class="line">print(df[sub_set.notna().all(<span class="number">1</span>)].head()) <span class="comment"># 没有任何缺失</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="删除缺失"><a href="#删除缺失" class="headerlink" title="删除缺失"></a>删除缺失</h2><p>Pandas 中提供了 dropna 函数来进行缺失值的删除操作，其主要参数为轴方向 axis （默认为0，即删除行）、删除方式 how 、删除的非缺失值个数阈值 thresh（非缺失值没有达到这个数量的相应维度会被删除）、备选的删除子集 subset，其中 how 主要有 any 和 all 两种参数可以选择。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">print(df.shape)</span><br><span class="line">res = df.dropna(how=<span class="string">'any'</span>, subset=[<span class="string">'Height'</span>, <span class="string">'Weight'</span>]) <span class="comment"># 删除身高体重至少一个缺失的行</span></span><br><span class="line">print(res.shape)</span><br><span class="line">print(df.dropna(<span class="number">1</span>, thresh=df.shape[<span class="number">0</span>]<span class="number">-15</span>).head()) <span class="comment"># 删除超过15个缺失值的列，“身高”列被删除</span></span><br><span class="line"><span class="comment"># 使用布尔索引来完成上述两个操作</span></span><br><span class="line">oper_1 = df.loc[df[[<span class="string">'Height'</span>, <span class="string">'Weight'</span>]].notna().all(<span class="number">1</span>)] <span class="comment"># 等同操作一</span></span><br><span class="line">oper_2 = df.loc[:, ~(df.isna().sum()&gt;<span class="number">15</span>)] <span class="comment"># 等同操作二</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="填充缺失"><a href="#填充缺失" class="headerlink" title="填充缺失"></a>填充缺失</h2><p>一种填充缺失的方法是使用 fillna 函数，其中有三个参数是常用的：value, method, limit。value 为填充值，可以是标量，也可以是索引到元素的字典映射；method 为填充方法；有用前面的元素填充ffill 和用后面的元素填充bfill 两种类型；limit 参数表示连续缺失值的最大填充次数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">s = pd.Series([np.nan, <span class="number">1</span>, np.nan, np.nan, <span class="number">2</span>, np.nan], list(<span class="string">'aaabcd'</span>))</span><br><span class="line">print(s.fillna(method=<span class="string">'ffill'</span>)) <span class="comment"># 用前面的值向后填充</span></span><br><span class="line">print(s.fillna(method=<span class="string">'ffill'</span>, limit=<span class="number">1</span>)) <span class="comment"># 连续出现的缺失，最多填充一次</span></span><br><span class="line">print(s.fillna(s.mean())) <span class="comment"># 用均值填充，value为标量</span></span><br><span class="line">print(s.fillna(&#123;<span class="string">'a'</span>: <span class="number">100</span>, <span class="string">'d'</span>: <span class="number">200</span>&#125;)) <span class="comment"># 通过索引映射填充的值，value为字典</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据年级进行身高的均值填充</span></span><br><span class="line">print(df.groupby(<span class="string">'Grade'</span>)[<span class="string">'Height'</span>].transform(<span class="keyword">lambda</span> x: x.fillna(x.mean())).head())</span><br></pre></td></tr></table></figure></p>
+<p>另一种填充缺失的方法是通过插值函数 interpolate 完成，该函数除了插值方法（默认为linear 线性插值）之外，有与 fillna 类似的两个常用参数，一个是控制方向的 limit_direction ，另一个是控制最大连续缺失值插值个数的 limit 。其中，限制插值的方向默认为 forward ，这与 fillna 的method 中的 ffill 是类似的，若想要后向限制插值或者双向限制插值可以指定为 backward 或 both 。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">s = pd.Series([np.nan, np.nan, <span class="number">1</span>, np.nan, np.nan, np.nan, <span class="number">2</span>, np.nan, np.nan])</span><br><span class="line">res = s.interpolate(limit_direction=<span class="string">'backward'</span>, limit=<span class="number">1</span>) <span class="comment"># 默认是线性插值法，后向限制</span></span><br><span class="line">print(res.values)</span><br><span class="line">res = s.interpolate(limit_direction=<span class="string">'both'</span>, limit=<span class="number">1</span>) <span class="comment"># 双向限制，还有前向（forward）</span></span><br><span class="line">print(res.values)</span><br><span class="line">res = s.interpolate(<span class="string">'nearest'</span>) <span class="comment"># 最近邻插值</span></span><br><span class="line">print(res.values)</span><br><span class="line"></span><br><span class="line">s = pd.Series([<span class="number">0</span>, np.nan, <span class="number">10</span>], index=pd.to_datetime([<span class="string">'20200101'</span>, <span class="string">'20200102'</span>, <span class="string">'20200111'</span>]))</span><br><span class="line">print(s.interpolate()) <span class="comment"># 线性插值，NaN -&gt; 5.0</span></span><br><span class="line">print(s.interpolate(method=<span class="string">'index'</span>)) <span class="comment"># 用索引插值，NaN -&gt; 1.0</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Nullable类型"><a href="#Nullable类型" class="headerlink" title="Nullable类型"></a>Nullable类型</h2><p>进入 1.0.0 版本后，Pandas 尝试设计了一种新的缺失类型 pd.NA 以及三种 Nullable 序列类型来应<br>对这些缺陷，它们分别是 Int, boolean 和 string。从字面意义上看 Nullable 就是可空的，言下之意就是序列类型不受缺失值的影响。例如，在上述三个 Nullable 类型中存储缺失值，都会转为 pandas 内置的 pd.NA。一般在实际数据处理时，可以在数据集读入后，先通过 convert_dtypes 转为 Nullable 类型。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/12/21/pandas-2/" rel="next" title="Pandas索引访问">
+                <i class="fa fa-chevron-left"></i> Pandas索引访问
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/01/23/pandas-4/" rel="prev" title="Pandas连接合并">
+                Pandas连接合并 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看缺失"><span class="nav-number">1.</span> <span class="nav-text">查看缺失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除缺失"><span class="nav-number">2.</span> <span class="nav-text">删除缺失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#填充缺失"><span class="nav-number">3.</span> <span class="nav-text">填充缺失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nullable类型"><span class="nav-number">4.</span> <span class="nav-text">Nullable类型</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>
