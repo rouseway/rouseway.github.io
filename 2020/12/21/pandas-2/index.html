@@ -1,0 +1,797 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="数据科学,数据处理,Pandas," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="索引操作可以方便地获取 Pandas 基础数据结构中的指定元素。1import pandas as pd 索引器 DataFrame 的索引形式是列索引，即通过 [列名] 的形式可以从 DataFrame 中取出相应的列。如果是单个列名，则返回一个 Series 对象；如果是多个列名组成的列表，则返回一个 DataFrame。此外，若要取出单列，且列名中不包含空格，则还可以使用 .列名 的形式取出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas索引访问">
+<meta property="og:url" content="http://yoursite.com/2020/12/21/pandas-2/index.html">
+<meta property="og:site_name" content="思维驿站">
+<meta property="og:description" content="索引操作可以方便地获取 Pandas 基础数据结构中的指定元素。1import pandas as pd 索引器 DataFrame 的索引形式是列索引，即通过 [列名] 的形式可以从 DataFrame 中取出相应的列。如果是单个列名，则返回一个 Series 对象；如果是多个列名组成的列表，则返回一个 DataFrame。此外，若要取出单列，且列名中不包含空格，则还可以使用 .列名 的形式取出">
+<meta property="article:published_time" content="2020-12-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-02T08:37:29.346Z">
+<meta property="article:author" content="rouseway">
+<meta property="article:tag" content="数据科学">
+<meta property="article:tag" content="数据处理">
+<meta property="article:tag" content="Pandas">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/12/21/pandas-2/"/>
+
+
+
+
+
+  <title> Pandas索引访问 | 思维驿站 </title>
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思维驿站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">思考的停滞才是真正的懒惰</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/12/21/pandas-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rouseway">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思维驿站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Pandas索引访问
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-21T00:00:00+08:00">
+                2020-12-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">技术文章</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">数据科学</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E6%96%87%E7%AB%A0/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/Pandas/" itemprop="url" rel="index">
+                    <span itemprop="name">Pandas</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>索引操作可以方便地获取 Pandas 基础数据结构中的指定元素。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br></pre></td></tr></table></figure></p>
+<h2 id="索引器"><a href="#索引器" class="headerlink" title="索引器"></a>索引器</h2><ul>
+<li><p>DataFrame 的索引形式是<strong>列索引</strong>，即通过 <strong>[列名]</strong> 的形式可以从 DataFrame 中取出相应的列。如果是单个列名，则返回一个 Series 对象；如果是多个列名组成的列表，则返回一个 DataFrame。此外，若要取出单列，且列名中不包含空格，则还可以使用 .列名 的形式取出。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">df = pd.read_csv(<span class="string">'./data/learn_pandas.csv'</span>, usecols=[<span class="string">'School'</span>, <span class="string">'Grade'</span>, <span class="string">'Name'</span>,</span><br><span class="line">                                                     <span class="string">'Gender'</span>, <span class="string">'Weight'</span>, <span class="string">'Transfer'</span>])</span><br><span class="line">print(df[<span class="string">'Name'</span>].head()) <span class="comment"># 单列Series对象 == df.Name.head()</span></span><br><span class="line">print(df[[<span class="string">'Gender'</span>, <span class="string">'Name'</span>]].head()) <span class="comment"># 多列组成的DataFrame</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Series 的索引形式是<strong>行索引</strong>，即通过 <strong>[idx]</strong> 的形式可以从 Series 中取出相应的行，这里的 idx 可以是字符串也可以是整数（包括未指定索引时从0开始的缺省值）。如果 idx 对应的只有单个值，则返回这个标量值；否则返回 Series 对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以字符串为索引的Series</span></span><br><span class="line">s = pd.Series([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], index=[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'a'</span>, <span class="string">'a'</span>, <span class="string">'a'</span>, <span class="string">'c'</span>])</span><br><span class="line">print(s[<span class="string">'a'</span>]) <span class="comment"># Series([1, 3, 4, 5], index=['a', 'a', 'a', 'a'])</span></span><br><span class="line">print(s[<span class="string">'b'</span>]) <span class="comment"># 2</span></span><br><span class="line">print(s[[<span class="string">'c'</span>, <span class="string">'b'</span>]]) <span class="comment"># Series([6, 2], index=['c', 'b'])</span></span><br><span class="line"><span class="comment"># 如果想要取出某两个索引之间的元素，并且这两个索引是在整个索引中唯一出现，则可以使用切片</span></span><br><span class="line"><span class="comment"># 需要注意的是这里的切片会包含两个端点！</span></span><br><span class="line">print(s[<span class="string">'c'</span>: <span class="string">'b'</span>: <span class="number">-2</span>]) <span class="comment"># Series([6, 4, 2], index=['c', 'a', 'b'])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以整数为索引的Series</span></span><br><span class="line">s = pd.Series([<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>, <span class="string">'e'</span>, <span class="string">'f'</span>], index=[<span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">4</span>])</span><br><span class="line">print(s[<span class="number">1</span>]) <span class="comment"># Series(['a', 'c'], index=[1, 1])</span></span><br><span class="line">print(s[[<span class="number">2</span>, <span class="number">3</span>]]) <span class="comment"># Series(['d', 'b'], index=[2, 3])</span></span><br><span class="line"><span class="comment"># 如果使用整数切片，则会取出对应索引位置的值，注意这里的整数切片同 Python 中的切片一样不包含右端点</span></span><br><span class="line">print(s[<span class="number">1</span>:<span class="number">-1</span>:<span class="number">2</span>]) <span class="comment"># Series(['b', 'd'], index=[3, 2])</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>DataFrame 默认的中括号索引是<strong>列索引</strong>，还需要支持行索引才可以方便我们按行访问数据，所以 Pandas 为 DataFrame 提供了另外两种<strong>行索引器</strong>：一种是基于元素的 <strong>loc索引器</strong>，另一种是基于位置的 <strong>iloc索引器</strong>。</p>
+<ul>
+<li><p>loc 索引器的一般形式是 loc[*, *] ，其中第一个 * 代表行的选择，第二个 * 代表列的选择，如果省略第二个位置写作 loc[*] ，这个 * 是指行的筛选。其中，* 的位置一共有五类合法对象，分别是：单个元素、元素列表、元素切片、布尔列表以及函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">df_demo = df.set_index(<span class="string">'Name'</span>) <span class="comment"># 将“姓名”设置为索引</span></span><br><span class="line">print(df_demo.loc[<span class="string">'Qiang Sun'</span>]) <span class="comment"># 改名字存在多人，则返回DataFrame； 如果只有一个，则返回Series</span></span><br><span class="line">print(df_demo.loc[<span class="string">'Qiang Sun'</span>, <span class="string">'School'</span>]) <span class="comment"># 同时选择行和列</span></span><br><span class="line">print(df_demo.loc[[<span class="string">'Qiang Sun'</span>,<span class="string">'Quan Zhao'</span>], [<span class="string">'School'</span>,<span class="string">'Gender'</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用切片： 无论是整数还是字符串类型的索引，切片都包含起点与终点，且不允许有重复值，否则报错</span></span><br><span class="line">print(df_demo.loc[<span class="string">'Gaojuan You'</span>:<span class="string">'Gaoqiang Qian'</span>, <span class="string">'School'</span>:<span class="string">'Gender'</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用布尔列表： 要求传入的布尔列表长度与DataFrame相同</span></span><br><span class="line">print(df_demo.loc[df_demo.Weight&gt;<span class="number">70</span>])</span><br><span class="line">condition_1_1 = df_demo.School == <span class="string">'Fudan University'</span></span><br><span class="line">condition_1_2 = df_demo.Grade == <span class="string">'Senior'</span></span><br><span class="line">condition_1_3 = df_demo.Weight &gt; <span class="number">70</span></span><br><span class="line">condition_1 = condition_1_1 &amp; condition_1_2 &amp; condition_1_3</span><br><span class="line">print(df_demo.loc[condition_1]) <span class="comment"># 复合逻辑判断组成的布尔列表</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用函数： 返回值必须是索引支持的类型（上述几种），函数的输入是Dataframe本身</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">condition</span><span class="params">(x)</span>:</span></span><br><span class="line">    condition_2_1 = x.School == <span class="string">'Peking University'</span></span><br><span class="line">    condition_2_2 = x.Grade == <span class="string">'Senior'</span></span><br><span class="line">    condition_2_3 = x.Weight &gt; <span class="number">80</span></span><br><span class="line">    condition_2 = condition_2_1 &amp; (~condition_2_2) &amp; condition_2_3</span><br><span class="line">    <span class="keyword">return</span> condition_2</span><br><span class="line">print(df_demo.loc[condition])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>iloc 索引器的使用与 loc 完全类似，只不过是针对位置进行筛选，在相应的* 位置处一共也有五类合法对象，分别是：整数、整数列表、整数切片、布尔列表以及函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">print(df_demo.iloc[<span class="number">1</span>, <span class="number">1</span>]) <span class="comment"># 第二行第二列</span></span><br><span class="line">print(df_demo.iloc[[<span class="number">0</span>, <span class="number">1</span>], [<span class="number">0</span>, <span class="number">1</span>]]) <span class="comment"># 前两行前两列</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用切片： 注意不包含终点！</span></span><br><span class="line">print(df_demo.iloc[<span class="number">1</span>: <span class="number">4</span>, <span class="number">2</span>:<span class="number">4</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用布尔列表： 注意需要出入的是条件序列的 values 属性！</span></span><br><span class="line">print(df_demo.iloc[(df_demo.Weight&gt;<span class="number">80</span>).values])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用函数： 返回值必须是索引支持的类型（上述几种），函数的输入是Dataframe本身</span></span><br><span class="line">print(df_demo.iloc[<span class="keyword">lambda</span> x: slice(<span class="number">1</span>, <span class="number">4</span>)]) <span class="comment"># lambda函数的返回值是切片</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>在使用索引对表或者序列赋值时需要特别注意，应当在使用一层索引器后直接进行赋值操作，这样做是由于进行多次索引后赋值是赋在临时返回的 copy 副本上的，而没有真正修改元素。</p>
+<h2 id="query方法"><a href="#query方法" class="headerlink" title="query方法"></a>query方法</h2><p>另一种对 DataFrame 进行查询的方法是 query 方法，它支持直接使用字符串形式的查询表达式进行查询数据，其表达式的执行结果必须返回布尔列表。在 query 表达式中，帮用户注册了所有来自 DataFrame 的列名，所有属于列 Series 的方法都可以被调用，和正常的函数调用并没有区别<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">print(df.query(<span class="string">'((School == "Fudan University")&amp;'</span></span><br><span class="line">               <span class="string">' (Grade == "Senior")&amp;'</span></span><br><span class="line">               <span class="string">' (Weight &gt; 70)) or '</span></span><br><span class="line">               <span class="string">'((School == "Peking University") and '</span></span><br><span class="line">               <span class="string">' (Grade != "Senior")&amp;'</span></span><br><span class="line">               <span class="string">' (Weight &gt; 80))'</span>))</span><br><span class="line"><span class="comment"># Weight列作为Series的内置函数，可以直接 . 调用</span></span><br><span class="line">print(df.query(<span class="string">'Weight &gt; Weight.mean()'</span>).head())</span><br><span class="line"><span class="comment"># 如果要引用外部变量，只需在变量名前加 @ 符号</span></span><br><span class="line">low, high = <span class="number">70</span>, <span class="number">80</span></span><br><span class="line">print(df.query(<span class="string">'Weight&gt;@low and Weight&lt;@high'</span>).head())</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，query 表达式支持 python 中的逻辑单词（or, and, is in等）；对于含有空格的列名，需要使用反引号括住列名（`col name`）的方式进行引用。</p>
+<h2 id="随机抽样"><a href="#随机抽样" class="headerlink" title="随机抽样"></a>随机抽样</h2><p>还有一种返回 DataFrame 数据的方法就是随机抽样，如果把 DataFrame 的每一行看作一个样本，而把每一列看作一个特征，再把整个 DataFrame 看作总体，有时候想要对样本或特征进行随机抽样就可以用 sample 函数。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">df_sample = pd.DataFrame(&#123;<span class="string">'id'</span>: list(<span class="string">'abcde'</span>),</span><br><span class="line">                          <span class="string">'value'</span>: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">90</span>]&#125;)</span><br><span class="line"><span class="comment"># 以数据的value值的相对大小为抽样概率进行有放回抽样，抽样数量为3</span></span><br><span class="line">print(df_sample.sample(<span class="number">3</span>, replace=<span class="literal">True</span>, weights=df_sample.value))</span><br></pre></td></tr></table></figure></p>
+<p>sample 函数中的主要参数为 n, axis, frac, replace, weights，前三个分别是指抽样数量、抽样的方向（0 为行、1 为列）和抽样比例（0.3 则为从总体中抽出30% 的样本）。replace 和 weights 分别是指是否放回和每个样本的抽样相对概率，当replace = True 则表示有放回抽样</p>
+<h2 id="多级索引"><a href="#多级索引" class="headerlink" title="多级索引"></a>多级索引</h2><p>我们基于上面的 DataFrame 表格数据，人工造一个具有多级索引的新表格：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">multi_index = pd.MultiIndex.from_product([list(<span class="string">'ABCD'</span>), df.Gender.unique()],</span><br><span class="line">                                         names=(<span class="string">'School'</span>, <span class="string">'Gender'</span>))</span><br><span class="line">multi_column = pd.MultiIndex.from_product([[<span class="string">'Height'</span>, <span class="string">'Weight'</span>], df.Grade.unique()],</span><br><span class="line">                                          names=(<span class="string">'Indicator'</span>, <span class="string">'Grade'</span>))</span><br><span class="line"><span class="comment"># 身高和体重都是8行4列的数据，基于163cm和65kg上下浮动5个单位左右</span></span><br><span class="line">df_multi = pd.DataFrame(np.c_[(np.random.randn(<span class="number">8</span>,<span class="number">4</span>)*<span class="number">5</span> + <span class="number">163</span>).tolist(),</span><br><span class="line">                              (np.random.randn(<span class="number">8</span>,<span class="number">4</span>)*<span class="number">5</span> + <span class="number">65</span>).tolist()],</span><br><span class="line">                        index = multi_index,</span><br><span class="line">                        columns = multi_column).round(<span class="number">1</span>)</span><br><span class="line">print(df_multi)</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">--------------------------------------------------------------------------------</span></span><br><span class="line"><span class="string">Indicator       Height                           Weight                        </span></span><br><span class="line"><span class="string">Grade         Freshman Senior Sophomore Junior Freshman Senior Sophomore Junior</span></span><br><span class="line"><span class="string">School Gender                                                                  </span></span><br><span class="line"><span class="string">A      Female    171.8  165.0     167.9  174.2     60.6   55.1      63.3   65.8</span></span><br><span class="line"><span class="string">       Male      172.3  158.1     167.8  162.2     71.2   71.0      63.1   63.5</span></span><br><span class="line"><span class="string">B      Female    162.5  165.1     163.7  170.3     59.8   57.9      56.5   74.8</span></span><br><span class="line"><span class="string">       Male      166.8  163.6     165.2  164.7     62.5   62.8      58.7   68.9</span></span><br><span class="line"><span class="string">C      Female    170.5  162.0     164.6  158.7     56.9   63.9      60.5   66.9</span></span><br><span class="line"><span class="string">       Male      150.2  166.3     167.3  159.3     62.4   59.1      64.9   67.1</span></span><br><span class="line"><span class="string">D      Female    174.3  155.7     163.2  162.1     65.3   66.5      61.8   63.2</span></span><br><span class="line"><span class="string">       Male      170.7  170.3     163.8  164.9     61.6   63.2      60.9   56.4</span></span><br><span class="line"><span class="string">--------------------------------------------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>与单层索引的表一样，具备元素值、行索引和列索引三个部分。其中，这里的行索引和列索引都 MultiIndex 类型，只不过索引中的一个元素是元组而不是单层索引中的标量。例如，行索引的第四个元素为(”B”, ”Male”) ，列索引的第二个元素为(”Height”, ”Senior”)。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">print(df_multi.index.names)</span><br><span class="line">print(df_multi.columns.names)</span><br><span class="line">print(df_multi.index.values) <span class="comment"># 是元组， df_multi.columns.values 也一样</span></span><br><span class="line">print(df_multi.index.get_level_values(<span class="number">0</span>)) <span class="comment"># 得到第一层索引的取值</span></span><br><span class="line"><span class="comment"># 任何索引（单层或多层）仅可以访问，不能通过赋值的方式修改索引取值</span></span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">['School', 'Gender']</span></span><br><span class="line"><span class="string">['Indicator', 'Grade']</span></span><br><span class="line"><span class="string">[('A', 'Female') ('A', 'Male') ('B', 'Female') ('B', 'Male')</span></span><br><span class="line"><span class="string"> ('C', 'Female') ('C', 'Male') ('D', 'Female') ('D', 'Male')]</span></span><br><span class="line"><span class="string">Index(['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'], dtype='object', name='School')</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>接下来，我们来看一看多级索引中的 loc 索引器如何使用，我们使用原表重新构建一个具有多级行索引的 DataFrame（列仍然是单级索引）。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">df_multi = df.set_index([<span class="string">'School'</span>, <span class="string">'Grade'</span>])</span><br><span class="line">print(df_multi.head())</span><br><span class="line"></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">----------------------------------------------------------------------</span></span><br><span class="line"><span class="string">                                                   Name  ... Transfer</span></span><br><span class="line"><span class="string">School                        Grade                      ...         </span></span><br><span class="line"><span class="string">Shanghai Jiao Tong University Freshman     Gaopeng Yang  ...        N</span></span><br><span class="line"><span class="string">Peking University             Freshman   Changqiang You  ...        N</span></span><br><span class="line"><span class="string">Shanghai Jiao Tong University Senior            Mei Sun  ...        N</span></span><br><span class="line"><span class="string">Fudan University              Sophomore    Xiaojuan Sun  ...        N</span></span><br><span class="line"><span class="string">                              Sophomore     Gaojuan You  ...        N</span></span><br><span class="line"><span class="string">----------------------------------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure></p>
+<p>很显然，多级索引应该用<strong>元组</strong>为下标进行访问，loc 的方法和前面所讲的完全一样，只需要把下标从单级索引的标量替换成多级索引的元组（在索引前最好对 MultiIndex 进行排序以避免性能警告）：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">df_multi = df_multi.sort_index()</span><br><span class="line"><span class="comment"># 复旦的大三学生</span></span><br><span class="line">print(df_multi.loc[(<span class="string">'Fudan University'</span>, <span class="string">'Junior'</span>)].head())</span><br><span class="line"><span class="comment"># 复旦的大四学生和上交的大一学生</span></span><br><span class="line">print(df_multi.loc[[(<span class="string">'Fudan University'</span>, <span class="string">'Senior'</span>),</span><br><span class="line">                    (<span class="string">'Shanghai Jiao Tong University'</span>, <span class="string">'Freshman'</span>)]].head())</span><br><span class="line"><span class="comment"># 所有北大和复旦的大二大三学生（多级索引彼此间的交叉组合）</span></span><br><span class="line">print(df_multi.loc[([<span class="string">'Peking University'</span>, <span class="string">'Fudan University'</span>],</span><br><span class="line">                    [<span class="string">'Sophomore'</span>, <span class="string">'Junior'</span>]), :].head())</span><br></pre></td></tr></table></figure></p>
+<p>布尔列表和函数同样是可以使用的，多级索引元组的元素如果是列表，则可以自动交叉组合成新的索引。此外，iloc 的方法同样可以完全照搬。</p>
+<p>前面介绍的方法，即使在索引不重复的时候，也只能对元组整体进行切片，而不能对每层进行切片，也不允许将切片和布尔列表混合使用，引入 IndexSlice 对象就能解决这个问题。Slice 对象一共有两种形式，第一种为 <strong>loc[idx[*,*]]</strong> 型，第二种为 <strong>loc[idx[*,*],idx[*,*]]</strong> 型。这里我们就不详细展开了，大家遇到具体问题可以上网查找相应的使用方法。</p>
+<h2 id="索引的常用方法"><a href="#索引的常用方法" class="headerlink" title="索引的常用方法"></a>索引的常用方法</h2><ul>
+<li><strong>交换</strong>：由 swaplevel( ) 和 reorder_levels( ) 来实现，前者只能交换两个层，后者可以交换任意层，两者都可以指定交换的轴是哪一个（即行索引或列索引）</li>
+<li><strong>删除</strong>：若想删除某一层的索引，可以使用 droplevel( ) 方法</li>
+<li><strong>修改</strong>：通过 rename_axis( ) 可以对索引层的名字进行修改，常用的修改方式是传入字典的映射；通过 rename( ) 可以对索引的值进行修改，如果是多级索引需要指定修改的层号 level；还有一个 map( ) 函数接收多级索引的元组作为参数</li>
+<li><strong>设置</strong>：使用 set_index( ) 完成索引的设置，这里的主要参数是 append ，表示是否来保留原来的索引，直接把新设定的添加到原索引的内层；reset_index( ) 是 set_index( ) 的逆函数，其主要参数是 drop ，表示是否要把去掉的索引层丢弃，而不是添加到列中</li>
+</ul>
+<p>我们构建了一个更为复杂的具有三级索引的 DataFrame，来演示上述方法的使用：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">L1,L2,L3 = [<span class="string">'A'</span>,<span class="string">'B'</span>],[<span class="string">'a'</span>,<span class="string">'b'</span>],[<span class="string">'alpha'</span>,<span class="string">'beta'</span>]</span><br><span class="line">mul_index1 = pd.MultiIndex.from_product([L1,L2,L3],</span><br><span class="line">                                        names=(<span class="string">'Upper'</span>, <span class="string">'Lower'</span>,<span class="string">'Extra'</span>))</span><br><span class="line">L4,L5,L6 = [<span class="string">'C'</span>,<span class="string">'D'</span>],[<span class="string">'c'</span>,<span class="string">'d'</span>],[<span class="string">'cat'</span>,<span class="string">'dog'</span>]</span><br><span class="line">mul_index2 = pd.MultiIndex.from_product([L4,L5,L6],</span><br><span class="line">                                        names=(<span class="string">'Big'</span>, <span class="string">'Small'</span>, <span class="string">'Other'</span>))</span><br><span class="line">df_ex = pd.DataFrame(np.random.randint(<span class="number">-9</span>,<span class="number">10</span>,(<span class="number">8</span>,<span class="number">8</span>)),</span><br><span class="line">                     index=mul_index1,</span><br><span class="line">                     columns=mul_index2)</span><br><span class="line">print(df_ex)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">---------------------------------------------------</span></span><br><span class="line"><span class="string">Big                 C               D            </span></span><br><span class="line"><span class="string">Small               c       d       c       d    </span></span><br><span class="line"><span class="string">Other             cat dog cat dog cat dog cat dog</span></span><br><span class="line"><span class="string">Upper Lower Extra                                </span></span><br><span class="line"><span class="string">A     a     alpha   3   6  -9  -6  -6  -2   0   9</span></span><br><span class="line"><span class="string">            beta   -5  -3   3  -8  -3  -2   5   8</span></span><br><span class="line"><span class="string">      b     alpha  -4   4  -1   0   7  -4   6   6</span></span><br><span class="line"><span class="string">            beta   -9   9  -6   8   5  -2  -9  -8</span></span><br><span class="line"><span class="string">B     a     alpha   0  -9   1  -6   2   9  -7  -9</span></span><br><span class="line"><span class="string">            beta   -9  -5  -4  -3  -1   8   6  -5</span></span><br><span class="line"><span class="string">      b     alpha   0   1  -8  -8  -2   0  -6  -3</span></span><br><span class="line"><span class="string">            beta    2   5   9  -9   5  -6   3   1</span></span><br><span class="line"><span class="string">--------------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">print(df_ex.swaplevel(<span class="number">0</span>,<span class="number">2</span>,axis=<span class="number">1</span>).head()) <span class="comment"># 列索引的第一层和第三层交换</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">----------------------------------------------------</span></span><br><span class="line"><span class="string">Other             cat dog cat dog cat dog cat dog</span></span><br><span class="line"><span class="string">Small               c   c   d   d   c   c   d   d</span></span><br><span class="line"><span class="string">Big                 C   C   C   C   D   D   D   D</span></span><br><span class="line"><span class="string">Upper Lower Extra                    </span></span><br><span class="line"><span class="string">----------------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">df_ex.reorder_levels([<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>], axis=<span class="number">0</span>) <span class="comment"># 列表数字指代原来索引中的层</span></span><br><span class="line">df_ex.droplevel(<span class="number">1</span>, axis=<span class="number">1</span>) <span class="comment"># 删除某一层，也可以传入列表以删除 [0, 1]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 对索引层的名字进行修改</span></span><br><span class="line">print(df_ex.rename_axis(index=&#123;<span class="string">'Upper'</span>:<span class="string">'Changed_row'</span>&#125;,</span><br><span class="line">                  columns=&#123;<span class="string">'Other'</span>:<span class="string">'Changed_Col'</span>&#125;).head())</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">--------------------------------------------------------</span></span><br><span class="line"><span class="string">Big                       C               D            </span></span><br><span class="line"><span class="string">Small                     c       d       c       d    </span></span><br><span class="line"><span class="string">Changed_Col             cat dog cat dog cat dog cat dog</span></span><br><span class="line"><span class="string">Changed_row Lower Extra                                </span></span><br><span class="line"><span class="string">--------------------------------------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">df_ex.rename(columns=&#123;<span class="string">'cat'</span>:<span class="string">'not_cat'</span>&#125;, level=<span class="number">2</span>) <span class="comment"># 修改索引的"cat" -&gt; "not cat"</span></span><br><span class="line">df_ex.rename(index=<span class="keyword">lambda</span> x:str.upper(x), level=<span class="number">2</span>) <span class="comment"># 也可以传入函数 alpha-&gt;ALPHA ...</span></span><br><span class="line"><span class="comment"># 使用map方法实现第二层索引的大写转换（区别在于传入map的参数本身就是个元组）</span></span><br><span class="line">df_temp = df_ex.copy()</span><br><span class="line">new_idx = df_temp.index.map(<span class="keyword">lambda</span> x: (x[<span class="number">0</span>], x[<span class="number">1</span>], str.upper(x[<span class="number">2</span>])))</span><br><span class="line">df_temp.index = new_idx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置索引</span></span><br><span class="line">df_new = pd.DataFrame(&#123;<span class="string">'A'</span>:list(<span class="string">'aacd'</span>), <span class="string">'B'</span>:list(<span class="string">'PQRT'</span>), <span class="string">'C'</span>:[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]&#125;)</span><br><span class="line">df_new.set_index([<span class="string">'A'</span>, <span class="string">'B'</span>])</span><br><span class="line">my_index = pd.Series(list(<span class="string">'WXYZ'</span>), name=<span class="string">'D'</span>) <span class="comment"># 增加一个自定义的新索引</span></span><br><span class="line">df_new = df_new.set_index([<span class="string">'A'</span>, my_index])</span><br><span class="line">df_new.reset_index([<span class="string">'D'</span>], drop=<span class="literal">True</span>) <span class="comment"># 去掉上面新增的自定义索引</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 索引变形</span></span><br><span class="line">df_reindex = pd.DataFrame(&#123;<span class="string">"Weight"</span>:[<span class="number">60</span>,<span class="number">70</span>,<span class="number">80</span>], <span class="string">"Height"</span>:[<span class="number">176</span>,<span class="number">180</span>,<span class="number">179</span>]&#125;,</span><br><span class="line">                          index=[<span class="string">'1001'</span>,<span class="string">'1003'</span>,<span class="string">'1002'</span>])</span><br><span class="line"><span class="comment"># 增加一名1004号员工，同时删除身高列，增加性别列                          </span></span><br><span class="line">print(df_reindex.reindex(index=[<span class="string">'1001'</span>,<span class="string">'1002'</span>,<span class="string">'1003'</span>,<span class="string">'1004'</span>],</span><br><span class="line">                   columns=[<span class="string">'Weight'</span>,<span class="string">'Gender'</span>]))</span><br></pre></td></tr></table></figure></p>
+<h2 id="索引运算"><a href="#索引运算" class="headerlink" title="索引运算"></a>索引运算</h2><p>如果存在两张表，它们拥有相同的索引，我们可以通过对索引进行相应的集合（逻辑）操作，来实现对表格数据（索引）的筛选。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">df_set_1 = pd.DataFrame([[<span class="number">0</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">3</span>,<span class="number">4</span>]], index = pd.Index([<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'a'</span>], name=<span class="string">'id1'</span>))</span><br><span class="line">df_set_2 = pd.DataFrame([[<span class="number">4</span>,<span class="number">5</span>],[<span class="number">2</span>,<span class="number">6</span>],[<span class="number">7</span>,<span class="number">1</span>]], index = pd.Index([<span class="string">'b'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>],name=<span class="string">'id2'</span>))</span><br><span class="line">id1, id2 = df_set_1.index.unique(), df_set_2.index.unique()</span><br><span class="line">print(id1.intersection(id2)) <span class="comment"># 交集 == d1 &amp; d2：Index(['b'], dtype='object')</span></span><br><span class="line">print(id1.union(id2)) <span class="comment"># 并集 == d1 | d2：Index(['a', 'b', 'c'], dtype='object')</span></span><br><span class="line">print(id1.difference(id2)) <span class="comment"># 差集 == (d1 ^ d2) &amp; d1： Index(['a'], dtype='object')</span></span><br><span class="line">print(id1.symmetric_difference(id2)) <span class="comment"># 对称差集 == d1 ^ d2： Index(['a', 'c'], dtype='object')</span></span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6/" rel="tag"># 数据科学</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" rel="tag"># 数据处理</a>
+          
+            <a href="/tags/Pandas/" rel="tag"># Pandas</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/17/pandas-1/" rel="next" title="Pandas基础知识">
+                <i class="fa fa-chevron-left"></i> Pandas基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/01/02/pandas-3/" rel="prev" title="Pandas缺失处理">
+                Pandas缺失处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://images.weserv.nl/?url=https://article.biliimg.com/bfs/article/cde6d7c5d3ef6c223b7084f947974abd880f42b2.jpg"
+               alt="rouseway" />
+          <p class="site-author-name" itemprop="name">rouseway</p>
+           
+              <p class="site-description motion-element" itemprop="description">在这里留下一些思考的痕迹</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#索引器"><span class="nav-number">1.</span> <span class="nav-text">索引器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#query方法"><span class="nav-number">2.</span> <span class="nav-text">query方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#随机抽样"><span class="nav-number">3.</span> <span class="nav-text">随机抽样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多级索引"><span class="nav-number">4.</span> <span class="nav-text">多级索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引的常用方法"><span class="nav-number">5.</span> <span class="nav-text">索引的常用方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引运算"><span class="nav-number">6.</span> <span class="nav-text">索引运算</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rouseway</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>
