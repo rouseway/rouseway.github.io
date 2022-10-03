@@ -94,7 +94,7 @@
 <meta property="og:site_name" content="思维驿站">
 <meta property="og:description" content="上一节我们使用了PyTorch的线性层（也叫全连接层）torch.nn.Linear( )，体验到了使用PyTorch封装好的函数构建神经网络的便捷。所以，这一节我们将处理一下常用的网络函数12import torchfrom torch import nn Embedding层实现自然语言处理任务的第一个操作就是讲离散类型的单词表示为密集向量，这个过程称为“representation lear">
 <meta property="article:published_time" content="2021-08-18T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-10-02T09:16:47.608Z">
+<meta property="article:modified_time" content="2022-10-03T13:57:55.083Z">
 <meta property="article:author" content="rouseway">
 <meta property="article:tag" content="人工智能">
 <meta property="article:tag" content="Deep Learning">
@@ -389,7 +389,63 @@
 <p>池化层只是一个进行简单操作的层，没有需要学习的参数。</p>
 <h2 id="循环网络层"><a href="#循环网络层" class="headerlink" title="循环网络层"></a>循环网络层</h2><p>循环网络层，我们重点介绍 LSTM 和 GRU（说明部分以 LSTM 举例，GRU也是一样的）：</p>
 <p><strong>torch.nn.LSTM(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0, bidirectional=False, proj_size=0)</strong><br><strong>torch.nn.GRU(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0, bidirectional=False)</strong></p>
-<p>通过设置 num_layers&gt;1 就可以支持多层，设置 bidirectional=True 可以得到双向 LSTM。需要注意的时，默认的输入和输出形状是 (seq, batch, feature), 如果需要将 batch 维度放在第0轴，则要设置 batch_first 参数设置为 True 。我们使用一个表格来总结 LSTM 中几个变量的维度：<br>|模型/变量|第0轴|第1轴|第2轴|<br>|—-|—-|—-|—-|<br>|torch.nn.LSTM()|input_size|hidden_size|num_layers|<br>|<strong>$x$</strong>|seq_len|batch|input_size|<br>|<strong>$h_0$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$c_0$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$output$</strong>|seq_len|batch|num_directions×hidden_size|<br>|<strong>$h_n$</strong>|num_layers×num_directions|batch|hidden_size|<br>|<strong>$c_n$</strong>|num_layers×num_directions|batch|hidden_size|</p>
+<p>通过设置 num_layers&gt;1 就可以支持多层，设置 bidirectional=True 可以得到双向 LSTM。需要注意的时，默认的输入和输出形状是 (seq, batch, feature), 如果需要将 batch 维度放在第0轴，则要设置 batch_first 参数设置为 True 。我们使用一个表格来总结 LSTM 中几个变量的维度：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>模型/变量</th>
+<th>第0轴</th>
+<th>第1轴</th>
+<th>第2轴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>torch.nn.LSTM()</td>
+<td>input_size</td>
+<td>hidden_size</td>
+<td>num_layers</td>
+</tr>
+<tr>
+<td><strong>$x$</strong></td>
+<td>seq_len</td>
+<td>batch</td>
+<td>input_size</td>
+</tr>
+<tr>
+<td><strong>$h_0$</strong></td>
+<td>num_layers×num_directions</td>
+<td>batch</td>
+<td>hidden_size</td>
+</tr>
+<tr>
+<td><strong>$c_0$</strong></td>
+<td>num_layers×num_directions</td>
+<td>batch</td>
+<td>hidden_size</td>
+</tr>
+<tr>
+<td><strong>$output$</strong></td>
+<td>seq_len</td>
+<td>batch</td>
+<td>num_directions×hidden_size</td>
+</tr>
+<tr>
+<td><strong>$h_n$</strong></td>
+<td>num_layers×num_directions</td>
+<td>batch</td>
+<td>hidden_size</td>
+</tr>
+<tr>
+<td><strong>$c_n$</strong></td>
+<td>num_layers×num_directions</td>
+<td>batch</td>
+<td>hidden_size</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>对句子进行 LSTM 操作，假设训练集有若干句子，每个句子里有7个词，batch_size=64，embedding_size=300，此时，各个参数为：input_size=embedding_size=300；batch=batch_size=64；seq_len=7，另外设置hidden_size=100, num_layers=1<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">lstm = nn.LSTM(<span class="number">300</span>, <span class="number">100</span>, <span class="number">1</span>)</span><br><span class="line">gru = nn.GRU(<span class="number">300</span>, <span class="number">128</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">x = torch.randn(<span class="number">7</span>, <span class="number">64</span>, <span class="number">300</span>) <span class="comment"># 具体维度参考上面的表格说明</span></span><br><span class="line">h0 = torch.randn(<span class="number">1</span>, <span class="number">64</span>, <span class="number">100</span>)</span><br><span class="line">c0 = torch.randn(<span class="number">1</span>, <span class="number">64</span>, <span class="number">100</span>)</span><br><span class="line"></span><br><span class="line">output, (hn, cn)=lstm(x, (h0, c0)) <span class="comment"># 如果不指定h0、c0，则使用默认全0的隐藏状态</span></span><br><span class="line">output, h = gru(x, h0)</span><br></pre></td></tr></table></figure></p>
 <p>output 就是最后一个 layer 上，序列中每个时刻（横向）状态h的集合（若为双向则按位置拼接，输出维度 2*hidden_size ），而 $h_n$ 实际上是每个 layer 最后一个状态（纵向）输出的拼接。对于单向 LSTM 来说，$h_n[-1,:,:]$ 就是 $output[-1,:,:]$，相当于序列最后一个时间步的输出（可以用它作为整个序列的 embedding或 representation）。但双向 LSTM 推广后，每个时间步的隐层输出都可以作为当前词的一个融合了上下文的 embedding，因此 BiLSTM 可以视为一种词级别的 encoder 方法，得到的 output 既可以用于词级别的输出拼接，也可以进行融合（比如 attention 加权求和、pooling ）得到序列级的输出。</p>
 <p>通常，输入到 LSTM 或 GRU 的序列并不是等长的，需要进行 pad 补齐后才能进行批量运算，但是长短不一的文本数据单纯 pad 往往会导致最短的那句话里大量都是无用的 \<pad> 符号，PyTorch提供了一种 <strong>压缩 pad</strong> 的机制：</p>

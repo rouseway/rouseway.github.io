@@ -94,7 +94,7 @@
 <meta property="og:site_name" content="思维驿站">
 <meta property="og:description" content="以标签为元素HTML是用来描述网页的语义的一种语言，该语言由一套标记标签组成123456789&lt;html&gt;&lt;body&gt;&lt;p&gt;This is my first paragraph.&lt;&#x2F;p&gt;&lt;br &#x2F;&gt;&lt;a href&#x3D;&quot;http:&#x2F;&#x2F;www.github.com&quot;&amp;g">
 <meta property="article:published_time" content="2021-04-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-10-02T08:29:09.277Z">
+<meta property="article:modified_time" content="2022-10-03T14:03:15.775Z">
 <meta property="article:author" content="rouseway">
 <meta property="article:tag" content="前端技术">
 <meta property="article:tag" content="HTML">
@@ -369,9 +369,9 @@
       
         <h2 id="以标签为元素"><a href="#以标签为元素" class="headerlink" title="以标签为元素"></a>以标签为元素</h2><p>HTML是用来描述网页的<strong>语义</strong>的一种语言，该语言由一套标记标签组成<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line"></span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;p&gt;This is my first paragraph.&lt;&#x2F;p&gt;</span><br><span class="line">&lt;br &#x2F;&gt;</span><br><span class="line">&lt;a href&#x3D;&quot;http:&#x2F;&#x2F;www.github.com&quot;&gt;This is a link&lt;&#x2F;a&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure><br>如上面的一段HTML示例代码，我们可以总结出标签元素具备如下语法规范：</p>
 <ul>
-<li>有的元素是<strong>双标签</strong>的，它们以开始标签起始（\<p>），以结束标签终止（\</p>）；也有元素是<strong>单标签</strong>的<br /\></li>
-<li>双标签的元素通常将待呈现的内容嵌在两个标签之间，这部分内容可以是纯文本（\<p>标签所括内容），也可以是合法的其他元素（\<body>标签所括内容）</li>
-<li>大多数的元素都拥有属性，且在开始标签内进行赋值（\<a href="">），属性值都是字符串类型””（用引号括起来）</li>
+<li>有的元素是<strong>双标签</strong>的，它们以开始标签起始（&lt;p&gt;），以结束标签终止（&lt;p&gt;）；也有元素是<strong>单标签</strong>的&lt;br /&gt;</li>
+<li>双标签的元素通常将待呈现的内容嵌在两个标签之间，这部分内容可以是纯文本（&lt;p&gt;标签所括内容），也可以是合法的其他元素（&lt;body&gt;标签所括内容）</li>
+<li>大多数的元素都拥有属性，且在开始标签内进行赋值（&lt;a href=””&gt;），属性值都是字符串类型””（用引号括起来）</li>
 </ul>
 <h2 id="基础标签整理"><a href="#基础标签整理" class="headerlink" title="基础标签整理"></a>基础标签整理</h2><div class="table-container">
 <table>
@@ -386,217 +386,217 @@
 <tbody>
 <tr>
 <td>页面</td>
-<td>\<html></td>
+<td>&lt;html&gt;</td>
 <td>所有的页面内容</td>
 <td>lang=语言</td>
 </tr>
 <tr>
 <td>头部</td>
-<td>\<head></td>
+<td>&lt;head&gt;</td>
 <td>页面的头部</td>
 <td></td>
 </tr>
 <tr>
 <td>标题</td>
-<td>\<title></td>
+<td>&lt;title&gt;</td>
 <td>页面的标题</td>
 <td></td>
 </tr>
 <tr>
 <td>主体</td>
-<td>\<body></td>
+<td>&lt;body&gt;</td>
 <td>页面的主体部分</td>
 <td>bgcolor=背景颜色, background=背景图片, text=文本颜色, leftmargin=左边距, rightmargin=右边距, topmargin=上边距, bottommargin=下边距, link=链接初始颜色, alink=链接点击时颜色, vlink=链接点击后颜色</td>
 </tr>
 <tr>
 <td>章节标题</td>
-<td>\<h1></td>
-<td>章节的标题，支持到\<h6></td>
+<td>&lt;h1&gt;</td>
+<td>章节的标题，支持到&lt;h6&gt;</td>
 <td>align=”left/center/right”</td>
 </tr>
 <tr>
 <td>段落</td>
-<td>\<p></td>
+<td>&lt;p&gt;</td>
 <td>将正文分割为若干段落</td>
 <td>align=”left/center/right”</td>
 </tr>
 <tr>
 <td>链接</td>
-<td>\<a></td>
+<td>&lt;a&gt;</td>
 <td>锚链接anchor</td>
 <td>href=目标（url或name）, name=锚点名称, title=悬停文本, target=”_self/_blank/_parent/_top”（用什么方式打开）</td>
 </tr>
 <tr>
 <td>图像</td>
-<td>\<img></td>
+<td>&lt;img&gt;</td>
 <td>页面中插入图像</td>
 <td>src=图片位置, width=宽, height=高, alt=图片不可用时代替显示内容, title=悬停文本</td>
 </tr>
 <tr>
 <td>分割</td>
-<td>\<div></td>
+<td>&lt;div&gt;</td>
 <td>分割页面为独立区块，单独占一行</td>
 <td>align=”left/center/right”</td>
 </tr>
 <tr>
 <td>范围</td>
-<td>\<span></td>
+<td>&lt;span&gt;</td>
 <td>划分小区域</td>
 <td>align=”left/center/right”</td>
 </tr>
 <tr>
 <td>水平线</td>
-<td>\<hr /></td>
+<td>&lt;hr /&gt;</td>
 <td>水平分割线</td>
 <td>align=位置, size=粗细, width=长度, color=颜色, noshade=不设阴影</td>
 </tr>
 <tr>
 <td>换行</td>
-<td>\<br /></td>
+<td>&lt;br /&gt;</td>
 <td>换行</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>无序列表</td>
-<td>\<ul></td>
+<td>&lt;ul&gt;</td>
 <td>无序列表</td>
 <td>type=”disc/square/circle”（项目符号）</td>
 </tr>
 <tr>
 <td>有序列表</td>
-<td>\<ol></td>
+<td>&lt;ol&gt;</td>
 <td>有序列表</td>
 <td>type=”1/a/A/i/I”（序号数字类型）, start=起始数字</td>
 </tr>
 <tr>
 <td>列表项</td>
-<td>\<li></td>
+<td>&lt;li&gt;</td>
 <td>list item</td>
 <td>type=项目符号</td>
 </tr>
 <tr>
 <td>定义列表</td>
-<td>\<dl></td>
+<td>&lt;dl&gt;</td>
 <td>definition list</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>定义列表标题</td>
-<td>\<dt></td>
+<td>&lt;dt&gt;</td>
 <td>definition title</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>定义列表项</td>
-<td>\<dd></td>
+<td>&lt;dd&gt;</td>
 <td>definition description</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>表格</td>
-<td>\<table></td>
+<td>&lt;table&gt;</td>
 <td>页面中插入表格</td>
 <td>border=边框, width=宽度, height=高度, bordercolor=边框颜色, align=”left/center/right”, cellpadding=内容与单元格边距, cellspacing=单元格间的距离, bgcolor=背景色, background=背景图片, dir=”ltr/rtl”（单元格排列方向从左到右）</td>
 </tr>
 <tr>
 <td>表行</td>
-<td>\<tr></td>
+<td>&lt;tr&gt;</td>
 <td>表格的每行</td>
 <td>dir=”ltr/rtl”, bgcolor=背景色, height=高度, align=”left/center/right”, valign=”top/midlle/bottom”（垂直位置）</td>
 </tr>
 <tr>
 <td>单元格</td>
-<td>\<td></td>
+<td>&lt;td&gt;</td>
 <td>一行中的每个单元格</td>
 <td>width=宽度; height,bgcolor,align,valign; colspan=横向合并单元格个数, rowspan=纵向合并</td>
 </tr>
 <tr>
 <td>加粗单元格</td>
-<td>\<th></td>
+<td>&lt;th&gt;</td>
 <td>单元格中的内容加粗</td>
-<td>（同\<td>）</td>
+<td>（同&lt;td&gt;）</td>
 </tr>
 <tr>
 <td>框架集合</td>
-<td>\<frameset></td>
+<td>&lt;frameset&gt;</td>
 <td>让一个网页显示多个页面</td>
 <td>rows=水平分割, cols=垂直分割</td>
 </tr>
 <tr>
 <td>框架</td>
-<td>\<frame></td>
+<td>&lt;frame&gt;</td>
 <td>在一个框架内显示一个页面</td>
 <td>src=框架内页面, scrolling=是否需要滚动条, noresize=不可改变框架大小, bordercolor=边框颜色, frameborder=隐藏(0)或显示(1)边框, name=框架名称</td>
 </tr>
 <tr>
 <td>内嵌框架</td>
-<td>\<iframe></td>
+<td>&lt;iframe&gt;</td>
 <td>嵌入在网页body内的页面</td>
 <td>src=嵌入页面, width=宽度, height=高度, scrolling=是否需要滚动条, name=框架名字（公有属性）</td>
 </tr>
 <tr>
 <td>表单</td>
-<td>\<form></td>
+<td>&lt;form&gt;</td>
 <td>与服务器交互的输入</td>
 <td>name=表单名称, action=表单处理程序, method=数据提交方式(GET/POST)</td>
 </tr>
 <tr>
 <td>输入框</td>
-<td>\<input></td>
+<td>&lt;input&gt;</td>
 <td>接收用户的输入</td>
 <td>type=”text/password/radio/checkbox/checked/hidden/button/submit/reset/image/file”（输入的形式）, value=内容, size=文本框显示字符数, readonly=文本框只读, disabled=光标不可点</td>
 </tr>
 <tr>
 <td>下拉列表</td>
-<td>\<select></td>
+<td>&lt;select&gt;</td>
 <td>下拉列表</td>
 <td>multiple=可以多选, size=大于1为滚动视图</td>
 </tr>
 <tr>
 <td>选项</td>
-<td>\<option></td>
+<td>&lt;option&gt;</td>
 <td>下拉列表的选项</td>
 <td>selected=预选中</td>
 </tr>
 <tr>
 <td>文本框</td>
-<td>\<textarea></td>
+<td>&lt;textarea&gt;</td>
 <td>文本输入框</td>
 <td>rows=行数, cols=列数, readonly=只读</td>
 </tr>
 <tr>
 <td>表单划分</td>
-<td>\<fieldset></td>
+<td>&lt;fieldset&gt;</td>
 <td>表单按语义分组</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>表单分组标签</td>
-<td>\<legend></td>
+<td>&lt;legend&gt;</td>
 <td>表单语义分组的标签</td>
 <td>（无属性）</td>
 </tr>
 <tr>
 <td>表单标签</td>
-<td>\<label></td>
+<td>&lt;label&gt;</td>
 <td>为表单元素定义标签</td>
 <td>for=表单的名称</td>
 </tr>
 <tr>
 <td>背景音乐</td>
-<td>\<bgsound></td>
+<td>&lt;bgsound&gt;</td>
 <td>播放背景音乐</td>
 <td>src=音乐文件, loop=播放次数（-1表示循环）</td>
 </tr>
 <tr>
 <td>多媒体文件</td>
-<td>\<embed></td>
+<td>&lt;embed&gt;</td>
 <td>播放多媒体文件</td>
 <td>src=多媒体文件, loop=播放次数, autostart=是否自动播放, volume=音量, width=Flash文件宽度, height=Flash文件高度, quality=播放质量, pluginspage=Flash插件下载地址, type=Flash文件格式, wmode=Flash背景是否透明</td>
 </tr>
 <tr>
 <td>字幕</td>
-<td>\<marquee></td>
+<td>&lt;marquee&gt;</td>
 <td>滚动字幕</td>
 <td>direction=移动目标方向, behavior=”slide/scroll/alternate”（行为方式）, scrollamount=移动速度, loop=循环圈数, scrolldelay=移动一次停顿时长</td>
 </tr>
@@ -606,8 +606,8 @@
 <h2 id="标签的层次关系"><a href="#标签的层次关系" class="headerlink" title="标签的层次关系"></a>标签的层次关系</h2><p>双标签元素互相包括嵌套，需要满足如下的层级关系的约束<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 一级--&gt;二级--&gt;三级--&gt;四级-&gt;五级</span><br><span class="line">&lt;html&gt;</span><br><span class="line">  |-- <span class="xml"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span></span><br><span class="line">        |-- &lt;title&gt;</span><br><span class="line">        |-- &lt;base&gt;</span><br><span class="line">        |-- &lt;link&gt;</span><br><span class="line">        |-- &lt;meta&gt;</span><br><span class="line">        |-- &lt;style&gt;</span><br><span class="line">        |-- &lt;script&gt;</span><br><span class="line">  |-- &lt;body&gt;</span><br><span class="line">        |-- &lt;h1&gt;</span><br><span class="line">        |-- &lt;p&gt;</span><br><span class="line">        |-- &lt;a&gt;</span><br><span class="line">        |-- &lt;img&gt;</span><br><span class="line">        |-- &lt;div&gt;</span><br><span class="line">        |-- &lt;span&gt;</span><br><span class="line">        |-- &lt;table&gt;</span><br><span class="line">                |-- &lt;tr&gt;</span><br><span class="line">                      |-- &lt;td&gt;</span><br><span class="line">                      |-- &lt;th&gt;</span><br><span class="line">        |-- &lt;ul&gt; /&lt;ol&gt;</span><br><span class="line">                |-- &lt;li&gt;</span><br><span class="line">        |-- &lt;dl&gt;</span><br><span class="line">                |-- &lt;dt&gt;</span><br><span class="line">                |-- &lt;dd&gt;</span><br><span class="line">        |-- &lt;iframe&gt;</span><br><span class="line">        |-- &lt;form&gt;</span><br><span class="line">                |-- &lt;input&gt;</span><br><span class="line">                |-- &lt;select&gt;</span><br><span class="line">                       |-- &lt;option&gt;</span><br><span class="line">                |-- &lt;textarea&gt;</span><br><span class="line">  |-- &lt;frameset&gt;</span><br><span class="line">        |-- &lt;frame&gt;</span><br></pre></td></tr></table></figure></p>
 <h2 id="标签的语义等级"><a href="#标签的语义等级" class="headerlink" title="标签的语义等级"></a>标签的语义等级</h2><p>HTML标签按语义可以分为两种等级：</p>
 <ul>
-<li>文本级标签：\<p>、\<span>、\<a>、\<b>、\<i>、\<u>、\<em> 等文本级标签里只能放文字、图片、表单元素</li>
-<li>容器级标签：\<div>、h系列、\<li>、\<dt>、\<dd> 等容器级标签里可以放置任何东西</li>
+<li>文本级标签：&lt;p&gt;、&lt;span&gt;、&lt;a&gt;、&lt;b&gt;、&lt;i&gt;、&lt;u&gt;、&lt;em&gt; 等文本级标签里只能放文字、图片、表单元素</li>
+<li>容器级标签：&lt;div&gt;、h系列、&lt;li&gt;、&lt;dt&gt;、&lt;dd&gt; 等容器级标签里可以放置任何东西</li>
 </ul>
 <h2 id="转义字符"><a href="#转义字符" class="headerlink" title="转义字符"></a>转义字符</h2><div class="table-container">
 <table>
@@ -856,7 +856,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#以标签为元素"><span class="nav-number">1.</span> <span class="nav-text">以标签为元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础标签整理"><span class="nav-number">2.</span> <span class="nav-text">基础标签整理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#"><span class="nav-number"></span> <span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#"><span class="nav-number">0.0.0.0.1.</span> <span class="nav-text"></span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签的层次关系"><span class="nav-number">1.</span> <span class="nav-text">标签的层次关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签的语义等级"><span class="nav-number">2.</span> <span class="nav-text">标签的语义等级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#转义字符"><span class="nav-number">3.</span> <span class="nav-text">转义字符</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#以标签为元素"><span class="nav-number">1.</span> <span class="nav-text">以标签为元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础标签整理"><span class="nav-number">2.</span> <span class="nav-text">基础标签整理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签的层次关系"><span class="nav-number">3.</span> <span class="nav-text">标签的层次关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签的语义等级"><span class="nav-number">4.</span> <span class="nav-text">标签的语义等级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#转义字符"><span class="nav-number">5.</span> <span class="nav-text">转义字符</span></a></li></ol></div>
             
 
           </div>
